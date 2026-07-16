@@ -13,6 +13,6 @@
   },
   "vars": {
     "PUBLIC_WAZOO_API_BASE_URL": "https://api.wazoo.dev",
-    "PUBLIC_TURNSTILE_SITE_KEY": ""
+    "PUBLIC_TURNSTILE_SITE_KEY": "0x4AAAAAAD29sqAta_wbcSpv"
   }
 }
