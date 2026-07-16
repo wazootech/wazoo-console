@@ -4,6 +4,9 @@
   "name": "wazoo-console",
   "compatibility_date": "2026-07-15",
   "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "console.wazoo.dev", "custom_domain": true }
+  ],
   "assets": {
     "directory": ".svelte-kit/cloudflare",
     "binding": "ASSETS"
