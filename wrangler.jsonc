@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".svelte-kit/cloudflare/_worker.js",
+  "name": "wazoo-console",
+  "compatibility_date": "2026-07-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".svelte-kit/cloudflare",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "PUBLIC_WAZOO_API_BASE_URL": "https://api.wazoo.dev",
+    "PUBLIC_TURNSTILE_SITE_KEY": ""
+  }
+}
