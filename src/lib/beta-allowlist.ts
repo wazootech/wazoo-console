@@ -5,6 +5,7 @@ export const ALLOWED_EMAILS = new Set([
   "mikesite2@yahoo.com",
   "magicat888@gmail.com",
   "ethan.r.davidson@gmail.com",
+  "jeffkazzee@gmail.com",
 ]);
 
 export function isAllowed(email: string): boolean {
