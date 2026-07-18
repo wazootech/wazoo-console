@@ -9,13 +9,15 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "deploy": "vite build && wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "format": "prettier \"src/**/*.{ts,svelte,js,css}\" --write",
+    "format:check": "prettier \"src/**/*.{ts,svelte,js,css}\" --check"
   },
-  "dependencies": {},
   "devDependencies": {
     "@sveltejs/adapter-cloudflare": "latest",
     "@sveltejs/kit": "latest",
     "@sveltejs/vite-plugin-svelte": "latest",
+    "prettier": "^3.9.5",
     "svelte": "latest",
     "svelte-check": "latest",
     "typescript": "latest",
