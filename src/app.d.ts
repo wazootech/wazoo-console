@@ -7,6 +7,10 @@ declare global {
         WAZOO_PLATFORM_ADMIN_TOKEN?: string;
       };
     }
+    interface Locals {
+      auth: string;
+      apiBaseUrl: string;
+    }
   }
 }
 
