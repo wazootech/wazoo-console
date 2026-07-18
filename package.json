@@ -18,6 +18,7 @@
     "@sveltejs/kit": "latest",
     "@sveltejs/vite-plugin-svelte": "latest",
     "prettier": "^3.9.5",
+    "prettier-plugin-svelte": "^4.1.1",
     "svelte": "latest",
     "svelte-check": "latest",
     "typescript": "latest",
