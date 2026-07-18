@@ -12,6 +12,7 @@
     "binding": "ASSETS"
   },
   "vars": {
-    "PUBLIC_WAZOO_API_BASE_URL": "https://api.wazoo.dev"
+    "PUBLIC_WAZOO_API_BASE_URL": "https://api.wazoo.dev",
+    "BETA_ALLOWLIST_SHEET_ID": "1LPzBKy8ZPSUgh4V44PeXYM1p2o7L4d_ceFE__CIPr6o"
   }
 }
