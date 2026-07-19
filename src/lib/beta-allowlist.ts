@@ -10,7 +10,9 @@ const TTL_MS = 60_000;
 
 function getEnv(platformEnv?: Record<string, string | undefined>) {
   const key = platformEnv?.GOOGLE_SERVICE_ACCOUNT_KEY ?? "";
-  const sheetId = platformEnv?.BETA_ALLOWLIST_SHEET_ID ?? "1LPzBKy8ZPSUgh4V44PeXYM1p2o7L4d_ceFE__CIPr6o";
+  const sheetId =
+    platformEnv?.BETA_ALLOWLIST_SHEET_ID ??
+    "1LPzBKy8ZPSUgh4V44PeXYM1p2o7L4d_ceFE__CIPr6o";
   return { key, sheetId };
 }
 

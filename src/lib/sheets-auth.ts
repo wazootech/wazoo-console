@@ -3,7 +3,9 @@ const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
 
 let cachedToken: { value: string; expiresAt: number } | null = null;
 
-export async function getAccessToken(serviceAccountKey: string): Promise<string> {
+export async function getAccessToken(
+  serviceAccountKey: string,
+): Promise<string> {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {
     return cachedToken.value;
   }
@@ -36,10 +38,15 @@ export async function getAccessToken(serviceAccountKey: string): Promise<string>
 
   if (!res.ok) {
     const body = await res.text();
-    throw new Error(`Google OAuth2 token request failed: ${res.status} ${body}`);
+    throw new Error(
+      `Google OAuth2 token request failed: ${res.status} ${body}`,
+    );
   }
 
-  const data = (await res.json()) as { access_token: string; expires_in: number };
+  const data = (await res.json()) as {
+    access_token: string;
+    expires_in: number;
+  };
   cachedToken = {
     value: data.access_token,
     expiresAt: Date.now() + (data.expires_in - 60) * 1000,
