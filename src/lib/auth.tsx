@@ -91,7 +91,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (token: string): Promise<string | null> => {
     const trimmed = token.trim();
     if (!trimmed.startsWith("wzp_")) return "Token must start with wzp_";
-    const client = createClient({ auth: trimmed, throwOnError: false, baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev" });
+    const client = createClient({
+      auth: trimmed,
+      throwOnError: false,
+      baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev",
+    });
     const r = await getUserMe({ client });
     if (r.error) {
       return typeof r.error === "object" && "error" in r.error
