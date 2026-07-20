@@ -9,7 +9,10 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "preview": "npx @opennextjs/cloudflare build && npx wrangler dev",
+    "build:qa": "next build",
+    "build:prod": "next build",
     "deploy": "npx @opennextjs/cloudflare build && npx wrangler deploy",
+    "deploy:qa": "npx @opennextjs/cloudflare build && npx wrangler deploy --env qa",
     "format": "prettier \"src/**/*.{ts,tsx,css}\" --write",
     "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check"
   },

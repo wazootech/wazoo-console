@@ -10,5 +10,13 @@
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
+  },
+  "env": {
+    "qa": {
+      "name": "wazoo-console-qa",
+      "routes": [
+        { "pattern": "console-qa.wazoo.dev", "custom_domain": true }
+      ]
+    }
   }
 }
