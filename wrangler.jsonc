@@ -13,7 +13,10 @@
   },
   "env": {
     "qa": {
-      "name": "wazoo-console-qa"
+      "name": "wazoo-console-qa",
+      "routes": [
+        { "pattern": "console-qa.wazoo.dev", "custom_domain": true }
+      ]
     }
   }
 }
