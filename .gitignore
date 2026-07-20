@@ -1,7 +1,3 @@
-node_modules
-.svelte-kit
-build
-.wrangler
-.dev.vars
-.env*.local
-cloudflare-env.d.ts
+node_modules/
+out/
+.next/

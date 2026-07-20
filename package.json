@@ -4,25 +4,31 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "deploy": "vite build && npx wrangler@latest deploy",
-    "cf-typegen": "wrangler types",
-    "format": "prettier \"src/**/*.{ts,svelte,js,css}\" --write",
-    "format:check": "prettier \"src/**/*.{ts,svelte,js,css}\" --check"
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier \"src/**/*.{ts,tsx,css}\" --write",
+    "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check"
+  },
+  "dependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
+    "lucide-react": "^0.562.0",
+    "next": "^16.1.1",
+    "nuqs": "^2.9.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "@sveltejs/adapter-cloudflare": "latest",
-    "@sveltejs/kit": "latest",
-    "@sveltejs/vite-plugin-svelte": "latest",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "prettier": "^3.9.5",
-    "prettier-plugin-svelte": "^4.1.1",
-    "svelte": "latest",
-    "svelte-check": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "wrangler": "latest"
+    "typescript": "^5.9.3"
   }
 }
