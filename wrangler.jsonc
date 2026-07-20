@@ -7,6 +7,16 @@
   "routes": [
     { "pattern": "console.wazoo.dev", "custom_domain": true }
   ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "wazoo-console"
+    }
+  ],
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1
@@ -16,6 +26,16 @@
       "name": "wazoo-console-qa",
       "routes": [
         { "pattern": "console-qa.wazoo.dev", "custom_domain": true }
+      ],
+      "assets": {
+        "directory": ".open-next/assets",
+        "binding": "ASSETS"
+      },
+      "services": [
+        {
+          "binding": "WORKER_SELF_REFERENCE",
+          "service": "wazoo-console-qa"
+        }
       ]
     }
   }
