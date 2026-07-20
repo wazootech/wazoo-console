@@ -8,12 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import {
-  createClient,
-  getUserMe,
-  type Client,
-  type User,
-} from "@wazoo/client";
+import { createClient, getUserMe, type Client, type User } from "@wazoo/client";
 
 interface AuthState {
   token: string | null;
