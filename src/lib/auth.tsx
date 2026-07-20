@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import {
-  createWazooApiClient,
+  createClient,
   getUserMe,
   type Client,
   type User,
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
     if (stored) {
-      const client = createWazooApiClient({
+      const client = createClient({
         auth: stored,
         throwOnError: false,
       });
@@ -88,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (token: string): Promise<string | null> => {
     const trimmed = token.trim();
     if (!trimmed.startsWith("wzp_")) return "Token must start with wzp_";
-    const client = createWazooApiClient({ auth: trimmed, throwOnError: false });
+    const client = createClient({ auth: trimmed, throwOnError: false });
     const r = await getUserMe({ client });
     if (r.error) {
       return typeof r.error === "object" && "error" in r.error
