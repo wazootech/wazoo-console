@@ -8,7 +8,12 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { createWazooApiClient, getUserMe, type Client, type User } from "@wazoo/client";
+import {
+  createWazooApiClient,
+  getUserMe,
+  type Client,
+  type User,
+} from "@wazoo/client";
 
 interface AuthState {
   token: string | null;
@@ -29,30 +34,52 @@ const USER_KEY = "wazoo_user";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
-    token: null, user: null, client: null, loading: true, error: null,
+    token: null,
+    user: null,
+    client: null,
+    loading: true,
+    error: null,
   });
 
   useEffect(() => {
     const stored = localStorage.getItem(TOKEN_KEY);
     if (stored) {
-      const client = createWazooApiClient({ auth: stored, throwOnError: false });
+      const client = createWazooApiClient({
+        auth: stored,
+        throwOnError: false,
+      });
       const userJson = localStorage.getItem(USER_KEY);
       if (userJson) {
         try {
-          setState({ token: stored, user: JSON.parse(userJson), client, loading: false, error: null });
+          setState({
+            token: stored,
+            user: JSON.parse(userJson),
+            client,
+            loading: false,
+            error: null,
+          });
           return;
         } catch {}
       }
-      getUserMe({ client }).then((r) => {
-        if (r.error) { logout(); }
-        else {
-          const user = r.data?.user;
-          if (user) {
-            localStorage.setItem(USER_KEY, JSON.stringify(user));
-            setState({ token: stored, user, client, loading: false, error: null });
+      getUserMe({ client })
+        .then((r) => {
+          if (r.error) {
+            logout();
+          } else {
+            const user = r.data?.user;
+            if (user) {
+              localStorage.setItem(USER_KEY, JSON.stringify(user));
+              setState({
+                token: stored,
+                user,
+                client,
+                loading: false,
+                error: null,
+              });
+            }
           }
-        }
-      }).catch(() => logout());
+        })
+        .catch(() => logout());
     } else {
       setState((s) => ({ ...s, loading: false }));
     }
@@ -79,7 +106,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    setState({ token: null, user: null, client: null, loading: false, error: null });
+    setState({
+      token: null,
+      user: null,
+      client: null,
+      loading: false,
+      error: null,
+    });
   }, []);
 
   return (

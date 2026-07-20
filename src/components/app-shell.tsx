@@ -32,7 +32,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 h-14">
           <div className="flex items-center gap-6">
-            <Link href="/worlds" className="flex items-center gap-2 font-semibold">
+            <Link
+              href="/worlds"
+              className="flex items-center gap-2 font-semibold"
+            >
               <Globe className="size-5 text-primary" />
               <span className="hidden sm:inline">Wazoo Console</span>
             </Link>

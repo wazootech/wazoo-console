@@ -5,8 +5,7 @@ type Variant = "default" | "destructive" | "outline" | "ghost" | "link";
 type Size = "default" | "sm" | "lg" | "icon";
 
 const variantStyles: Record<Variant, string> = {
-  default:
-    "bg-primary text-primary-foreground shadow hover:bg-primary/90",
+  default: "bg-primary text-primary-foreground shadow hover:bg-primary/90",
   destructive:
     "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
   outline:

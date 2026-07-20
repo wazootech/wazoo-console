@@ -2,11 +2,7 @@
 
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import {
-  LogOut,
-  User,
-  Settings,
-} from "lucide-react";
+import { LogOut, User, Settings } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
