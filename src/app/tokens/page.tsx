@@ -3,10 +3,13 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { ErrorCard } from "@/components/error-card";
+import { PageHeader } from "@/components/page-header";
+import { TokenSecretCard } from "@/components/token-secret-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -14,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import {
   listPlatformTokens,
   createPlatformToken,
@@ -61,69 +64,30 @@ export default function TokensPage() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">API Tokens</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage platform API tokens for authentication
-            </p>
-          </div>
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="size-4" /> Create Token
-          </Button>
-        </div>
+        <PageHeader
+          title="API Tokens"
+          description="Manage platform API tokens for authentication"
+          actions={
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="size-4" /> Create Token
+            </Button>
+          }
+        />
         {newSecret && (
-          <Card className="border-primary">
-            <CardHeader>
-              <CardTitle className="text-sm">New Token Created</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                Copy this token now.{" "}
-                <strong>It will not be shown again.</strong>
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-secondary px-3 py-2 text-sm font-mono break-all">
-                  {showSecret ? newSecret.token : "•".repeat(60)}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={showSecret ? "Hide token" : "Show token"}
-                  aria-pressed={showSecret}
-                  onClick={() => setShowSecret(!showSecret)}
-                >
-                  {showSecret ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setNewSecret(null)}
-              >
-                Dismiss
-              </Button>
-            </CardContent>
-          </Card>
+          <TokenSecretCard
+            token={newSecret.token}
+            showSecret={showSecret}
+            maskedLength={60}
+            onToggle={() => setShowSecret(!showSecret)}
+            onDismiss={() => setNewSecret(null)}
+          />
         )}
         {loading && (
           <div className="flex justify-center py-12">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         )}
-        {error && (
-          <Card className="border-destructive">
-            <CardContent className="py-4">
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {error && <ErrorCard message={error} />}
         {!loading && tokens.length > 0 && (
           <div className="space-y-2">
             {tokens.map((t) => (

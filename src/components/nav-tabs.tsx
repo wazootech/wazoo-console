@@ -20,11 +20,9 @@ export function NavTabs({ tabs }: { tabs: Tab[] }) {
           <Link
             key={tab.href}
             href={tab.href}
-            role="tab"
-            aria-selected={active}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "px-3 py-2 text-sm font-medium rounded-t-md transition-colors border-b-2 -mb-[px] outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              "px-3 py-2 text-sm font-medium rounded-t-md transition-colors border-b-2 -mb-px outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
               active
                 ? "border-primary text-primary"
                 : "border-transparent text-muted-foreground hover:text-foreground",

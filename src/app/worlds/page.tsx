@@ -3,10 +3,12 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { ErrorCard } from "@/components/error-card";
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Loader2, AlertCircle, Globe } from "lucide-react";
+import { Plus, Loader2, Globe } from "lucide-react";
 import Link from "next/link";
 import { CreateWorldDialog } from "@/components/create-world-dialog";
 import { listWorlds, type World } from "@wazoo/client";
@@ -44,39 +46,29 @@ export default function WorldsPage() {
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Worlds</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage your knowledge worlds
-            </p>
-          </div>
-          <Button onClick={() => setShowCreate(true)}>
-            <Plus className="size-4" /> Create World
-          </Button>
-        </div>
+        <PageHeader
+          title="Worlds"
+          description="Manage your knowledge worlds"
+          actions={
+            <Button onClick={() => setShowCreate(true)}>
+              <Plus className="size-4" /> Create World
+            </Button>
+          }
+        />
         {loading && (
           <div className="flex justify-center py-12">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
           </div>
         )}
         {error && (
-          <Card className="border-destructive">
-            <CardContent className="flex items-center gap-3 py-4">
-              <AlertCircle className="size-5 text-destructive shrink-0" />
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchWorlds}
-                className="ml-auto"
-              >
+          <ErrorCard
+            message={error}
+            action={
+              <Button variant="outline" size="sm" onClick={fetchWorlds}>
                 Retry
               </Button>
-            </CardContent>
-          </Card>
+            }
+          />
         )}
         {!loading && !error && worlds.length === 0 && (
           <Card>
@@ -95,7 +87,7 @@ export default function WorldsPage() {
               <Link
                 key={w.uid}
                 href={`/worlds/${w.worldId}`}
-                className="block rounded-xl border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="block rounded-md border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex-1 min-w-0">

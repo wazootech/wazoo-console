@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,10 @@ export default function SettingsPage() {
   return (
     <AppShell>
       <div className="space-y-6 max-w-2xl">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Account information and API status
-          </p>
-        </div>
+        <PageHeader
+          title="Settings"
+          description="Account information and API status"
+        />
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Account</CardTitle>

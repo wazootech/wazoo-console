@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,10 @@ export default function WorldBillingPage({
   return (
     <AppShell>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Billing</h1>
+        <PageHeader
+          title="Billing"
+          description="Review billing state for this world"
+        />
         <NavTabs tabs={tabs} />
         {loading && (
           <div className="flex justify-center py-12">

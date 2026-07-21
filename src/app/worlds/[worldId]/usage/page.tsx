@@ -3,6 +3,7 @@
 import { useEffect, useState, use } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -42,7 +43,10 @@ export default function WorldUsagePage({
   return (
     <AppShell>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold">Usage</h1>
+        <PageHeader
+          title="Usage"
+          description="Review usage metrics for this world"
+        />
         <NavTabs tabs={tabs} />
         {loading && (
           <div className="flex justify-center py-12">

@@ -4,11 +4,12 @@ import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { ErrorCard } from "@/components/error-card";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, AlertCircle, Copy, Check } from "lucide-react";
+import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { getWorld, type World } from "@wazoo/client";
 
@@ -73,14 +74,7 @@ export default function WorldDetailPage({
   if (error)
     return (
       <AppShell>
-        <Card className="border-destructive">
-          <CardContent className="flex items-center gap-3 py-4">
-            <AlertCircle className="size-5 text-destructive shrink-0" />
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
-          </CardContent>
-        </Card>
+        <ErrorCard message={error} />
       </AppShell>
     );
   if (!world)

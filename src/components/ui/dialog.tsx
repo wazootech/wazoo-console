@@ -32,7 +32,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
         if (e.target === ref.current) onOpenChange(false);
       }}
       className={cn(
-        "rounded-xl border bg-card text-card-foreground shadow-lg p-0 backdrop:bg-black/50",
+        "rounded-md border bg-card text-card-foreground shadow-lg p-0 backdrop:bg-black/50",
         "w-full max-w-md",
         "fixed inset-0 m-auto max-h-[90vh] overflow-auto",
       )}

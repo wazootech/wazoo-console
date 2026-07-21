@@ -3,10 +3,13 @@
 import { useEffect, useState, use } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { ErrorCard } from "@/components/error-card";
+import { PageHeader } from "@/components/page-header";
+import { TokenSecretCard } from "@/components/token-secret-card";
 import { NavTabs } from "@/components/nav-tabs";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Trash2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Plus, Trash2 } from "lucide-react";
 import {
   listWorldTokens,
   createWorldToken,
@@ -82,54 +85,24 @@ export default function WorldTokensPage({
   return (
     <AppShell>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">World Tokens</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Manage access tokens for this world
-            </p>
-          </div>
-          <Button onClick={handleCreate}>
-            <Plus className="size-4" /> Create Token
-          </Button>
-        </div>
+        <PageHeader
+          title="World Tokens"
+          description="Manage access tokens for this world"
+          actions={
+            <Button onClick={handleCreate}>
+              <Plus className="size-4" /> Create Token
+            </Button>
+          }
+        />
         <NavTabs tabs={tabs} />
         {newToken && (
-          <Card className="border-primary">
-            <CardHeader>
-              <CardTitle className="text-sm">New Token Created</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2">
-              <p className="text-xs text-muted-foreground">
-                Copy this token now. It will not be shown again.
-              </p>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-secondary px-3 py-2 text-sm font-mono break-all">
-                  {showSecret ? newToken.token : "•".repeat(40)}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={showSecret ? "Hide token" : "Show token"}
-                  aria-pressed={showSecret}
-                  onClick={() => setShowSecret(!showSecret)}
-                >
-                  {showSecret ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </Button>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setNewToken(null)}
-              >
-                Dismiss
-              </Button>
-            </CardContent>
-          </Card>
+          <TokenSecretCard
+            token={newToken.token}
+            showSecret={showSecret}
+            maskedLength={40}
+            onToggle={() => setShowSecret(!showSecret)}
+            onDismiss={() => setNewToken(null)}
+          />
         )}
         {loading && (
           <div className="flex justify-center py-12">
@@ -167,15 +140,7 @@ export default function WorldTokensPage({
             </CardContent>
           </Card>
         )}
-        {error && (
-          <Card className="border-destructive">
-            <CardContent className="py-4">
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        {error && <ErrorCard message={error} />}
       </div>
     </AppShell>
   );
