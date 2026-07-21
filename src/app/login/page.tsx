@@ -61,7 +61,7 @@ export default function LoginPage() {
       const res = await fetch(`${apiBase}/v1/auth/verify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: otp.trim() }),
+        body: JSON.stringify({ email, code: otp.trim() }),
       });
       const data = await res.json();
       if (!res.ok) {
