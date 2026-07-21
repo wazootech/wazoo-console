@@ -6,6 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Wazoo Console",
   description: "Wazoo platform management console",
+  icons: "/favicon.svg",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
