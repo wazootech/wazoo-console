@@ -162,7 +162,9 @@ export default function WorldTokensPage({
         {error && (
           <Card className="border-destructive">
             <CardContent className="py-4">
-              <p role="alert" className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
             </CardContent>
           </Card>
         )}

@@ -111,7 +111,9 @@ export default function TokensPage() {
         {error && (
           <Card className="border-destructive">
             <CardContent className="py-4">
-              <p role="alert" className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
             </CardContent>
           </Card>
         )}
@@ -248,7 +250,11 @@ function CreateTokenDialog({
               Space-separated scope names. Empty = all default scopes.
             </p>
           </div>
-          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
           <div className="flex justify-end gap-2">
             <Button
               type="button"

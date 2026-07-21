@@ -123,7 +123,11 @@ export default function LoginPage() {
                   autoFocus
                 />
               </div>
-              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              {error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />
@@ -154,7 +158,11 @@ export default function LoginPage() {
                   className="text-center text-2xl tracking-[0.25em]"
                 />
               </div>
-              {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+              {error && (
+                <p role="alert" className="text-sm text-destructive">
+                  {error}
+                </p>
+              )}
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? (
                   <Loader2 className="size-4 animate-spin" />

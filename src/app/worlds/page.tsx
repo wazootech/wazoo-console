@@ -59,7 +59,9 @@ export default function WorldsPage() {
           <Card className="border-destructive">
             <CardContent className="flex items-center gap-3 py-4">
               <AlertCircle className="size-5 text-destructive shrink-0" />
-              <p role="alert" className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
               <Button
                 variant="outline"
                 size="sm"
