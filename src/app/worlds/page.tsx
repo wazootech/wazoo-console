@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Loader2, AlertCircle, Globe } from "lucide-react";
+import Link from "next/link";
 import { CreateWorldDialog } from "@/components/create-world-dialog";
 import { listWorlds, type World } from "@wazoo/client";
 
@@ -19,7 +19,6 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 
 export default function WorldsPage() {
   const { client } = useAuth();
-  const router = useRouter();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,7 +59,7 @@ export default function WorldsPage() {
           <Card className="border-destructive">
             <CardContent className="flex items-center gap-3 py-4">
               <AlertCircle className="size-5 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">{error}</p>
               <Button
                 variant="outline"
                 size="sm"
@@ -86,10 +85,10 @@ export default function WorldsPage() {
         {!loading && worlds.length > 0 && (
           <div className="space-y-2">
             {worlds.map((w) => (
-              <Card
+              <Link
                 key={w.uid}
-                className="cursor-pointer hover:bg-accent/50 transition-colors"
-                onClick={() => router.push(`/worlds/${w.worldId}`)}
+                href={`/worlds/${w.worldId}`}
+                className="block rounded-xl border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex-1 min-w-0">
@@ -106,7 +105,7 @@ export default function WorldsPage() {
                     </p>
                   </div>
                 </CardContent>
-              </Card>
+              </Link>
             ))}
           </div>
         )}

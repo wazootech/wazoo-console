@@ -63,7 +63,7 @@ export function DeleteWorldDialog({
             onChange={(e) => setConfirm(e.target.value)}
             disabled={loading}
           />
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <div className="flex justify-end gap-2">
             <Button
               variant="outline"

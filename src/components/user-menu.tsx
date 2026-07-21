@@ -45,6 +45,7 @@ export function UserMenu() {
           </div>
           <div className="h-px bg-border my-1" />
           <button
+            type="button"
             className={cn(
               "flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm hover:bg-accent",
             )}
@@ -57,6 +58,7 @@ export function UserMenu() {
             Settings
           </button>
           <button
+            type="button"
             className={cn(
               "flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-destructive hover:bg-accent",
             )}
