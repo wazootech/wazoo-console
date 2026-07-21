@@ -45,7 +45,12 @@ export default function WorldsPage() {
     <AppShell>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">Worlds</h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Worlds</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage your knowledge worlds
+            </p>
+          </div>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="size-4" /> Create World
           </Button>
@@ -90,7 +95,7 @@ export default function WorldsPage() {
               <Link
                 key={w.uid}
                 href={`/worlds/${w.worldId}`}
-                className="block rounded-xl border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                className="block rounded-xl border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <CardContent className="flex items-center gap-4 py-4">
                   <div className="flex-1 min-w-0">

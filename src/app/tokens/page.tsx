@@ -62,7 +62,12 @@ export default function TokensPage() {
     <AppShell>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">API Tokens</h1>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">API Tokens</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage platform API tokens for authentication
+            </p>
+          </div>
           <Button onClick={() => setShowCreate(true)}>
             <Plus className="size-4" /> Create Token
           </Button>
@@ -84,6 +89,8 @@ export default function TokensPage() {
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={showSecret ? "Hide token" : "Show token"}
+                  aria-pressed={showSecret}
                   onClick={() => setShowSecret(!showSecret)}
                 >
                   {showSecret ? (
@@ -144,6 +151,7 @@ export default function TokensPage() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label={`Revoke token ${t.name}`}
                     onClick={() => handleRevoke(t.name)}
                   >
                     <Trash2 className="size-4 text-muted-foreground" />

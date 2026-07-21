@@ -96,17 +96,25 @@ export default function WorldDetailPage({
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold">{world.displayName}</h1>
-            <button
-              onClick={copyWorldId}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mt-1"
-            >
-              {world.worldId}
-              {copied ? (
-                <Check className="size-3 text-green-400" />
-              ) : (
-                <Copy className="size-3" />
-              )}
-            </button>
+            <div className="flex items-center gap-1 mt-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={`Copy world ID ${world.worldId}`}
+                onClick={copyWorldId}
+                className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
+              >
+                {world.worldId}
+                {copied ? (
+                  <Check className="size-3 text-green-400" />
+                ) : (
+                  <Copy className="size-3" />
+                )}
+              </Button>
+              <span className="sr-only" aria-live="polite">
+                {copied ? "Copied to clipboard" : ""}
+              </span>
+            </div>
           </div>
           <Button
             variant="destructive"

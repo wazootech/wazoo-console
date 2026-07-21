@@ -23,7 +23,12 @@ export default function SettingsPage() {
   return (
     <AppShell>
       <div className="space-y-6 max-w-2xl">
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
+          <p className="text-sm text-muted-foreground mt-1">
+            Account information and API status
+          </p>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">Account</CardTitle>

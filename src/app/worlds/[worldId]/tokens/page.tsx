@@ -83,7 +83,12 @@ export default function WorldTokensPage({
     <AppShell>
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">World Tokens</h1>
+          <div>
+            <h1 className="text-2xl font-bold">World Tokens</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Manage access tokens for this world
+            </p>
+          </div>
           <Button onClick={handleCreate}>
             <Plus className="size-4" /> Create Token
           </Button>
@@ -105,6 +110,8 @@ export default function WorldTokensPage({
                 <Button
                   variant="ghost"
                   size="icon"
+                  aria-label={showSecret ? "Hide token" : "Show token"}
+                  aria-pressed={showSecret}
                   onClick={() => setShowSecret(!showSecret)}
                 >
                   {showSecret ? (
@@ -143,6 +150,7 @@ export default function WorldTokensPage({
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label={`Revoke token ${t.name}`}
                     onClick={() => handleRevoke(t.uid)}
                   >
                     <Trash2 className="size-4 text-muted-foreground" />

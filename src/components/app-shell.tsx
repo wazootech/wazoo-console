@@ -39,16 +39,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Globe className="size-5 text-primary" />
               <span className="hidden sm:inline">Wazoo Console</span>
             </Link>
-            <nav className="hidden sm:flex items-center gap-4">
+            <nav
+              className="hidden sm:flex items-center gap-4"
+              aria-label="Main"
+            >
               <Link
                 href="/worlds"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
               >
                 Worlds
               </Link>
               <Link
                 href="/tokens"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
               >
                 API Tokens
               </Link>
