@@ -39,13 +39,7 @@ export function UserMenu() {
           <Settings className="size-4" />
           Settings
         </DropdownMenuItem>
-        <DropdownMenuItem
-          variant="destructive"
-          onSelect={() => {
-            logout();
-            router.push("/login");
-          }}
-        >
+        <DropdownMenuItem variant="destructive" onSelect={() => logout()}>
           <LogOut className="size-4" />
           Sign out
         </DropdownMenuItem>

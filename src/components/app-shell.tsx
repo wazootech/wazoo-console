@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/lib/auth";
-import { Globe, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -34,9 +34,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-6">
             <Link
               href="/worlds"
-              className="flex items-center gap-2 font-semibold"
+              className="group flex items-center gap-2 font-semibold"
             >
-              <Globe className="size-5 text-primary" />
+              <img
+                src="/wazoo.svg"
+                alt=""
+                className="size-7 transition-transform duration-[600ms] ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] group-hover:rotate-[360deg]"
+              />
               <span className="hidden sm:inline">Wazoo Console</span>
             </Link>
             <nav

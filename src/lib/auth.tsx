@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { createClient, getUserMe, type Client, type User } from "@wazoo/client";
+import { createClient, type Client, type User } from "@wazoo/client";
 
 function getApiBaseUrl(): string | undefined {
   if (typeof window !== "undefined" && (window as any).__WZ_API_URL) {
@@ -26,13 +26,15 @@ interface AuthState {
 }
 
 interface AuthContextValue extends AuthState {
-  login: (token: string) => Promise<string | null>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
-const TOKEN_KEY = "wazoo_token";
-const USER_KEY = "wazoo_user";
+
+type SessionResponse = {
+  token: string;
+  user: User;
+};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -44,75 +46,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    const stored = localStorage.getItem(TOKEN_KEY);
-    if (stored) {
-      const client = createClient({
-        auth: stored,
-        throwOnError: false,
-        baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev",
-      });
-      const userJson = localStorage.getItem(USER_KEY);
-      if (userJson) {
-        try {
-          setState({
-            token: stored,
-            user: JSON.parse(userJson),
-            client,
-            loading: false,
-            error: null,
-          });
-          return;
-        } catch {}
-      }
-      getUserMe({ client })
-        .then((r) => {
-          if (r.error) {
-            logout();
-          } else {
-            const user = r.data?.user;
-            if (user) {
-              localStorage.setItem(USER_KEY, JSON.stringify(user));
-              setState({
-                token: stored,
-                user,
-                client,
-                loading: false,
-                error: null,
-              });
-            }
-          }
-        })
-        .catch(() => logout());
-    } else {
-      setState((s) => ({ ...s, loading: false }));
-    }
-  }, []);
+    let cancelled = false;
+    const pathname = window.location.pathname.replace(/\/$/, "");
+    const authPathnames = new Set(["/login", "/sign-in", "/callback"]);
 
-  const login = useCallback(async (token: string): Promise<string | null> => {
-    const trimmed = token.trim();
-    if (!trimmed.startsWith("wzp_")) return "Token must start with wzp_";
-    const client = createClient({
-      auth: trimmed,
-      throwOnError: false,
-      baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev",
-    });
-    const r = await getUserMe({ client });
-    if (r.error) {
-      return typeof r.error === "object" && "error" in r.error
-        ? (r.error as { error: { message: string } }).error.message
-        : "Invalid token";
+    if (authPathnames.has(pathname)) {
+      setState((currentState) => ({ ...currentState, loading: false }));
+      return () => {
+        cancelled = true;
+      };
     }
-    const user = r.data?.user;
-    if (!user) return "Could not fetch user";
-    localStorage.setItem(TOKEN_KEY, trimmed);
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
-    setState({ token: trimmed, user, client, loading: false, error: null });
-    return null;
+
+    fetch("/api/auth/session", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("Not signed in");
+        }
+        return (await response.json()) as SessionResponse;
+      })
+      .then(({ token, user }) => {
+        if (cancelled) return;
+        const client = createClient({
+          auth: token,
+          throwOnError: false,
+          baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev",
+        });
+        setState({ token, user, client, loading: false, error: null });
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        const message =
+          error instanceof Error ? error.message : "Could not load session.";
+        setState({
+          token: null,
+          user: null,
+          client: null,
+          loading: false,
+          error: message,
+        });
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    fetch("/api/auth/logout", { method: "POST" }).catch(() => {});
     setState({
       token: null,
       user: null,
@@ -120,10 +100,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       loading: false,
       error: null,
     });
+    window.location.assign("/sign-out");
   }, []);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
+    <AuthContext.Provider value={{ ...state, logout }}>
       {children}
     </AuthContext.Provider>
   );

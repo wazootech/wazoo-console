@@ -7,13 +7,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { LogOut, CheckCircle, XCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getHealth } from "@wazoo/client";
 
 export default function SettingsPage() {
   const { user, client, logout } = useAuth();
-  const router = useRouter();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -68,13 +66,7 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Button
-          variant="destructive"
-          onClick={() => {
-            logout();
-            router.push("/login");
-          }}
-        >
+        <Button variant="destructive" onClick={() => logout()}>
           <LogOut className="size-4" />
           Sign out
         </Button>

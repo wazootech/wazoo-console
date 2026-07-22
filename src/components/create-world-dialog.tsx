@@ -19,6 +19,11 @@ import {
   suggestWorldId,
 } from "@/lib/world-id";
 
+const regionOptions = [
+  { value: "auto", label: "Automatic" },
+  { value: "us-east", label: "US East" },
+] as const;
+
 function useDebounce<T>(value: T, delay: number): T {
   const [debounced, setDebounced] = useState(value);
   useEffect(() => {
@@ -149,15 +154,25 @@ export function CreateWorldDialog({
               onChange={(e) => setDisplayName(e.target.value)}
               disabled={loading}
             />
+            <p className="text-xs text-muted-foreground">
+              A human-readable name for this world. You can change it later.
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="region">Region</Label>
-            <Input
+            <select
               id="region"
               value={region}
               onChange={(e) => setRegion(e.target.value)}
               disabled={loading}
-            />
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {regionOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
           {error && (
             <p role="alert" className="text-sm text-destructive">
