@@ -1,0 +1,19 @@
+vercel:
+  users:
+    - username: developer
+      name: Wazoo Developer
+      email: developer@wazoo.dev
+  teams:
+    - slug: wazoo
+      name: Wazoo
+  projects:
+    - name: wazoo-console
+      team: wazoo
+      framework: nextjs
+  integrations:
+    - client_id: emu_vercel_client_id
+      client_secret: emu_vercel_client_secret
+      name: Wazoo Console
+      redirect_uris:
+        - http://localhost:3000/callback
+        - http://localhost:3001/callback

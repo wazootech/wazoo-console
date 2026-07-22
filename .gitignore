@@ -4,3 +4,5 @@ out/
 .open-next/
 .wrangler/
 *.tsbuildinfo
+/.codex-*.log
+.env*
