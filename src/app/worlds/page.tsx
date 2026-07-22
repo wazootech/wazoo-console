@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
@@ -25,6 +25,11 @@ export default function WorldsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
+
+  const existingWorldIds = useMemo(
+    () => new Set(worlds.map((w) => w.worldId)),
+    [worlds],
+  );
 
   async function fetchWorlds() {
     if (!client) return;
@@ -112,6 +117,7 @@ export default function WorldsPage() {
           open={showCreate}
           onOpenChange={setShowCreate}
           onCreated={fetchWorlds}
+          existingWorldIds={existingWorldIds}
         />
       </div>
     </AppShell>

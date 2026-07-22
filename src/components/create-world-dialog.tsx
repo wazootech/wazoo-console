@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,22 +11,66 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, Check, X } from "lucide-react";
 import { createWorld } from "@wazoo/client";
+import {
+  validateWorldId,
+  isWorldIdTaken,
+  suggestWorldId,
+} from "@/lib/world-id";
+
+function useDebounce<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(id);
+  }, [value, delay]);
+  return debounced;
+}
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
+  existingWorldIds: Set<string>;
 }
 
-export function CreateWorldDialog({ open, onOpenChange, onCreated }: Props) {
+export function CreateWorldDialog({
+  open,
+  onOpenChange,
+  onCreated,
+  existingWorldIds,
+}: Props) {
   const { client } = useAuth();
+  const displayNameRef = useRef<HTMLInputElement>(null);
   const [worldId, setWorldId] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [region, setRegion] = useState("auto");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const debouncedWorldId = useDebounce(worldId, 250);
+  const validationError = validateWorldId(debouncedWorldId);
+  const taken =
+    !validationError &&
+    debouncedWorldId &&
+    isWorldIdTaken(debouncedWorldId, existingWorldIds);
+  const canSubmit =
+    !loading &&
+    !validateWorldId(worldId) &&
+    !isWorldIdTaken(worldId, existingWorldIds) &&
+    worldId.length > 0;
+
+  useEffect(() => {
+    if (open) {
+      setWorldId(suggestWorldId(existingWorldIds));
+      setDisplayName("");
+      setRegion("auto");
+      setError(null);
+      setLoading(false);
+      setTimeout(() => displayNameRef.current?.focus(), 0);
+    }
+  }, [open]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,9 +84,6 @@ export function CreateWorldDialog({ open, onOpenChange, onCreated }: Props) {
     if (r.error) {
       setError(errMsg(r.error));
     } else {
-      setWorldId("");
-      setDisplayName("");
-      setRegion("auto");
       onOpenChange(false);
       onCreated();
     }
@@ -65,15 +106,43 @@ export function CreateWorldDialog({ open, onOpenChange, onCreated }: Props) {
               onChange={(e) => setWorldId(e.target.value)}
               disabled={loading}
               required
-              autoFocus
+              aria-describedby="world-id-feedback world-id-hint"
+              aria-invalid={!!validationError || !!taken}
             />
-            <p className="text-xs text-muted-foreground">
+            <p id="world-id-hint" className="text-xs text-muted-foreground">
               Lowercase letters, digits, and hyphens. 3-63 characters.
             </p>
+            <div
+              id="world-id-feedback"
+              className="flex items-center gap-1.5 min-h-5"
+            >
+              {validationError && (
+                <span
+                  role="alert"
+                  className="text-xs text-destructive flex items-center gap-1"
+                >
+                  <X className="size-3" /> {validationError}
+                </span>
+              )}
+              {!validationError && taken && (
+                <span
+                  role="alert"
+                  className="text-xs text-destructive flex items-center gap-1"
+                >
+                  <X className="size-3" /> Already taken.
+                </span>
+              )}
+              {!validationError && !taken && worldId && (
+                <span className="text-xs text-emerald-500 flex items-center gap-1">
+                  <Check className="size-3" /> Available
+                </span>
+              )}
+            </div>
           </div>
           <div className="space-y-2">
             <Label htmlFor="displayName">Display Name</Label>
             <Input
+              ref={displayNameRef}
               id="displayName"
               placeholder="My World"
               value={displayName}
@@ -104,7 +173,7 @@ export function CreateWorldDialog({ open, onOpenChange, onCreated }: Props) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={!canSubmit}>
               {loading ? <Loader2 className="size-4 animate-spin" /> : null}
               Create
             </Button>
