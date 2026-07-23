@@ -46,6 +46,11 @@ run the `CI` workflow with `workflow_dispatch` from the intended branch. The
 `deploy-prod` job waits for `verify` before publishing the top-level
 `wazoo-console` Worker and custom domain.
 
+Pull requests deploy preview Workers with `wrangler.preview.jsonc`, which keeps
+`workers_dev` enabled and defines no custom-domain routes. Do not deploy PR
+previews with the production Wrangler config, because it owns
+`console.wazoo.dev`.
+
 Required GitHub Actions secrets:
 
 ```sh
