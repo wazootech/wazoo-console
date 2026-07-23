@@ -49,7 +49,10 @@ run the `CI` workflow with `workflow_dispatch` from the intended branch. The
 Pull requests deploy preview Workers with `wrangler.preview.jsonc`, which keeps
 `workers_dev` enabled and defines no custom-domain routes. Do not deploy PR
 previews with the production Wrangler config, because it owns
-`console.wazoo.dev`.
+`console.wazoo.dev`. Preview deploys use non-secret AuthKit placeholder values
+so the app can render and redirect without exposing production WorkOS/admin
+secrets to pull request code; they are not intended for completing a real
+WorkOS callback.
 
 Required GitHub Actions secrets:
 
