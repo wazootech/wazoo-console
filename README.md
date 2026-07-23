@@ -37,3 +37,45 @@ npm run dev:emulate:vercel
 The emulator serves Vercel at [http://localhost:4000](http://localhost:4000)
 with client ID `emu_vercel_client_id` and client secret
 `emu_vercel_client_secret`.
+
+## Deployment
+
+Production deploys are human-in-the-loop. Do not deploy `console.wazoo.dev`
+directly from a local shell for normal releases. Push the reviewed commit, then
+run the `CI` workflow with `workflow_dispatch` from the intended branch. The
+`deploy-prod` job waits for `verify` before publishing the top-level
+`wazoo-console` Worker and custom domain.
+
+Pull requests deploy preview Workers with `wrangler.preview.jsonc`, which keeps
+`workers_dev` enabled and defines no custom-domain routes. Do not deploy PR
+previews with the production Wrangler config, because it owns
+`console.wazoo.dev`. Preview deploys use non-secret AuthKit placeholder values
+so the app can render and redirect without exposing production WorkOS/admin
+secrets to pull request code; they are not intended for completing a real
+WorkOS callback.
+
+Required GitHub Actions secrets:
+
+```sh
+CLOUDFLARE_ACCOUNT_ID
+CLOUDFLARE_API_TOKEN
+WORKOS_CLIENT_ID
+WORKOS_API_KEY
+WORKOS_COOKIE_PASSWORD
+WAZOO_PLATFORM_ADMIN_TOKEN
+```
+
+Required Cloudflare Worker secrets for `wazoo-console`:
+
+```sh
+WORKOS_CLIENT_ID
+WORKOS_API_KEY
+WORKOS_COOKIE_PASSWORD
+WAZOO_PLATFORM_ADMIN_TOKEN
+```
+
+`NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WORKOS_REDIRECT_URI` are set by the
+production workflow to `https://api.wazoo.dev` and
+`https://console.wazoo.dev/callback`. After deployment, smoke test
+`https://console.wazoo.dev/sign-in/` and confirm it returns a `307` redirect to
+hosted WorkOS with the production callback URI.
