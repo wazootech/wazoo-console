@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@radix-ui/react-dropdown-menu": "^2.1.21",
+    "@radix-ui/react-select": "^2.3.5",
     "@tailwindcss/postcss": "^4.3.3",
     "@wazoo/client": "npm:@jsr/wazoo__client@^0.1.4",
     "@workos-inc/authkit-nextjs": "^4.3.0",
