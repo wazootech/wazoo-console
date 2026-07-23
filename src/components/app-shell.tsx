@@ -36,11 +36,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href="/worlds"
               className="group flex items-center gap-2 font-semibold"
             >
-              <img
-                src="/wazoo.svg"
-                alt=""
-                className="size-7 transition-transform duration-[600ms] ease-[cubic-bezier(0.68,-0.55,0.27,1.55)] group-hover:rotate-[360deg]"
-              />
+              <img src="/wazoo.svg" alt="" className="size-7 logo-spin" />
               <span className="hidden sm:inline">Wazoo Console</span>
             </Link>
             <nav

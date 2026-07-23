@@ -84,3 +84,16 @@ h6 {
     --foreground: #b0b0b1;
   }
 }
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.group:hover .logo-spin {
+  animation: logo-spin 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;
+}
