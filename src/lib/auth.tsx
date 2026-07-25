@@ -10,11 +10,17 @@ import {
 } from "react";
 import { createClient, type Client, type User } from "@wazoo/client";
 
-function getApiBaseUrl(): string | undefined {
-  if (typeof window !== "undefined" && (window as any).__WZ_API_URL) {
-    return (window as any).__WZ_API_URL;
+function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    if ((window as any).__WZ_API_URL) return (window as any).__WZ_API_URL;
+    if (
+      window.location.hostname.includes("console-qa.wazoo.dev") ||
+      window.location.hostname.includes("-qa.")
+    ) {
+      return "https://api-qa.wazoo.dev";
+    }
   }
-  return process.env.NEXT_PUBLIC_API_URL;
+  return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
 }
 
 interface AuthState {
