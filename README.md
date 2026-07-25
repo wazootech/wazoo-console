@@ -21,12 +21,9 @@ WORKOS_CLIENT_ID="client_..."
 WORKOS_API_KEY="sk_test_..."
 WORKOS_COOKIE_PASSWORD="<at least 32 characters>"
 NEXT_PUBLIC_WORKOS_REDIRECT_URI="http://localhost:3000/callback"
-WAZOO_CONSOLE_ADMIN_TOKEN="wzp_..."
+WAZOO_PLATFORM_ADMIN_TOKEN="wzp_..."
 NEXT_PUBLIC_API_URL="http://localhost:8080"
 ```
-
-`WAZOO_PLATFORM_ADMIN_TOKEN` is also accepted for parity with the Cloudflare
-Worker secret name.
 
 To run the Vercel OAuth emulator for WorkOS provider development:
 
