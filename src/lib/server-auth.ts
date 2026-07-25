@@ -3,20 +3,7 @@ import type { User } from "@wazoo/client";
 export const tokenCookieName = "wazoo_console_token";
 
 export function getApiBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_API_URL) {
-    return process.env.NEXT_PUBLIC_API_URL;
-  }
-  const redirectUri =
-    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ??
-    process.env.WORKOS_REDIRECT_URI ??
-    "";
-  if (
-    redirectUri.includes("console-qa.wazoo.dev") ||
-    redirectUri.includes("-qa.")
-  ) {
-    return "https://api-qa.wazoo.dev";
-  }
-  return "https://api.wazoo.dev";
+  return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
 }
 
 export async function fetchUser(token: string): Promise<User | null> {
