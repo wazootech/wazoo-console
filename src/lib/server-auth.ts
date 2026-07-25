@@ -18,7 +18,7 @@ export async function fetchUser(token: string): Promise<User | null> {
   return body.user ?? null;
 }
 
-export async function mintConsoleToken(options: {
+export async function mintPlatformToken(options: {
   email: string;
   displayName: string | null;
 }): Promise<string> {

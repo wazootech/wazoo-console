@@ -2,14 +2,14 @@ import { handleAuth } from "@workos-inc/authkit-nextjs";
 import { cookies } from "next/headers";
 import {
   getDisplayName,
-  mintConsoleToken,
+  mintPlatformToken,
   tokenCookieName,
 } from "@/lib/server-auth";
 
 export const GET = handleAuth({
   returnPathname: "/worlds",
   onSuccess: async ({ user }) => {
-    const token = await mintConsoleToken({
+    const token = await mintPlatformToken({
       email: user.email,
       displayName: getDisplayName({
         email: user.email,
