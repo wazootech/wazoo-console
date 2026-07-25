@@ -3,10 +3,10 @@ import { NextResponse } from "next/server";
 import type { User } from "@wazoo/client";
 import { fetchUser, tokenCookieName } from "@/lib/server-auth";
 
-type SessionResponse = {
+interface SessionResponse {
   token: string;
   user: User;
-};
+}
 
 export async function GET(): Promise<NextResponse<SessionResponse | unknown>> {
   const cookieStore = await cookies();
