@@ -18,17 +18,13 @@ export async function fetchUser(token: string): Promise<User | null> {
   return body.user ?? null;
 }
 
-export async function mintConsoleToken(options: {
+export async function mintPlatformToken(options: {
   email: string;
   displayName: string | null;
 }): Promise<string> {
-  const adminToken =
-    process.env.WAZOO_CONSOLE_ADMIN_TOKEN ??
-    process.env.WAZOO_PLATFORM_ADMIN_TOKEN;
+  const adminToken = process.env.WAZOO_PLATFORM_ADMIN_TOKEN;
   if (!adminToken) {
-    throw new Error(
-      "WAZOO_CONSOLE_ADMIN_TOKEN or WAZOO_PLATFORM_ADMIN_TOKEN is required for WorkOS login.",
-    );
+    throw new Error("WAZOO_PLATFORM_ADMIN_TOKEN is required for WorkOS login.");
   }
 
   const response = await fetch(`${getApiBaseUrl()}/v1/auth/workos-session`, {
