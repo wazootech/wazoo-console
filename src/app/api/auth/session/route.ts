@@ -20,11 +20,12 @@ export async function GET(): Promise<NextResponse<SessionResponse | unknown>> {
 
   const user = await fetchUser(storedToken);
   if (!user) {
-    cookieStore.delete(tokenCookieName);
-    return NextResponse.json(
+    const res = NextResponse.json(
       { error: { message: "Session expired." } },
       { status: 401 },
     );
+    res.cookies.delete(tokenCookieName);
+    return res;
   }
 
   return NextResponse.json({ token: storedToken, user });
