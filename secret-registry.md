@@ -2,14 +2,14 @@
 
 ## wazoo-console
 
-| Secret | Prod Worker | QA Worker | GitHub Secrets | Source |
-| --- | --- | --- | --- | --- |
-| WORKOS_CLIENT_ID | yes | yes | yes | `.env.local` |
-| WORKOS_API_KEY | yes | yes | yes | `.env.local` |
-| WORKOS_COOKIE_PASSWORD | yes | yes | yes | `.env.local` |
-| WAZOO_PLATFORM_ADMIN_TOKEN | yes | yes | yes | `.env.local` |
+| Secret | Prod Worker | QA Worker | GitHub Secrets | Source | Security Rule |
+| --- | --- | --- | --- | --- | --- |
+| WORKOS_CLIENT_ID | yes | yes | yes | `.env.local` | Identical for staging AuthKit instance |
+| WORKOS_API_KEY | yes | yes | yes | `.env.local` | Staging API key |
+| WORKOS_COOKIE_PASSWORD | yes | yes | yes | `.env.local` | Environment-specific random 32-byte secret |
+| WAZOO_PLATFORM_ADMIN_TOKEN | yes | yes | yes | `.env.local` | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
 
-Last audited: 2026-07-24
+Last audited: 2026-07-25
 
 ## WorkOS environment variables
 
