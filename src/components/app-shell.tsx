@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/lib/auth";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading && !token) {
@@ -27,6 +29,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   if (!token) return null;
 
+  const navItems = [
+    { label: "Worlds", href: "/worlds" },
+    { label: "Tokens", href: "/tokens" },
+  ];
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -40,21 +47,26 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="hidden sm:inline">Wazoo Console</span>
             </Link>
             <nav
-              className="hidden sm:flex items-center gap-4"
+              className="hidden sm:flex items-center gap-2"
               aria-label="Main"
             >
-              <Link
-                href="/worlds"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-              >
-                Worlds
-              </Link>
-              <Link
-                href="/tokens"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm"
-              >
-                API Tokens
-              </Link>
+              {navItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={cn(
+                      "px-3 py-1.5 text-sm font-medium rounded-md border transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                      isActive
+                        ? "border-border bg-accent text-foreground font-semibold"
+                        : "border-border/60 bg-background/50 text-muted-foreground hover:border-border hover:bg-accent/50 hover:text-foreground",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
           </div>
           <UserMenu />
