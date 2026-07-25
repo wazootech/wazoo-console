@@ -26,4 +26,32 @@ export const GET = handleAuth({
       path: "/",
     });
   },
+  onError: async ({ error }) => {
+    console.error("[AuthKit callback error]", error);
+    const errObj = error as Record<string, unknown> | null | undefined;
+    return new Response(
+      JSON.stringify(
+        {
+          error: "AuthKit Callback Error",
+          message: error instanceof Error ? error.message : String(error),
+          name: error instanceof Error ? error.name : undefined,
+          code: (errObj as { code?: unknown })?.code,
+          status:
+            (errObj as { status?: unknown; statusCode?: unknown })?.status ??
+            (errObj as { status?: unknown; statusCode?: unknown })?.statusCode,
+          rawData:
+            (errObj as { rawData?: unknown; response?: unknown })?.rawData ??
+            (errObj as { rawData?: unknown; response?: unknown })?.response ??
+            null,
+          stack: error instanceof Error ? error.stack : undefined,
+        },
+        null,
+        2,
+      ),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  },
 });
