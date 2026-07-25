@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "dev:emulate:vercel": "emulate --service vercel --seed emulate.config.yaml",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "preview": "npx @opennextjs/cloudflare build && npx wrangler dev",
