@@ -8,6 +8,7 @@ import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
+import { getWorldTabs } from "@/lib/utils";
 import { getWorldBilling, type Billing } from "@wazoo/client";
 
 export default function WorldBillingPage({
@@ -20,12 +21,7 @@ export default function WorldBillingPage({
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const tabs = [
-    { label: "Overview", href: `/worlds/${worldId}` },
-    { label: "Tokens", href: `/worlds/${worldId}/tokens` },
-    { label: "Usage", href: `/worlds/${worldId}/usage` },
-    { label: "Billing", href: `/worlds/${worldId}/billing` },
-  ];
+  const tabs = getWorldTabs(worldId);
 
   useEffect(() => {
     if (!client) return;

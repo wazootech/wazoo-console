@@ -10,6 +10,7 @@ import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import { getWorldTabs, saveLocalWorldToken } from "@/lib/utils";
 import {
   listWorldTokens,
   createWorldToken,
@@ -34,12 +35,7 @@ export default function WorldTokensPage({
   } | null>(null);
   const [showSecret, setShowSecret] = useState(false);
 
-  const tabs = [
-    { label: "Overview", href: `/worlds/${worldId}` },
-    { label: "Tokens", href: `/worlds/${worldId}/tokens` },
-    { label: "Usage", href: `/worlds/${worldId}/usage` },
-    { label: "Billing", href: `/worlds/${worldId}/billing` },
-  ];
+  const tabs = getWorldTabs(worldId);
 
   async function fetchTokens() {
     if (!client) return;
@@ -67,12 +63,15 @@ export default function WorldTokensPage({
       return;
     }
     const t = r.data?.token;
-    if (t)
+    if (t) {
+      const tokenStr = (t as WorldToken & { token: string }).token ?? "";
       setNewToken({
         uid: t.uid,
         name: t.name,
-        token: (t as WorldToken & { token: string }).token ?? "",
+        token: tokenStr,
       });
+      saveLocalWorldToken(worldId, tokenStr, t.name);
+    }
     fetchTokens();
   }
 
