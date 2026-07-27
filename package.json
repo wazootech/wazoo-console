@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
+    "monaco-editor": "^0.56.0",
     "@radix-ui/react-dropdown-menu": "^2.1.21",
     "@radix-ui/react-select": "^2.3.5",
     "@tailwindcss/postcss": "^4.3.3",
