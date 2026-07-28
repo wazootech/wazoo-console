@@ -63,7 +63,26 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npx wrangler delete --config wrangler.preview.jsonc --name "wazoo-console-pr-${{ github.event.pull_request.number }}" --force
+      - run: |
+          worker_name="wazoo-console-pr-${{ github.event.pull_request.number }}"
+          response="$(
+            curl -sS -X DELETE \
+              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${worker_name}" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
+          )"
+
+          if echo "${response}" | grep -q '"success":true'; then
+            echo "Deleted ${worker_name}."
+            exit 0
+          fi
+
+          if echo "${response}" | grep -q '"code":10007'; then
+            echo "${worker_name} was already deleted."
+            exit 0
+          fi
+
+          echo "${response}"
+          exit 1
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
