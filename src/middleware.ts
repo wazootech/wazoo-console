@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import type { NextRequest, NextFetchEvent } from "next/server";
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
 import { tokenCookieName } from "@/lib/server-auth";
 
@@ -10,7 +10,7 @@ const proxy = authkitProxy({
   },
 });
 
-export default async function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest, event: NextFetchEvent) {
   const hasToken = request.cookies.has(tokenCookieName);
   const pathname = request.nextUrl.pathname;
 
@@ -21,7 +21,7 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  return proxy(request);
+  return proxy(request, event);
 }
 
 export const config = {
