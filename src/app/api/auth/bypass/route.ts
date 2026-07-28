@@ -15,7 +15,9 @@ export async function POST(request: Request) {
     const user = await fetchUser(token);
     if (!user) {
       return NextResponse.json(
-        { error: { message: "Invalid token or unable to fetch user profile." } },
+        {
+          error: { message: "Invalid token or unable to fetch user profile." },
+        },
         { status: 401 },
       );
     }
@@ -31,7 +33,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, user });
   } catch (err) {
     return NextResponse.json(
-      { error: { message: err instanceof Error ? err.message : "Internal server error" } },
+      {
+        error: {
+          message: err instanceof Error ? err.message : "Internal server error",
+        },
+      },
       { status: 500 },
     );
   }

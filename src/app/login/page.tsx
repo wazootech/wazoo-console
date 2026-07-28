@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { KeyRound, ShieldAlert, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
+import {
+  KeyRound,
+  ShieldAlert,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+} from "lucide-react";
 
 export default function LoginPage() {
   const [token, setToken] = useState("");
@@ -83,15 +89,24 @@ export default function LoginPage() {
               className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors mx-auto flex items-center gap-1.5 focus:outline-none"
             >
               <KeyRound className="w-3.5 h-3.5" />
-              {showBypass ? "Hide developer bypass options" : "Show developer bypass options"}
+              {showBypass
+                ? "Hide developer bypass options"
+                : "Show developer bypass options"}
             </button>
           </div>
 
           {/* Bypass Form */}
           {showBypass && (
-            <form onSubmit={handleBypassSubmit} className="mt-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
+            <form
+              onSubmit={handleBypassSubmit}
+              className="mt-4 flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-300"
+            >
               <div className="text-xs text-zinc-400 mb-1 leading-relaxed">
-                Paste a valid <code className="text-zinc-200 px-1 py-0.5 bg-zinc-900 rounded font-mono">wazoo_console_token</code> JWT below to bypass the SSO authentication layer.
+                Paste a valid{" "}
+                <code className="text-zinc-200 px-1 py-0.5 bg-zinc-900 rounded font-mono">
+                  wazoo_console_token
+                </code>{" "}
+                JWT below to bypass the SSO authentication layer.
               </div>
               <div className="relative">
                 <textarea

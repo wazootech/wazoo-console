@@ -6,11 +6,19 @@ import { tokenCookieName } from "@/lib/server-auth";
 const proxy = authkitProxy({
   middlewareAuth: {
     enabled: true,
-    unauthenticatedPaths: ["/login", "/sign-in", "/callback", "/api/auth/bypass"],
+    unauthenticatedPaths: [
+      "/login",
+      "/sign-in",
+      "/callback",
+      "/api/auth/bypass",
+    ],
   },
 });
 
-export default async function middleware(request: NextRequest, event: NextFetchEvent) {
+export default async function middleware(
+  request: NextRequest,
+  event: NextFetchEvent,
+) {
   const hasToken = request.cookies.has(tokenCookieName);
   const pathname = request.nextUrl.pathname;
 
