@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
+import { getWorldTabs } from "@/lib/utils";
 import { getWorld, type World } from "@wazoo/client";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
@@ -50,12 +51,7 @@ export default function WorldDetailPage({
     fetchWorld();
   }, [client, worldId]);
 
-  const tabs = [
-    { label: "Overview", href: `/worlds/${worldId}` },
-    { label: "Tokens", href: `/worlds/${worldId}/tokens` },
-    { label: "Usage", href: `/worlds/${worldId}/usage` },
-    { label: "Billing", href: `/worlds/${worldId}/billing` },
-  ];
+  const tabs = getWorldTabs(worldId);
 
   function copyWorldId() {
     navigator.clipboard.writeText(worldId);
