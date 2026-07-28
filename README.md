@@ -25,15 +25,28 @@ WAZOO_PLATFORM_ADMIN_TOKEN="wzp_..."
 NEXT_PUBLIC_API_URL="http://localhost:8080"
 ```
 
-To run the Vercel OAuth emulator for WorkOS provider development:
+Local auth uses the official [WorkOS Emulate](https://github.com/workos/emulate)
+server instead of the real WorkOS API. We chose `@workos/emulate` over
+general-purpose emulators (e.g. `vercel-labs/emulate`) because it is
+purpose-built for WorkOS and stays feature-complete for AuthKit flows, MFA,
+SSO, and webhooks. `vercel-labs/emulate` does not include a WorkOS service.
+
+Start the emulator alongside the dev server:
 
 ```sh
-npm run dev:emulate:vercel
+npm run dev:emulate:workos
 ```
 
-The emulator serves Vercel at [http://localhost:4000](http://localhost:4000)
-with client ID `emu_vercel_client_id` and client secret
-`emu_vercel_client_secret`.
+The emulator serves WorkOS at [http://localhost:4100](http://localhost:4100)
+and accepts any `WORKOS_CLIENT_ID`. Sign in with the seeded test user:
+
+| Email                 | Password |
+| --------------------- | -------- |
+| `developer@wazoo.dev` | `dev`    |
+
+The `--interactive` flag serves browser login pages so the full AuthKit
+redirect flow works locally. Seed users are defined in
+`workos-emulate.config.yaml`.
 
 ## Deployment
 
