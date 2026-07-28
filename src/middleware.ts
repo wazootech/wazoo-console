@@ -1,11 +1,28 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
+import { tokenCookieName } from "@/lib/server-auth";
 
-export default authkitProxy({
+const proxy = authkitProxy({
   middlewareAuth: {
     enabled: true,
-    unauthenticatedPaths: ["/login", "/sign-in", "/callback"],
+    unauthenticatedPaths: ["/login", "/sign-in", "/callback", "/api/auth/bypass"],
   },
 });
+
+export default async function middleware(request: NextRequest) {
+  const hasToken = request.cookies.has(tokenCookieName);
+  const pathname = request.nextUrl.pathname;
+
+  if (hasToken) {
+    if (pathname === "/login" || pathname === "/sign-in") {
+      return NextResponse.redirect(new URL("/worlds", request.url));
+    }
+    return NextResponse.next();
+  }
+
+  return proxy(request);
+}
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
