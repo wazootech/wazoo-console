@@ -11,6 +11,7 @@ const proxy = authkitProxy({
       "/sign-in",
       "/callback",
       "/api/auth/bypass",
+      "/api/health",
     ],
   },
 });

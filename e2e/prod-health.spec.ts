@@ -24,7 +24,7 @@ test.describe("prod smoke", () => {
   });
 
   test("API health endpoints return ok", async ({ request }) => {
-    for (const url of [`${API_BASE_URL}/health`, `${WORLDS_API_URL}/health`]) {
+    for (const url of [`${API_BASE_URL}/health`, `${WORLDS_API_URL}/health`, `/api/health`]) {
       const response = await request.get(url);
       expect(response.status(), `Expected 200 from ${url}`).toBe(200);
       const body = await response.json();
