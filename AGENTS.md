@@ -12,6 +12,6 @@ This repository contains the Wazoo console application.
   commands.
 - Run `npm run typecheck` and the narrowest relevant build for code changes when
   practical.
-- Run `npm run test:e2e` for browser/API sanity checks against the deployed
+- Run `npm run test:e2e` for browser/API smoke tests against the deployed
   console. Set `BASE_URL` to target a different environment (default is production).
 - Do not touch deploy targets or environment configuration unless the user asks.

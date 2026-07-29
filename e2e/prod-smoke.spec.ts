@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 const API_BASE_URL = process.env.API_BASE_URL ?? "https://api.wazoo.dev";
 const WORLDS_API_URL = process.env.WORLDS_API_URL ?? "https://worlds-api.wazoo.dev";
 
-test.describe("prod sanity", () => {
+test.describe("prod smoke", () => {
   test("console landing page loads without console errors", async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
