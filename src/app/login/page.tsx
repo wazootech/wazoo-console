@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   KeyRound,
@@ -17,6 +17,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [showBypass, setShowBypass] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const isBypass = searchParams.get("bypass") === "true";
+    if (!isBypass) {
+      router.replace("/sign-in");
+    }
+  }, [searchParams, router]);
+
 
   const handleBypassSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
