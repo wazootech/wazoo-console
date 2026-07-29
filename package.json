@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:emulate:vercel": "emulate --service vercel --seed emulate.config.yaml",
+    "dev:emulate:workos": "workos-emulate --seed workos-emulate.config.yaml --interactive",
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
@@ -46,8 +46,8 @@
     "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@workos/emulate": "^0.4.1",
     "cross-env": "^10.1.0",
-    "emulate": "^0.9.0",
     "prettier": "^3.9.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",
