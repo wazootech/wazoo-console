@@ -10,7 +10,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading) {
-      router.push(token ? "/worlds" : "/login");
+      router.push(token ? "/worlds" : "/sign-in");
     }
   }, [loading, token, router]);
 
