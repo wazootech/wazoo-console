@@ -6,3 +6,6 @@ out/
 *.tsbuildinfo
 /.codex-*.log
 .env*
+test-results/
+playwright-report/
+playwright/.cache/
