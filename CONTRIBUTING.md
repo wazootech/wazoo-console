@@ -175,6 +175,7 @@ local `wazoo-api` instance.
 
 - Type check: `npm run typecheck`
 - Format check: `npm run format:check`
+- Health check: `npm run health:local`
 - Worlds data-plane smoke test: `npm run test:worlds`
 
 Manual QA is required for the hosted WorkOS auth flow because Cloudflare

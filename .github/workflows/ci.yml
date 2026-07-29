@@ -136,9 +136,18 @@ jobs:
         env:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console.wazoo.dev/callback
-          WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  health-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: deploy-qa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run health:qa

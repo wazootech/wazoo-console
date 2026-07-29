@@ -16,6 +16,8 @@
     "deploy:qa": "cross-env NEXT_PUBLIC_API_URL=https://api-qa.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console-qa.wazoo.dev/callback npx @opennextjs/cloudflare build && npx wrangler deploy --env qa",
     "format": "prettier \"src/**/*.{ts,tsx,css}\" --write",
     "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check",
+    "health:local": "node scripts/health.mjs",
+    "health:qa": "node scripts/health.mjs https://console-qa.wazoo.dev",
     "test:worlds": "tsx scripts/test-worlds.ts",
     "test:e2e": "playwright test"
   },

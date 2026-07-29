@@ -48,6 +48,20 @@ The `--interactive` flag serves browser login pages so the full AuthKit
 redirect flow works locally. Seed users are defined in
 `workos-emulate.config.yaml`.
 
+## Health checks
+
+- Local: `npm run health:local`
+- QA: `npm run health:qa`
+
+The `/api/health` endpoint returns `{ "status": "ok" }` and a `200` status.
+
+## Environment files
+
+- `.env.local` — local development secrets (gitignored).
+- `.env.qa` — QA reference values (gitignored).
+- `.env.production` — production reference values (gitignored).
+- `.env.local.example`, `.env.qa.example`, `.env.production.example` — committed templates.
+
 ## Deployment
 
 Production deploys are human-in-the-loop. Do not deploy `console.wazoo.dev`
@@ -90,6 +104,9 @@ WAZOO_PLATFORM_ADMIN_TOKEN
 
 `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WORKOS_REDIRECT_URI` are set by the
 production workflow to `https://api.wazoo.dev` and
-`https://console.wazoo.dev/callback`. After deployment, smoke test
-`https://console.wazoo.dev/sign-in/` and confirm it returns a `307` redirect to
-hosted WorkOS with the production callback URI.
+`https://console.wazoo.dev/callback`. After deployment, the `health-qa` CI job
+verifies `https://console.wazoo.dev/api/health` returns `{ "status": "ok" }`.
+
+For a full sign-in verification, smoke test `https://console.wazoo.dev/sign-in/`
+and confirm it returns a `307` redirect to hosted WorkOS with the production
+callback URI.
