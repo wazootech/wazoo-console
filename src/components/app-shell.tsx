@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && !token) {
-      router.push("/login");
+      router.push("/sign-in");
     }
   }, [loading, token, router]);
 

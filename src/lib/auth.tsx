@@ -48,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     const pathname = window.location.pathname.replace(/\/$/, "");
-    const authPathnames = new Set(["/login", "/sign-in", "/callback"]);
+    const authPathnames = new Set(["/sign-in", "/callback"]);
 
     if (authPathnames.has(pathname)) {
       setState((currentState) => ({ ...currentState, loading: false }));

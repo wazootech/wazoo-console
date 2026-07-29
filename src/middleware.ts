@@ -7,7 +7,6 @@ const proxy = authkitProxy({
   middlewareAuth: {
     enabled: true,
     unauthenticatedPaths: [
-      "/login",
       "/sign-in",
       "/callback",
       "/api/auth/bypass",
@@ -28,6 +27,10 @@ export default async function middleware(
       return NextResponse.redirect(new URL("/worlds", request.url));
     }
     return NextResponse.next();
+  }
+
+  if (pathname === "/login") {
+    return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
   return proxy(request, event);

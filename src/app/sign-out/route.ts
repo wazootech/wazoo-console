@@ -8,7 +8,7 @@ export async function GET(request: Request) {
   cookieStore.delete(tokenCookieName);
 
   const url = new URL(request.url);
-  const returnTo = `${url.protocol}//${url.host}/login`;
+  const returnTo = `${url.protocol}//${url.host}/sign-in`;
 
   try {
     await signOut({ returnTo });
@@ -16,5 +16,5 @@ export async function GET(request: Request) {
     // Fall back to local redirect if WorkOS signOut throws or redirects to WorkOS error
   }
 
-  return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.redirect(new URL("/sign-in", request.url));
 }
