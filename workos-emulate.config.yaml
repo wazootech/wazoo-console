@@ -1,0 +1,4 @@
+users:
+  - email: developer@wazoo.dev
+    password: dev
+    email_verified: true
