@@ -2,8 +2,15 @@ import { test, expect } from "@playwright/test";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8080";
 const WORLDS_API_URL = process.env.WORLDS_API_URL ?? "http://localhost:8081";
-const ADMIN_TOKEN = process.env.WAZOO_PLATFORM_ADMIN_TOKEN ?? "wzp_h0kyMrn4M7uJCe4LuHNHoLTxi5dS_cP8FR3Z_MBkx4k";
+const ADMIN_TOKEN = process.env.WAZOO_PLATFORM_ADMIN_TOKEN;
 const ADMIN_EMAIL = "admin@wazoo.dev";
+
+if (!ADMIN_TOKEN) {
+  throw new Error(
+    "WAZOO_PLATFORM_ADMIN_TOKEN is required. Generate one locally with " +
+      "`npm run launch:seed-admin` in wazoo-api and export it before running this spec.",
+  );
+}
 
 const slug = `e2e-${Date.now()}`;
 
