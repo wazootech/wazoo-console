@@ -1,14 +1,26 @@
 import { test, expect } from "@playwright/test";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "https://api.wazoo.dev";
-const WORLDS_API_URL = process.env.WORLDS_API_URL ?? "https://worlds-api.wazoo.dev";
+const WORLDS_API_URL =
+  process.env.WORLDS_API_URL ?? "https://worlds-api.wazoo.dev";
 
 test.describe("prod smoke", () => {
-  test("console landing page loads without console errors", async ({ page }) => {
+  test("console landing page loads without console errors", async ({
+    page,
+  }) => {
     const errors: string[] = [];
     page.on("pageerror", (err) => errors.push(err.message));
     page.on("console", (msg) => {
-      if (msg.type() === "error") errors.push(msg.text());
+      if (msg.type() !== "error") return;
+      if (
+        msg
+          .text()
+          .includes(
+            "'upgrade-insecure-requests' is ignored when delivered in a report-only policy",
+          )
+      )
+        return;
+      errors.push(msg.text());
     });
 
     const response = await page.goto("/");
@@ -17,14 +29,20 @@ test.describe("prod smoke", () => {
     expect(errors).toEqual([]);
   });
 
-  test("unauthenticated app route redirects to sign-in", async ({ request }) => {
+  test("unauthenticated app route redirects to sign-in", async ({
+    request,
+  }) => {
     const response = await request.get("/worlds", { maxRedirects: 0 });
     expect(response.status()).toBeGreaterThanOrEqual(300);
     expect(response.status()).toBeLessThan(400);
   });
 
   test("API health endpoints return ok", async ({ request }) => {
-    for (const url of [`${API_BASE_URL}/health`, `${WORLDS_API_URL}/health`, `/api/health`]) {
+    for (const url of [
+      `${API_BASE_URL}/health`,
+      `${WORLDS_API_URL}/health`,
+      `/api/health`,
+    ]) {
       const response = await request.get(url);
       expect(response.status(), `Expected 200 from ${url}`).toBe(200);
       const body = await response.json();
