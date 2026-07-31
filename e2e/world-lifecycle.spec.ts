@@ -3,7 +3,6 @@ import { test, expect } from "@playwright/test";
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8080";
 const WORLDS_API_URL = process.env.WORLDS_API_URL ?? "http://localhost:8081";
 const ADMIN_TOKEN = process.env.WAZOO_PLATFORM_ADMIN_TOKEN;
-const ADMIN_EMAIL = "admin@wazoo.dev";
 
 if (!ADMIN_TOKEN) {
   throw new Error(
@@ -12,19 +11,37 @@ if (!ADMIN_TOKEN) {
   );
 }
 
-const slug = `e2e-${Date.now()}`;
+const runId = Date.now();
+const slug = `e2e-${runId}`;
+const ADMIN_EMAIL = `e2e+${runId}@wazoo.dev`;
 
 test.describe("world lifecycle", () => {
   test.afterAll(async ({ request }) => {
-    const res = await request.delete(`${API_BASE_URL}/v1/worlds/${slug}?email=${ADMIN_EMAIL}`, {
-      headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
-    });
+    const res = await request.delete(
+      `${API_BASE_URL}/v1/worlds/${slug}?email=${encodeURIComponent(ADMIN_EMAIL)}`,
+      {
+        headers: { Authorization: `Bearer ${ADMIN_TOKEN}` },
+      },
+    );
     if (res.ok()) {
       console.log(`Cleaned up world ${slug}`);
     }
   });
 
-  test("create world, insert SPARQL data, and SELECT it back", async ({ request }) => {
+  test("create world, insert SPARQL data, and SELECT it back", async ({
+    request,
+  }) => {
+    // ── Step 0: Ensure owner user exists ──
+    const userRes = await request.get(
+      `${API_BASE_URL}/v1/users/me?email=${encodeURIComponent(ADMIN_EMAIL)}`,
+      { headers: { Authorization: `Bearer ${ADMIN_TOKEN}` } },
+    );
+    expect(
+      userRes.status(),
+      `ensure user: ${userRes.status()}`,
+    ).toBeGreaterThanOrEqual(200);
+    expect(userRes.status()).toBeLessThan(300);
+
     // ── Step 1: Create world ──
     const createRes = await request.post(`${API_BASE_URL}/v1/worlds`, {
       headers: {
@@ -43,7 +60,7 @@ test.describe("world lifecycle", () => {
 
     // ── Step 2: Create world auth token ──
     const tokenRes = await request.post(
-      `${API_BASE_URL}/v1/worlds/${slug}/auth/tokens?email=${ADMIN_EMAIL}`,
+      `${API_BASE_URL}/v1/worlds/${slug}/auth/tokens?email=${encodeURIComponent(ADMIN_EMAIL)}`,
       {
         headers: {
           Authorization: `Bearer ${ADMIN_TOKEN}`,
@@ -75,7 +92,9 @@ INSERT DATA {
         },
       },
     );
-    expect(insertRes.status(), `sparql insert: ${insertRes.status()}`).toBe(200);
+    expect(insertRes.status(), `sparql insert: ${insertRes.status()}`).toBe(
+      200,
+    );
 
     // ── Step 4: SPARQL SELECT and verify ──
     const selectRes = await request.post(
@@ -95,10 +114,13 @@ SELECT ?name ?age ?city WHERE {
         },
       },
     );
-    expect(selectRes.status(), `sparql select: ${selectRes.status()}`).toBe(200);
+    expect(selectRes.status(), `sparql select: ${selectRes.status()}`).toBe(
+      200,
+    );
     const results = await selectRes.json();
 
-    const bindings = results?.results?.bindings as Array<Record<string, { value: string }>> | undefined;
+    const bindings = results?.results?.bindings as
+      Array<Record<string, { value: string }>> | undefined;
     expect(bindings?.length).toBeGreaterThanOrEqual(1);
 
     const b = bindings![0];
