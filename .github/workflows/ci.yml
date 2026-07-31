@@ -109,6 +109,25 @@ jobs:
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
 
+  e2e-qa:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: deploy-qa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+        env:
+          BASE_URL: https://console-qa.wazoo.dev
+          API_BASE_URL: https://api-qa.wazoo.dev
+          WORLDS_API_URL: https://worlds-api-qa.wazoo.dev
+          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
+
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
