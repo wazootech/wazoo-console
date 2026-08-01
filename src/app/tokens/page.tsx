@@ -97,7 +97,9 @@ export default function TokensPage() {
                 name={t.name}
                 uid={t.uid}
                 typeBadge="Platform Token"
-                scopes={t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined}
+                scopes={
+                  t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined
+                }
                 onRevoke={() => handleRevoke(t.name)}
               />
             ))}

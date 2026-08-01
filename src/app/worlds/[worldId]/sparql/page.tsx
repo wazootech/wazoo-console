@@ -164,11 +164,18 @@ export default function SparqlPage({
     }
 
     // 2. Check for mutation success response (INSERT/DELETE DATA)
-    if (result.message || result.ok || result.success || result.status === "ok") {
+    if (
+      result.message ||
+      result.ok ||
+      result.success ||
+      result.status === "ok"
+    ) {
       const msg = result.message || "Graph update executed successfully.";
       return (
         <div className="p-4 border rounded bg-zinc-900/80 border-emerald-500/30 text-center">
-          <p className="text-emerald-400 font-semibold text-sm">Update Successful</p>
+          <p className="text-emerald-400 font-semibold text-sm">
+            Update Successful
+          </p>
           <p className="text-zinc-300 text-xs mt-1">{msg}</p>
         </div>
       );

@@ -43,7 +43,10 @@ export function TokenListItem({
               {name}
             </span>
             {typeBadge && (
-              <Badge variant="outline" className="text-[10px] border-zinc-700 text-zinc-300">
+              <Badge
+                variant="outline"
+                className="text-[10px] border-zinc-700 text-zinc-300"
+              >
                 {typeBadge}
               </Badge>
             )}
@@ -70,7 +73,11 @@ export function TokenListItem({
           {scopes && scopes.length > 0 && (
             <div className="flex gap-1 pt-1 flex-wrap">
               {scopes.map((s) => (
-                <Badge key={s} variant="secondary" className="text-[10px] bg-zinc-900 text-zinc-400 border border-zinc-800">
+                <Badge
+                  key={s}
+                  variant="secondary"
+                  className="text-[10px] bg-zinc-900 text-zinc-400 border border-zinc-800"
+                >
                   {s}
                 </Badge>
               ))}
