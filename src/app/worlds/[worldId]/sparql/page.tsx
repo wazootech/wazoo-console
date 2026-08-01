@@ -16,34 +16,47 @@ import { Play, Save, Trash2, Loader2, Sparkles } from "lucide-react";
 
 const PRESET_QUERIES = [
   {
-    name: "Select all quads",
-    query: `SELECT ?s ?p ?o ?g WHERE {
-  GRAPH ?g {
-    ?s ?p ?o .
-  }
+    name: "Insert sample triples",
+    query: `PREFIX ex: <http://example.org/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+INSERT DATA {
+  ex:Agent1 rdf:type ex:Agent ;
+            ex:status "Active" ;
+            ex:name "Wazoo Bot" .
+}`,
+  },
+  {
+    name: "Select all triples",
+    query: `SELECT ?s ?p ?o WHERE {
+  ?s ?p ?o .
 } LIMIT 100`,
   },
   {
     name: "Find type definitions",
-    query: `PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
 SELECT ?subject ?type WHERE {
   ?subject rdf:type ?type .
 } LIMIT 50`,
   },
   {
-    name: "Insert a sample triple",
+    name: "Ask check status",
     query: `PREFIX ex: <http://example.org/>
-INSERT DATA {
-  ex:Agent ex:status "Active" ;
-           ex:name "Wazoo Bot" .
+
+ASK WHERE {
+  ?agent ex:status "Active" .
 }`,
   },
   {
-    name: "Ask check status",
+    name: "Delete sample triples",
     query: `PREFIX ex: <http://example.org/>
-ASK WHERE {
-  ex:Agent ex:status "Active" .
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+DELETE DATA {
+  ex:Agent1 rdf:type ex:Agent ;
+            ex:status "Active" ;
+            ex:name "Wazoo Bot" .
 }`,
   },
 ];
@@ -150,7 +163,25 @@ export default function SparqlPage({
       );
     }
 
-    // 2. Check if it's select bindings query
+    // 2. Check for mutation success response (INSERT/DELETE DATA)
+    if (
+      result.message ||
+      result.ok ||
+      result.success ||
+      result.status === "ok"
+    ) {
+      const msg = result.message || "Graph update executed successfully.";
+      return (
+        <div className="p-4 border rounded bg-zinc-900/80 border-emerald-500/30 text-center">
+          <p className="text-emerald-400 font-semibold text-sm">
+            Update Successful
+          </p>
+          <p className="text-zinc-300 text-xs mt-1">{msg}</p>
+        </div>
+      );
+    }
+
+    // 3. Check if it's select bindings query
     if (result.head?.vars && result.results?.bindings) {
       const vars = result.head.vars as string[];
       const bindings = result.results.bindings as Array<

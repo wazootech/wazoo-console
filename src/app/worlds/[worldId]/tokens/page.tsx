@@ -6,6 +6,7 @@ import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { PageHeader } from "@/components/page-header";
 import { TokenSecretCard } from "@/components/token-secret-card";
+import { TokenListItem } from "@/components/token-list-item";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -111,24 +112,13 @@ export default function WorldTokensPage({
         {!loading && tokens.length > 0 && (
           <div className="space-y-2">
             {tokens.map((t) => (
-              <Card key={t.uid}>
-                <CardContent className="flex items-center gap-4 py-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{t.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {t.uid}
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    aria-label={`Revoke token ${t.name}`}
-                    onClick={() => handleRevoke(t.uid)}
-                  >
-                    <Trash2 className="size-4 text-muted-foreground" />
-                  </Button>
-                </CardContent>
-              </Card>
+              <TokenListItem
+                key={t.uid}
+                name={t.name}
+                uid={t.uid}
+                typeBadge="World Token"
+                onRevoke={() => handleRevoke(t.uid)}
+              />
             ))}
           </div>
         )}

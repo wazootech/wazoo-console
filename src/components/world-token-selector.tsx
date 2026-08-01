@@ -102,7 +102,10 @@ export function WorldTokenSelector({
                 <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                   {tokens.map((t) => (
                     <SelectItem key={t.token} value={t.token}>
-                      {t.name}
+                      <span className="font-medium">{t.name}</span>
+                      <span className="ml-2 text-xs text-zinc-500 font-mono">
+                        ({t.token.slice(0, 10)}...)
+                      </span>
                     </SelectItem>
                   ))}
                   <SelectItem
