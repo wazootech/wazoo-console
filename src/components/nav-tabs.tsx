@@ -13,7 +13,7 @@ export function NavTabs({ tabs }: { tabs: Tab[] }) {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Tabs" className="flex gap-1 border-b pb-0">
+    <nav aria-label="Tabs" className="flex gap-1 border-b border-border pb-0">
       {tabs.map((tab) => {
         const active = pathname === tab.href;
         return (
@@ -22,10 +22,10 @@ export function NavTabs({ tabs }: { tabs: Tab[] }) {
             href={tab.href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "px-3 py-2 text-sm font-medium rounded-t-md transition-colors border-b-2 -mb-px outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+              "px-3.5 py-2 text-sm font-medium rounded-t-md transition-all border-b-2 -mb-px outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
               active
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground",
+                ? "border-primary text-primary bg-primary/10 shadow-[0_1px_8px_rgba(255,140,0,0.15)] font-semibold"
+                : "border-transparent text-muted-foreground hover:text-foreground hover:bg-zinc-900/50",
             )}
           >
             {tab.label}
