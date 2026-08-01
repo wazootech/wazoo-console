@@ -16,7 +16,7 @@ import { Play, Save, Trash2, Loader2, Sparkles } from "lucide-react";
 
 const PRESET_QUERIES = [
   {
-    name: "1. Insert sample triples",
+    name: "Insert sample triples",
     query: `PREFIX ex: <http://example.org/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
@@ -27,13 +27,13 @@ INSERT DATA {
 }`,
   },
   {
-    name: "2. Select all triples",
+    name: "Select all triples",
     query: `SELECT ?s ?p ?o WHERE {
   ?s ?p ?o .
 } LIMIT 100`,
   },
   {
-    name: "3. Find type definitions",
+    name: "Find type definitions",
     query: `PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 SELECT ?subject ?type WHERE {
@@ -41,7 +41,7 @@ SELECT ?subject ?type WHERE {
 } LIMIT 50`,
   },
   {
-    name: "4. Ask check status",
+    name: "Ask check status",
     query: `PREFIX ex: <http://example.org/>
 
 ASK WHERE {
@@ -49,7 +49,7 @@ ASK WHERE {
 }`,
   },
   {
-    name: "5. Delete sample triples",
+    name: "Delete sample triples",
     query: `PREFIX ex: <http://example.org/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
