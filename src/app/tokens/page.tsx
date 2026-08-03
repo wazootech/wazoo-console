@@ -58,7 +58,11 @@ export default function TokensPage() {
 
   async function handleRevoke(tokenName: string) {
     if (!client) return;
-    await deletePlatformToken({ client, path: { tokenName } });
+    const res = await deletePlatformToken({ client, path: { tokenName } });
+    if (res.error) {
+      setError(errMsg(res.error));
+      return;
+    }
     fetchTokens();
   }
 

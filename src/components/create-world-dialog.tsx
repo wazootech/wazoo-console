@@ -53,7 +53,7 @@ export function CreateWorldDialog({
   onCreated,
   existingWorldIds,
 }: Props) {
-  const { client } = useAuth();
+  const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
   const [worldId, setWorldId] = useState("");
   const [displayName, setDisplayName] = useState("");
@@ -94,6 +94,10 @@ export function CreateWorldDialog({
       body: { worldId, world: { displayName: displayName || worldId, region } },
     });
     if (r.error) {
+      if (isUnauthorizedError(r.error)) {
+        logout();
+        return;
+      }
       setError(errMsg(r.error));
     } else {
       onOpenChange(false);
@@ -168,10 +172,10 @@ export function CreateWorldDialog({
           <div className="space-y-2">
             <Label htmlFor="region">Region</Label>
             <Select value={region} onValueChange={setRegion} disabled={loading}>
-              <SelectTrigger>
+              <SelectTrigger id="region">
                 <SelectValue placeholder="Select a region" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent position="popper">
                 {regionOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -209,4 +213,17 @@ function errMsg(err: unknown): string {
   if (typeof err === "object" && err !== null && "error" in err)
     return (err as { error: { message: string } }).error.message;
   return "Unknown error";
+}
+
+function isUnauthorizedError(err: unknown): boolean {
+  if (typeof err === "object" && err !== null) {
+    if ("status" in err && (err as { status: number }).status === 401) return true;
+    if ("error" in err) {
+      const msg = (err as { error: { message?: string; code?: string } }).error;
+      if (msg?.code === "UNAUTHORIZED" || msg?.message?.toLowerCase().includes("token is expired") || msg?.message?.toLowerCase().includes("unauthorized")) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
