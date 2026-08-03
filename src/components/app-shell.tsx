@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { UserMenu } from "@/components/user-menu";
 import { useAuth } from "@/lib/auth";
-import { Loader2 } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +32,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const navItems = [
     { label: "Worlds", href: "/worlds" },
     { label: "Tokens", href: "/tokens" },
+    { label: "Docs", href: "https://docs.wazoo.dev", external: true },
   ];
 
   return (
@@ -51,6 +52,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               aria-label="Main"
             >
               {navItems.map((item) => {
+                if (item.external) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3 py-1.5 text-sm font-medium rounded-md border border-border/60 bg-background/50 text-muted-foreground hover:border-border hover:bg-accent/50 hover:text-foreground transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 flex items-center gap-1"
+                    >
+                      {item.label}
+                      <ExternalLink className="size-3 opacity-70" />
+                    </a>
+                  );
+                }
                 const isActive = pathname.startsWith(item.href);
                 return (
                   <Link

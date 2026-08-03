@@ -11,11 +11,13 @@ interface Tab {
 
 export function NavTabs({ tabs }: { tabs: Tab[] }) {
   const pathname = usePathname();
+  const normalizedPathname = pathname ? pathname.replace(/\/$/, "") : "";
 
   return (
     <nav aria-label="Tabs" className="flex gap-1 border-b border-border pb-0">
       {tabs.map((tab) => {
-        const active = pathname === tab.href;
+        const normalizedHref = tab.href.replace(/\/$/, "");
+        const active = normalizedPathname === normalizedHref;
         return (
           <Link
             key={tab.href}
