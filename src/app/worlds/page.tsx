@@ -20,7 +20,7 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 };
 
 export default function WorldsPage() {
-  const { client } = useAuth();
+  const { client, logout } = useAuth();
   const [worlds, setWorlds] = useState<World[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +37,15 @@ export default function WorldsPage() {
     setError(null);
     const r = await listWorlds({ client });
     if (r.error) {
+      if (
+        typeof r.error === "object" &&
+        r.error !== null &&
+        "status" in r.error &&
+        (r.error as any).status === 401
+      ) {
+        logout();
+        return;
+      }
       setError(errMsg(r.error));
     } else {
       setWorlds(r.data?.worlds ?? []);

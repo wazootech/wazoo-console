@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
+import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { getWorldTabs } from "@/lib/utils";
 import { getWorld, type World } from "@wazoo/client";
 
@@ -106,13 +107,16 @@ export default function WorldDetailPage({
               </span>
             </div>
           </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDelete(true)}
-          >
-            Delete
-          </Button>
+          <div className="flex items-center gap-2">
+            <ReindexWorldButton worldId={worldId} />
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowDelete(true)}
+            >
+              Delete
+            </Button>
+          </div>
         </div>
         <NavTabs tabs={tabs} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
