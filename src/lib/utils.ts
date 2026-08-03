@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -13,6 +13,7 @@ export function getWorldTabs(worldId: string) {
     { label: "Search", href: `/worlds/${worldId}/search` },
     { label: "Tokens", href: `/worlds/${worldId}/tokens` },
     { label: "Usage", href: `/worlds/${worldId}/usage` },
+    { label: "Export", href: `/worlds/${worldId}/export` },
     { label: "Billing", href: `/worlds/${worldId}/billing` },
   ];
 }
