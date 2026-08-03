@@ -107,11 +107,9 @@ export default function ExportPage({
     setIsEmpty(false);
 
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/export?format=${
-        encodeURIComponent(
-          format.mime,
-        )
-      }`;
+      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/export?format=${encodeURIComponent(
+        format.mime,
+      )}`;
 
       const res = await fetch(endpoint, {
         method: "GET",
@@ -283,19 +281,17 @@ export default function ExportPage({
                   onClick={handleCopy}
                   className="h-8 border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs gap-1.5"
                 >
-                  {copied
-                    ? (
-                      <>
-                        <Check className="size-3.5 text-green-400" />
-                        Copied
-                      </>
-                    )
-                    : (
-                      <>
-                        <Copy className="size-3.5" />
-                        Copy Preview
-                      </>
-                    )}
+                  {copied ? (
+                    <>
+                      <Check className="size-3.5 text-green-400" />
+                      Copied
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="size-3.5" />
+                      Copy Preview
+                    </>
+                  )}
                 </Button>
               )}
 
@@ -306,9 +302,11 @@ export default function ExportPage({
                 disabled={loading || !token}
                 className="h-8 border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 text-xs gap-1.5"
               >
-                {loading
-                  ? <Loader2 className="size-3.5 animate-spin" />
-                  : <FileCode className="size-3.5" />}
+                {loading ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <FileCode className="size-3.5" />
+                )}
                 {previewContent ? "Refresh Preview" : "Preview Sample"}
               </Button>
 
@@ -318,9 +316,11 @@ export default function ExportPage({
                 disabled={downloading || loading || !token}
                 className="h-8 font-semibold text-xs gap-1.5"
               >
-                {downloading
-                  ? <Loader2 className="size-3.5 animate-spin" />
-                  : <Download className="size-3.5" />}
+                {downloading ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <Download className="size-3.5" />
+                )}
                 Download {selectedFormat.ext}
               </Button>
             </div>
@@ -371,8 +371,8 @@ export default function ExportPage({
                   Ready to export in {selectedFormat.name} format
                 </p>
                 <p className="text-[11px] text-zinc-500 max-w-md">
-                  Click <strong>Download {selectedFormat.ext}</strong>{" "}
-                  to save the exported data file, or click{" "}
+                  Click <strong>Download {selectedFormat.ext}</strong> to save
+                  the exported data file, or click{" "}
                   <strong>Preview Sample</strong> to inspect content inline.
                 </p>
               </div>

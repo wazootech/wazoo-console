@@ -217,10 +217,15 @@ function errMsg(err: unknown): string {
 
 function isUnauthorizedError(err: unknown): boolean {
   if (typeof err === "object" && err !== null) {
-    if ("status" in err && (err as { status: number }).status === 401) return true;
+    if ("status" in err && (err as { status: number }).status === 401)
+      return true;
     if ("error" in err) {
       const msg = (err as { error: { message?: string; code?: string } }).error;
-      if (msg?.code === "UNAUTHORIZED" || msg?.message?.toLowerCase().includes("token is expired") || msg?.message?.toLowerCase().includes("unauthorized")) {
+      if (
+        msg?.code === "UNAUTHORIZED" ||
+        msg?.message?.toLowerCase().includes("token is expired") ||
+        msg?.message?.toLowerCase().includes("unauthorized")
+      ) {
         return true;
       }
     }

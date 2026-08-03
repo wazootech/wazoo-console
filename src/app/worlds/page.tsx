@@ -37,7 +37,12 @@ export default function WorldsPage() {
     setError(null);
     const r = await listWorlds({ client });
     if (r.error) {
-      if (typeof r.error === "object" && r.error !== null && "status" in r.error && (r.error as any).status === 401) {
+      if (
+        typeof r.error === "object" &&
+        r.error !== null &&
+        "status" in r.error &&
+        (r.error as any).status === 401
+      ) {
         logout();
         return;
       }
