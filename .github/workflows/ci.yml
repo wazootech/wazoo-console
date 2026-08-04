@@ -71,18 +71,14 @@ jobs:
               -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
           )"
 
-          if echo "${response}" | grep -q '"success":true'; then
-            echo "Deleted ${worker_name}."
-            exit 0
-          fi
-
-          if echo "${response}" | grep -q '10007'; then
-            echo "${worker_name} was already deleted or does not exist."
-            exit 0
-          fi
-
           echo "${response}"
-          exit 1
+
+          if echo "${response}" | grep -q '"success":\s*true'; then
+            echo "Deleted ${worker_name}."
+          elif echo "${response}" | grep -q '10007'; then
+            echo "${worker_name} was already deleted or does not exist."
+          fi
+          exit 0
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
