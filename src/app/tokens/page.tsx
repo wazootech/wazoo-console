@@ -26,6 +26,8 @@ import {
   type PlatformToken,
 } from "@wazoo/client";
 
+import { ScopeSelector } from "@/components/scope-selector";
+
 export default function TokensPage() {
   const { client } = useAuth();
   const [tokens, setTokens] = useState<PlatformToken[]>([]);
@@ -141,12 +143,13 @@ function CreateTokenDialog({
   const { client, user } = useAuth();
   const [name, setName] = useState("");
   const [scope, setScope] = useState("");
+  const [isScopeValid, setIsScopeValid] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!client) return;
+    if (!client || !isScopeValid) return;
     setError(null);
     setLoading(true);
     const r = await createPlatformToken({
@@ -193,19 +196,12 @@ function CreateTokenDialog({
               autoFocus
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="scope">Scopes (optional)</Label>
-            <Input
-              id="scope"
-              placeholder="users.read worlds.read worlds.write usage.read billing.read"
-              value={scope}
-              onChange={(e) => setScope(e.target.value)}
-              disabled={loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              Space-separated scope names. Empty = all default scopes.
-            </p>
-          </div>
+          <ScopeSelector
+            value={scope}
+            onChange={setScope}
+            disabled={loading}
+            onValidationChange={setIsScopeValid}
+          />
           {error && (
             <p role="alert" className="text-sm text-destructive">
               {error}
@@ -220,8 +216,10 @@ function CreateTokenDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+            <Button type="submit" disabled={loading || !isScopeValid}>
+              {loading ? (
+                <Loader2 className="size-4 animate-spin text-muted-foreground mr-1" />
+              ) : null}
               Create
             </Button>
           </div>
