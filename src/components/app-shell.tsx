@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/auth";
 import { Loader2, ExternalLink } from "lucide-react";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
@@ -42,10 +43,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-6">
             <Link
               href="/worlds"
-              className="group flex items-center gap-2 font-semibold"
+              className="group flex items-center gap-2 font-semibold shrink-0"
             >
               <img src="/wazoo.svg" alt="" className="size-7 logo-spin" />
-              <span className="hidden sm:inline">Wazoo Console</span>
+              <span className="flex items-center gap-2">
+                <span className="hidden sm:inline">Wazoo Console</span>
+                <Badge
+                  variant="outline"
+                  className="text-[10px] uppercase font-mono font-semibold tracking-wider text-primary border-primary/30 bg-primary/10 px-1.5 py-0.5 rounded shrink-0"
+                >
+                  BETA
+                </Badge>
+              </span>
             </Link>
             <nav
               className="hidden sm:flex items-center gap-2"
