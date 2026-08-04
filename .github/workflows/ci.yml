@@ -76,8 +76,8 @@ jobs:
             exit 0
           fi
 
-          if echo "${response}" | grep -q '"code":10007'; then
-            echo "${worker_name} was already deleted."
+          if echo "${response}" | grep -q '10007'; then
+            echo "${worker_name} was already deleted or does not exist."
             exit 0
           fi
 
