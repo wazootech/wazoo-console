@@ -53,6 +53,7 @@
     "prettier": "^3.9.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",
+    "wazoo-e2e": "github:wazootech/wazoo-e2e#main",
     "wrangler": "^4.112.0"
   }
 }
