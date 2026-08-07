@@ -27,7 +27,7 @@ export const VALID_PLATFORM_SCOPES: ScopeDefinition[] = [
   {
     name: "worlds.write",
     label: "Worlds (Write)",
-    description: "Create, update, delete, and sync worlds",
+    description: "Create, update, and delete worlds",
     isDefault: true,
   },
   {
