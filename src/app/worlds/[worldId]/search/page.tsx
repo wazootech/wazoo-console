@@ -17,6 +17,9 @@ import {
   Sparkles,
   SlidersHorizontal,
   AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  X,
 } from "lucide-react";
 
 interface SearchResult {
@@ -45,6 +48,13 @@ export default function SearchPage({
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [mode, setMode] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState("");
+  const [labelFilter, setLabelFilter] = useState("");
+  const [propFilter, setPropFilter] = useState("");
+  const [detailSubject, setDetailSubject] = useState<string | null>(null);
+  const [detailQuads, setDetailQuads] = useState<SearchResult[]>([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   async function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -81,10 +91,97 @@ export default function SearchPage({
 
       setResults(data.results || []);
       setMode(data.mode || "semantic");
+      setDetailSubject(null);
+      setDetailQuads([]);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred during search");
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Derived type options from rdf:type triples found in the current results.
+  const typeOptions = Array.from(
+    new Set(
+      results
+        .filter((r) => r.predicate.includes("#type"))
+        .map((r) => r.object || r.content)
+        .filter((v): v is string => Boolean(v)),
+    ),
+  ).sort();
+
+  // Client-side filtering over the fetched results.
+  const filteredResults = results.filter((r) => {
+    if (typeFilter) {
+      const typedSubjects = new Set(
+        results
+          .filter(
+            (t) =>
+              t.predicate.includes("#type") &&
+              (t.object || t.content) === typeFilter,
+          )
+          .map((t) => t.subject),
+      );
+      if (!typedSubjects.has(r.subject)) return false;
+    }
+    if (
+      propFilter &&
+      !r.predicate.toLowerCase().includes(propFilter.toLowerCase())
+    ) {
+      return false;
+    }
+    if (
+      labelFilter &&
+      !(r.content || r.object || "")
+        .toLowerCase()
+        .includes(labelFilter.toLowerCase())
+    ) {
+      return false;
+    }
+    return true;
+  });
+
+  async function openDetail(subject: string) {
+    if (detailSubject === subject) {
+      setDetailSubject(null);
+      setDetailQuads([]);
+      return;
+    }
+    setDetailSubject(subject);
+    setDetailLoading(true);
+    setDetailError(null);
+    setDetailQuads([]);
+    try {
+      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/sparql`;
+      const escaped = subject.replace(/[\\"]/g, (m) =>
+        m === '"' ? '\\"' : "\\\\",
+      );
+      const query = `SELECT ?p ?o ?g WHERE { GRAPH ?g { <${escaped}> ?p ?o } }`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ query }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Failed to load subject detail");
+      }
+      const bindings: any[] = data?.results?.bindings || [];
+      setDetailQuads(
+        bindings.map((b) => ({
+          subject,
+          predicate: b.p?.value || "",
+          object: b.o?.value || "",
+          graph: b.g?.value || "",
+        })),
+      );
+    } catch (err: any) {
+      setDetailError(err.message || "Failed to load subject detail");
+    } finally {
+      setDetailLoading(false);
     }
   }
 
@@ -172,6 +269,59 @@ export default function SearchPage({
                         className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
                       />
                     </div>
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="type-filter"
+                        className="text-zinc-400 text-xs"
+                      >
+                        Type (rdf:type)
+                      </Label>
+                      <select
+                        id="type-filter"
+                        value={typeFilter}
+                        onChange={(e) => setTypeFilter(e.target.value)}
+                        className="h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white text-xs px-2"
+                      >
+                        <option value="">All types</option>
+                        {typeOptions.map((t) => (
+                          <option key={t} value={t}>
+                            {t}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="prop-filter"
+                        className="text-zinc-400 text-xs"
+                      >
+                        Property (predicate contains)
+                      </Label>
+                      <Input
+                        id="prop-filter"
+                        type="text"
+                        placeholder="e.g. #label"
+                        value={propFilter}
+                        onChange={(e) => setPropFilter(e.target.value)}
+                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label
+                        htmlFor="label-filter"
+                        className="text-zinc-400 text-xs"
+                      >
+                        Label / object contains
+                      </Label>
+                      <Input
+                        id="label-filter"
+                        type="text"
+                        placeholder="e.g. agent"
+                        value={labelFilter}
+                        onChange={(e) => setLabelFilter(e.target.value)}
+                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
+                      />
+                    </div>
                   </div>
                 )}
               </form>
@@ -211,57 +361,157 @@ export default function SearchPage({
 
               {!loading && results.length > 0 && (
                 <div className="space-y-3">
-                  <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
-                    <table className="w-full text-left text-xs text-zinc-300 border-collapse">
-                      <thead>
-                        <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
-                          <th className="p-3 border-r border-zinc-800">
-                            Subject
-                          </th>
-                          <th className="p-3 border-r border-zinc-800">
-                            Predicate
-                          </th>
-                          <th className="p-3 border-r border-zinc-800">
-                            Content / Object
-                          </th>
-                          {mode !== "fallback" && (
+                  {filteredResults.length === 0 && (
+                    <div className="py-8 text-center text-zinc-500 text-xs border border-dashed border-zinc-800 rounded">
+                      No results match the active filters.
+                    </div>
+                  )}
+                  {filteredResults.length > 0 && (
+                    <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
+                      <table className="w-full text-left text-xs text-zinc-300 border-collapse">
+                        <thead>
+                          <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
+                            <th className="p-3 w-8" />
                             <th className="p-3 border-r border-zinc-800">
-                              Score
+                              Subject
                             </th>
-                          )}
-                          <th className="p-3">Graph</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {results.map((r, idx) => (
-                          <tr
-                            key={idx}
-                            className="border-b border-zinc-800 last:border-b-0 hover:bg-zinc-900/10"
-                          >
-                            <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
-                              {r.subject}
-                            </td>
-                            <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
-                              {r.predicate}
-                            </td>
-                            <td className="p-3 border-r border-zinc-800 break-words text-zinc-200">
-                              {r.content || r.object || "—"}
-                            </td>
+                            <th className="p-3 border-r border-zinc-800">
+                              Predicate
+                            </th>
+                            <th className="p-3 border-r border-zinc-800">
+                              Content / Object
+                            </th>
                             {mode !== "fallback" && (
-                              <td className="p-3 border-r border-zinc-800 font-semibold text-primary">
-                                {r.score !== undefined
-                                  ? r.score.toFixed(4)
-                                  : "—"}
-                              </td>
+                              <th className="p-3 border-r border-zinc-800">
+                                Score
+                              </th>
                             )}
-                            <td className="p-3 font-mono break-all max-w-[100px]">
-                              {r.graph || "—"}
-                            </td>
+                            <th className="p-3">Graph</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody>
+                          {filteredResults.map((r, idx) => (
+                            <tr
+                              key={idx}
+                              className={`border-b border-zinc-800 last:border-b-0 ${
+                                detailSubject === r.subject
+                                  ? "bg-primary/5"
+                                  : "hover:bg-zinc-900/10"
+                              }`}
+                            >
+                              <td className="p-3">
+                                <button
+                                  type="button"
+                                  onClick={() => openDetail(r.subject)}
+                                  aria-expanded={detailSubject === r.subject}
+                                  aria-label={`Inspect ${r.subject}`}
+                                  className="text-zinc-500 hover:text-primary transition-colors"
+                                >
+                                  {detailSubject === r.subject ? (
+                                    <ChevronDown className="size-4" />
+                                  ) : (
+                                    <ChevronRight className="size-4" />
+                                  )}
+                                </button>
+                              </td>
+                              <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
+                                {r.subject}
+                              </td>
+                              <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
+                                {r.predicate}
+                              </td>
+                              <td className="p-3 border-r border-zinc-800 break-words text-zinc-200">
+                                {r.content || r.object || "—"}
+                              </td>
+                              {mode !== "fallback" && (
+                                <td className="p-3 border-r border-zinc-800 font-semibold text-primary">
+                                  {r.score !== undefined
+                                    ? r.score.toFixed(4)
+                                    : "—"}
+                                </td>
+                              )}
+                              <td className="p-3 font-mono break-all max-w-[100px]">
+                                {r.graph || "—"}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+
+                  {detailSubject && (
+                    <div className="border border-zinc-800 rounded-lg bg-zinc-900/40">
+                      <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-zinc-200">
+                            Subject detail
+                          </p>
+                          <p className="font-mono text-[11px] text-zinc-500 break-all">
+                            {detailSubject}
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDetailSubject(null);
+                            setDetailQuads([]);
+                          }}
+                          aria-label="Close detail panel"
+                          className="text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
+                        >
+                          <X className="size-4" />
+                        </button>
+                      </div>
+                      <div className="p-4">
+                        {detailLoading && (
+                          <div className="flex items-center gap-2 text-zinc-400 text-xs">
+                            <Loader2 className="size-4 animate-spin" />
+                            Loading all quads for subject...
+                          </div>
+                        )}
+                        {detailError && <ErrorCard message={detailError} />}
+                        {!detailLoading &&
+                          !detailError &&
+                          detailQuads.length === 0 && (
+                            <p className="text-zinc-500 text-xs">
+                              No quads found for this subject.
+                            </p>
+                          )}
+                        {!detailLoading && detailQuads.length > 0 && (
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-left text-xs text-zinc-300 border-collapse">
+                              <thead>
+                                <tr className="text-zinc-400 font-medium border-b border-zinc-800">
+                                  <th className="py-2 pr-3">Predicate</th>
+                                  <th className="py-2 pr-3">Object</th>
+                                  <th className="py-2">Graph</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {detailQuads.map((q, i) => (
+                                  <tr
+                                    key={i}
+                                    className="border-b border-zinc-900 last:border-b-0"
+                                  >
+                                    <td className="py-2 pr-3 font-mono break-all max-w-[160px]">
+                                      {q.predicate}
+                                    </td>
+                                    <td className="py-2 pr-3 break-words text-zinc-200">
+                                      {q.object}
+                                    </td>
+                                    <td className="py-2 font-mono break-all max-w-[120px]">
+                                      {q.graph || "—"}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
