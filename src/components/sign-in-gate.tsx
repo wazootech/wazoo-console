@@ -123,6 +123,17 @@ export function SignInGate() {
             {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
             Continue to sign in
           </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            We do not sell or share your personal information.{" "}
+            <a
+              href={privacyPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+              Do Not Sell or Share My Personal Information
+            </a>
+          </p>
         </CardContent>
       </Card>
     </main>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/lib/auth";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, User, Settings, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
@@ -38,6 +38,16 @@ export function UserMenu() {
         <DropdownMenuItem onSelect={() => router.push("/settings")}>
           <Settings className="size-4" />
           Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <a
+            href="https://docs.wazoo.dev/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ShieldCheck className="size-4" />
+            Do Not Sell or Share My Personal Information
+          </a>
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={() => logout()}>
           <LogOut className="size-4" />
