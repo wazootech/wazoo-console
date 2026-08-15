@@ -1,6 +1,7 @@
 import { handleAuth } from "@workos-inc/authkit-nextjs";
 import { cookies } from "next/headers";
 import {
+  ageCookieName,
   getDisplayName,
   mintPlatformToken,
   tokenCookieName,
@@ -9,6 +10,8 @@ import {
 export const GET = handleAuth({
   returnPathname: "/worlds",
   onSuccess: async ({ user }) => {
+    const cookieStore = await cookies();
+    const ageConfirmed = cookieStore.get(ageCookieName)?.value === "1";
     const token = await mintPlatformToken({
       email: user.email,
       displayName: getDisplayName({
@@ -16,7 +19,12 @@ export const GET = handleAuth({
         firstName: user.firstName,
         lastName: user.lastName,
       }),
+      ageConfirmed,
     });
+
+    if (ageConfirmed) {
+      cookieStore.delete(ageCookieName);
+    }
 
     (await cookies()).set(tokenCookieName, token, {
       httpOnly: true,
@@ -27,8 +35,15 @@ export const GET = handleAuth({
     });
   },
   onError: async ({ error }) => {
+    const errObj = error as { code?: string } | null | undefined;
+    if (errObj?.code === "AGE_GATE_REQUIRED") {
+      return new Response(null, {
+        status: 303,
+        headers: { Location: "/sign-in" },
+      });
+    }
+
     console.error("[AuthKit callback error]", error);
-    const errObj = error as Record<string, unknown> | null | undefined;
     return new Response(
       JSON.stringify(
         {
