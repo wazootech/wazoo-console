@@ -1,6 +1,7 @@
 import type { User } from "@wazoo/client";
 
 export const tokenCookieName = "wazoo_console_token";
+export const ageCookieName = "wazoo_age_confirmed";
 
 export function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
@@ -21,6 +22,7 @@ export async function fetchUser(token: string): Promise<User | null> {
 export async function mintPlatformToken(options: {
   email: string;
   displayName: string | null;
+  ageConfirmed?: boolean;
 }): Promise<string> {
   const adminToken = process.env.WAZOO_PLATFORM_ADMIN_TOKEN;
   if (!adminToken) {
@@ -39,11 +41,15 @@ export async function mintPlatformToken(options: {
 
   const body = (await response.json().catch(() => ({}))) as {
     token?: string;
-    error?: { message?: string };
+    error?: { code?: string; message?: string };
   };
 
   if (!response.ok || !body.token) {
-    throw new Error(body.error?.message ?? "Could not create console session.");
+    const err = new Error(
+      body.error?.message ?? "Could not create console session.",
+    );
+    (err as Error & { code?: string }).code = body.error?.code;
+    throw err;
   }
 
   return body.token;
