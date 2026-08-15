@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 
+const privacyPolicyUrl = "https://docs.wazoo.dev/privacy-policy";
+const termsUrl = "https://docs.wazoo.dev/terms";
+
 export function SignInGate() {
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -55,6 +58,29 @@ export function SignInGate() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            We collect the minimum needed to run your account: your email
+            address and display name. Usage data is tracked to meter and manage
+            the platform. See our{" "}
+            <a
+              href={privacyPolicyUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+              privacy policy
+            </a>{" "}
+            and{" "}
+            <a
+              href={termsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline underline-offset-4 hover:opacity-80"
+            >
+              terms of service
+            </a>
+            .
+          </p>
           <label className="flex items-start gap-3 text-sm">
             <input
               type="checkbox"
@@ -63,8 +89,25 @@ export function SignInGate() {
               className="mt-0.5 size-4 rounded border-input"
             />
             <span>
-              I confirm I am at least 13 years old and have read the Wazoo
-              privacy policy.
+              I confirm I am at least 13 years old and have read the Wazoo{" "}
+              <a
+                href={privacyPolicyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                privacy policy
+              </a>{" "}
+              and{" "}
+              <a
+                href={termsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                terms of service
+              </a>
+              .
             </span>
           </label>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
