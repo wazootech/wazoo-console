@@ -48,7 +48,11 @@ export function SignInGate() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="flex min-h-screen items-center justify-center px-4 outline-none"
+    >
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome to Wazoo</CardTitle>
@@ -121,6 +125,6 @@ export function SignInGate() {
           </Button>
         </CardContent>
       </Card>
-    </div>
+    </main>
   );
 }
