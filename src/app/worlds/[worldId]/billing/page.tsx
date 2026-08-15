@@ -7,7 +7,16 @@ import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Loader2, XCircle } from "lucide-react";
 import { getWorldTabs } from "@/lib/utils";
 import { getWorldBilling, type Billing } from "@wazoo/client";
 
@@ -20,6 +29,11 @@ export default function WorldBillingPage({
   const { client } = useAuth();
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [confirm, setConfirm] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const [cancelled, setCancelled] = useState(false);
 
   const tabs = getWorldTabs(worldId);
 
@@ -31,6 +45,35 @@ export default function WorldBillingPage({
       setLoading(false);
     });
   }, [client, worldId]);
+
+  async function handleCancel() {
+    if (!client || confirm !== worldId) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      const res = await fetch(
+        `/api/worlds/${encodeURIComponent(worldId)}/billing/cancel`,
+        { method: "POST" },
+      );
+      const body = (await res.json().catch(() => ({}))) as {
+        billing?: Billing;
+        error?: { message?: string };
+      };
+      if (!res.ok || !body.billing) {
+        setCancelError(
+          body.error?.message ?? "Could not cancel the subscription.",
+        );
+        return;
+      }
+      setBilling(body.billing);
+      setCancelled(true);
+      setCancelOpen(false);
+    } catch {
+      setCancelError("Could not cancel the subscription.");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   return (
     <AppShell>
@@ -80,20 +123,92 @@ export default function WorldBillingPage({
                 <CardTitle className="text-sm">Subscription</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge
-                  variant={
-                    billing.subscriptionConfigured ? "default" : "secondary"
-                  }
-                >
-                  {billing.subscriptionConfigured
-                    ? "Configured"
-                    : "Not configured"}
-                </Badge>
+                <div className="space-y-3">
+                  <Badge
+                    variant={
+                      billing.subscriptionConfigured ? "default" : "secondary"
+                    }
+                  >
+                    {billing.subscriptionConfigured
+                      ? "Configured"
+                      : "Not configured"}
+                  </Badge>
+                  {billing.subscriptionConfigured && !cancelled ? (
+                    <div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => {
+                          setConfirm("");
+                          setCancelError(null);
+                          setCancelOpen(true);
+                        }}
+                      >
+                        <XCircle className="size-4" />
+                        Cancel subscription
+                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Cancelling ends the subscription immediately. Your world
+                        and its data stay intact; access to paid features ends
+                        at the next billing cycle.
+                      </p>
+                    </div>
+                  ) : null}
+                  {cancelled ? (
+                    <p className="text-sm text-muted-foreground">
+                      Subscription cancelled.
+                    </p>
+                  ) : null}
+                </div>
               </CardContent>
             </Card>
           </div>
         )}
       </div>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cancel subscription</DialogTitle>
+            <DialogDescription>
+              This ends your subscription. Your world and its data stay intact.
+              Type <strong>{worldId}</strong> to confirm.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              placeholder={worldId}
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              disabled={cancelling}
+            />
+            {cancelError && (
+              <p role="alert" className="text-sm text-destructive">
+                {cancelError}
+              </p>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setCancelOpen(false)}
+                disabled={cancelling}
+              >
+                Keep subscription
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleCancel}
+                disabled={confirm !== worldId || cancelling}
+              >
+                {cancelling ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : null}
+                Cancel subscription
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppShell>
   );
 }
