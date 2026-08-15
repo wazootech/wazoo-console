@@ -15,6 +15,7 @@ import {
   CheckCircle,
   Loader2,
   AlertCircle,
+  ClipboardPaste,
 } from "lucide-react";
 
 interface ParsedQuad {
@@ -46,6 +47,9 @@ export default function ImportPage({
     chunks: number;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<"file" | "paste">("file");
+  const [pasteContent, setPasteContent] = useState("");
+  const [pasteType, setPasteType] = useState<"json" | "text">("json");
 
   // Drag handlers
   const handleDrag = (e: React.DragEvent) => {
@@ -138,12 +142,59 @@ export default function ImportPage({
     reader.readAsText(selectedFile);
   };
 
+  function processPaste() {
+    setError(null);
+    setSuccess(null);
+
+    if (pasteType === "json") {
+      try {
+        const parsed = JSON.parse(pasteContent);
+        if (!Array.isArray(parsed)) {
+          throw new Error("JSON must contain an array of quad objects.");
+        }
+        const valid = parsed.every(
+          (item: any) =>
+            typeof item === "object" &&
+            item !== null &&
+            "subject" in item &&
+            "predicate" in item &&
+            "object" in item,
+        );
+        if (!valid) {
+          throw new Error(
+            "Each object in the array must contain 'subject', 'predicate', and 'object' fields.",
+          );
+        }
+        setParsedQuads(parsed);
+        setParsedLines([]);
+      } catch (err: any) {
+        setError(`JSON Parse Error: ${err.message}`);
+        setParsedQuads([]);
+        setParsedLines([]);
+      }
+    } else {
+      const lines = pasteContent
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      setParsedLines(lines);
+      setParsedQuads([]);
+    }
+  }
+
   async function handleImport() {
     if (!token) {
       setError("Please select or add a World Access Token first.");
       return;
     }
-    if (!fileContent) {
+    if (mode === "paste") {
+      if (!pasteContent.trim()) {
+        setError("Paste some content to import.");
+        return;
+      }
+      setFileContent(pasteContent);
+      setContentType(pasteType === "json" ? "application/json" : "text/plain");
+    } else if (!fileContent) {
       setError("No file content loaded to import.");
       return;
     }
@@ -175,9 +226,10 @@ export default function ImportPage({
         quads: data.imported?.quads || 0,
         chunks: data.imported?.chunks || 0,
       });
-      // Clear file state
+      // Clear input state
       setFile(null);
       setFileContent("");
+      setPasteContent("");
       setParsedQuads([]);
       setParsedLines([]);
     } catch (e: any) {
@@ -204,55 +256,138 @@ export default function ImportPage({
             <Card className="border border-zinc-800 bg-zinc-950 text-white">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">
-                  Upload File
+                  Import Data
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div
-                  onDragEnter={handleDrag}
-                  onDragOver={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDrop={handleDrop}
-                  className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
-                    dragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-zinc-800 hover:border-zinc-700 bg-zinc-900/30"
-                  }`}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="hidden"
-                    onChange={handleChange}
-                    accept=".json,.txt,.csv"
-                  />
-                  <Upload className="size-8 text-zinc-500 mb-3" />
-                  <p className="text-sm text-zinc-300 font-medium">
-                    Drag and drop file here
-                  </p>
-                  <p className="text-xs text-zinc-500 mt-1">
-                    Supports JSON (quads), CSV, TXT (chunks)
-                  </p>
+                <div className="flex gap-1 rounded-lg border border-zinc-800 bg-zinc-900/60 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setMode("file")}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      mode === "file"
+                        ? "bg-primary/15 text-primary"
+                        : "text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    <Upload className="size-3.5" />
+                    Upload file
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMode("paste")}
+                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+                      mode === "paste"
+                        ? "bg-primary/15 text-primary"
+                        : "text-zinc-400 hover:text-zinc-200"
+                    }`}
+                  >
+                    <ClipboardPaste className="size-3.5" />
+                    Paste text
+                  </button>
                 </div>
 
-                {file && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/60">
-                    <FileText className="size-5 text-primary shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium truncate text-zinc-200">
-                        {file.name}
+                {mode === "file" ? (
+                  <>
+                    <div
+                      onDragEnter={handleDrag}
+                      onDragOver={handleDrag}
+                      onDragLeave={handleDrag}
+                      onDrop={handleDrop}
+                      className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
+                        dragActive
+                          ? "border-primary bg-primary/5"
+                          : "border-zinc-800 hover:border-zinc-700 bg-zinc-900/30"
+                      }`}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        className="hidden"
+                        onChange={handleChange}
+                        accept=".json,.txt,.csv"
+                      />
+                      <Upload className="size-8 text-zinc-500 mb-3" />
+                      <p className="text-sm text-zinc-300 font-medium">
+                        Drag and drop file here
                       </p>
-                      <p className="text-[10px] text-zinc-500">
-                        {(file.size / 1024).toFixed(1)} KB • {contentType}
+                      <p className="text-xs text-zinc-500 mt-1">
+                        Supports JSON (quads), CSV, TXT (chunks)
                       </p>
                     </div>
+
+                    {file && (
+                      <div className="flex items-center gap-3 p-3 rounded-lg border border-zinc-800 bg-zinc-900/60">
+                        <FileText className="size-5 text-primary shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate text-zinc-200">
+                            {file.name}
+                          </p>
+                          <p className="text-[10px] text-zinc-500">
+                            {(file.size / 1024).toFixed(1)} KB • {contentType}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex gap-1 rounded-lg border border-zinc-800 bg-zinc-900/60 p-1">
+                      <button
+                        type="button"
+                        onClick={() => setPasteType("json")}
+                        className={`flex-1 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                          pasteType === "json"
+                            ? "bg-primary/15 text-primary"
+                            : "text-zinc-400 hover:text-zinc-200"
+                        }`}
+                      >
+                        JSON quads
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPasteType("text")}
+                        className={`flex-1 rounded-md px-3 py-1 text-xs font-medium transition-colors ${
+                          pasteType === "text"
+                            ? "bg-primary/15 text-primary"
+                            : "text-zinc-400 hover:text-zinc-200"
+                        }`}
+                      >
+                        Plain text
+                      </button>
+                    </div>
+                    <textarea
+                      value={pasteContent}
+                      onChange={(e) => setPasteContent(e.target.value)}
+                      placeholder={
+                        pasteType === "json"
+                          ? '[{"subject": "https://example.org/alice", "predicate": "https://schema.org/givenName", "object": "Alice"}]'
+                          : "One text chunk per line. Each line becomes a chunk indexed for full-text and vector search."
+                      }
+                      rows={8}
+                      className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
+                    />
+                    {pasteContent.trim() && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={processPaste}
+                        className="border-zinc-800 hover:bg-zinc-900"
+                      >
+                        Preview
+                      </Button>
+                    )}
                   </div>
                 )}
 
                 <Button
                   onClick={handleImport}
-                  disabled={!fileContent || loading}
+                  disabled={
+                    loading ||
+                    (mode === "file" ? !fileContent : !pasteContent.trim())
+                  }
                   className="w-full h-10 font-semibold"
                 >
                   {loading ? (
@@ -367,11 +502,11 @@ export default function ImportPage({
                   </div>
                 )}
 
-                {!error && !file && (
+                {!error && !file && !pasteContent.trim() && (
                   <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
                     <AlertCircle className="size-6 mb-2 text-zinc-600" />
                     <p className="text-xs">
-                      No file loaded. Upload a file on the left to see preview.
+                      Upload a file or paste text on the left to see a preview.
                     </p>
                   </div>
                 )}
