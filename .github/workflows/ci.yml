@@ -27,6 +27,24 @@ jobs:
       - run: npm run build
         env:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Run a11y regression check
+        run: |
+          npx next start -p 3100 &
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null http://localhost:3100/sign-in; then
+              echo "Server ready after ${i}s"
+              break
+            fi
+            sleep 1
+          done
+          BASE_URL=http://localhost:3100 npx playwright test e2e/a11y.spec.ts
+        env:
+          NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3100/callback
+          WORKOS_CLIENT_ID: client_preview_placeholder
+          WORKOS_API_KEY: sk_test_preview_placeholder
+          WORKOS_COOKIE_PASSWORD: preview-cookie-password-at-least-32-bytes
 
   deploy-preview:
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
@@ -161,4 +179,3 @@ jobs:
           WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
           WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
           WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
-

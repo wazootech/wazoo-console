@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <UserMenu />
         </div>
       </header>
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {children}
         </div>

@@ -59,6 +59,7 @@ export function TokenListItem({
                 type="button"
                 onClick={handleCopyUid}
                 className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
+                aria-label="Copy Token UID"
                 title="Copy Token UID"
               >
                 {copied ? (

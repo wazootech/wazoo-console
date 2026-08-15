@@ -165,6 +165,10 @@ export function WorldTokenSelector({
                 <button
                   type="button"
                   onClick={() => setShowTokenSecret(!showTokenSecret)}
+                  aria-label={
+                    showTokenSecret ? "Hide token secret" : "Show token secret"
+                  }
+                  aria-pressed={showTokenSecret}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
                 >
                   {showTokenSecret ? (
