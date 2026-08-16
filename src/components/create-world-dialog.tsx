@@ -60,6 +60,9 @@ export function CreateWorldDialog({
   const [region, setRegion] = useState("auto");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [limitInfo, setLimitInfo] = useState<{ usagePercent?: number } | null>(
+    null,
+  );
 
   const debouncedWorldId = useDebounce(worldId, 250);
   const validationError = validateWorldId(debouncedWorldId);
@@ -79,6 +82,7 @@ export function CreateWorldDialog({
       setDisplayName("");
       setRegion("auto");
       setError(null);
+      setLimitInfo(null);
       setLoading(false);
       setTimeout(() => displayNameRef.current?.focus(), 0);
     }
@@ -88,6 +92,7 @@ export function CreateWorldDialog({
     e.preventDefault();
     if (!client) return;
     setError(null);
+    setLimitInfo(null);
     setLoading(true);
     const r = await createWorld({
       client,
@@ -99,6 +104,7 @@ export function CreateWorldDialog({
         return;
       }
       setError(errMsg(r.error));
+      setLimitInfo(limitInfoFromError(r.error));
     } else {
       onOpenChange(false);
       onCreated();
@@ -185,9 +191,18 @@ export function CreateWorldDialog({
             </Select>
           </div>
           {error && (
-            <p role="alert" className="text-sm text-destructive">
-              {error}
-            </p>
+            <div role="alert" className="text-sm text-destructive space-y-1">
+              <p>{error}</p>
+              {limitInfo && (
+                <p>
+                  {limitInfo.usagePercent !== undefined
+                    ? `Database capacity is at ${Math.round(limitInfo.usagePercent)}%. `
+                    : null}
+                  Delete unused worlds or raise the database limit to create
+                  more.
+                </p>
+              )}
+            </div>
           )}
           <div className="flex justify-end gap-2">
             <Button
@@ -213,6 +228,19 @@ function errMsg(err: unknown): string {
   if (typeof err === "object" && err !== null && "error" in err)
     return (err as { error: { message: string } }).error.message;
   return "Unknown error";
+}
+
+function limitInfoFromError(err: unknown): { usagePercent?: number } | null {
+  if (typeof err === "object" && err !== null && "error" in err) {
+    const body = err as {
+      error?: { code?: string };
+      quota?: { usagePercent?: number };
+    };
+    if (body.error?.code === "DATABASE_LIMIT_REACHED") {
+      return { usagePercent: body.quota?.usagePercent };
+    }
+  }
+  return null;
 }
 
 function isUnauthorizedError(err: unknown): boolean {
