@@ -21,6 +21,7 @@ import {
 import { Loader2, Check, X } from "lucide-react";
 import { createWorld } from "@wazoo/client";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
+import { errMsg, isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
   validateWorldId,
   isWorldIdTaken,
@@ -105,7 +106,7 @@ export function CreateWorldDialog({
         return;
       }
       setError(errMsg(r.error));
-      setLimitInfo(limitInfoFromError(r.error));
+      setLimitInfo(quotaErrorInfo(r.error));
     } else {
       onOpenChange(false);
       onCreated();
@@ -220,41 +221,4 @@ export function CreateWorldDialog({
       </DialogContent>
     </Dialog>
   );
-}
-
-function errMsg(err: unknown): string {
-  if (typeof err === "object" && err !== null && "error" in err)
-    return (err as { error: { message: string } }).error.message;
-  return "Unknown error";
-}
-
-function limitInfoFromError(err: unknown): { usagePercent?: number } | null {
-  if (typeof err === "object" && err !== null && "error" in err) {
-    const body = err as {
-      error?: { code?: string };
-      quota?: { usagePercent?: number };
-    };
-    if (body.error?.code === "DATABASE_LIMIT_REACHED") {
-      return { usagePercent: body.quota?.usagePercent };
-    }
-  }
-  return null;
-}
-
-function isUnauthorizedError(err: unknown): boolean {
-  if (typeof err === "object" && err !== null) {
-    if ("status" in err && (err as { status: number }).status === 401)
-      return true;
-    if ("error" in err) {
-      const msg = (err as { error: { message?: string; code?: string } }).error;
-      if (
-        msg?.code === "UNAUTHORIZED" ||
-        msg?.message?.toLowerCase().includes("token is expired") ||
-        msg?.message?.toLowerCase().includes("unauthorized")
-      ) {
-        return true;
-      }
-    }
-  }
-  return false;
 }

@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
+import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,12 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, XCircle } from "lucide-react";
 import { getWorldTabs } from "@/lib/utils";
+import {
+  errMsg,
+  isUnauthorizedError,
+  quotaErrorInfo,
+  type QuotaError,
+} from "@/lib/quota-error";
 import { getWorldBilling, type Billing } from "@wazoo/client";
 
 export default function WorldBillingPage({
@@ -26,9 +33,11 @@ export default function WorldBillingPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const { client } = useAuth();
+  const { client, logout } = useAuth();
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [quota, setQuota] = useState<QuotaError | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [cancelling, setCancelling] = useState(false);
@@ -40,11 +49,22 @@ export default function WorldBillingPage({
   useEffect(() => {
     if (!client) return;
     setLoading(true);
+    setError(null);
+    setQuota(null);
     getWorldBilling({ client, path: { worldId } }).then((r) => {
-      if (!r.error) setBilling(r.data?.billing ?? null);
+      if (r.error) {
+        if (isUnauthorizedError(r.error)) {
+          logout();
+          return;
+        }
+        setError(errMsg(r.error));
+        setQuota(quotaErrorInfo(r.error));
+      } else {
+        setBilling(r.data?.billing ?? null);
+      }
       setLoading(false);
     });
-  }, [client, worldId]);
+  }, [client, worldId, logout]);
 
   async function handleCancel() {
     if (!client || confirm !== worldId) return;
@@ -83,6 +103,17 @@ export default function WorldBillingPage({
           description="Review billing state for this world"
         />
         <NavTabs tabs={tabs} />
+        {error && (
+          <QuotaErrorBanner
+            message={error}
+            usagePercent={quota?.usagePercent}
+            hint={
+              quota
+                ? "Upgrade your plan or free up capacity to continue."
+                : undefined
+            }
+          />
+        )}
         {loading && (
           <div className="flex justify-center py-12">
             <Loader2 className="size-6 animate-spin text-muted-foreground" />
@@ -182,11 +213,7 @@ export default function WorldBillingPage({
               onChange={(e) => setConfirm(e.target.value)}
               disabled={cancelling}
             />
-            {cancelError && (
-              <p role="alert" className="text-sm text-destructive">
-                {cancelError}
-              </p>
-            )}
+            {cancelError && <QuotaErrorBanner message={cancelError} />}
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"

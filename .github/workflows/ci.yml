@@ -29,7 +29,7 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Run UI regression checks (a11y + quota banner)
+      - name: Run UI regression checks (a11y + quota banners)
         run: |
           npx next start -p 3100 &
           for i in $(seq 1 60); do
@@ -39,7 +39,7 @@ jobs:
             fi
             sleep 1
           done
-          BASE_URL=http://localhost:3100 npx playwright test e2e/a11y.spec.ts e2e/quota-banner.spec.ts
+          BASE_URL=http://localhost:3100 npx playwright test e2e/a11y.spec.ts e2e/quota-banner.spec.ts e2e/quota-surfaces.spec.ts
         env:
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3100/callback
           WORKOS_CLIENT_ID: client_preview_placeholder
