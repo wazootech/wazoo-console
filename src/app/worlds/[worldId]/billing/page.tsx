@@ -23,7 +23,9 @@ import {
   errMsg,
   isUnauthorizedError,
   quotaErrorInfo,
+  quotaFromData,
   type QuotaError,
+  type QuotaSummary,
 } from "@/lib/quota-error";
 import { getWorldBilling, type Billing } from "@wazoo/client";
 
@@ -37,7 +39,8 @@ export default function WorldBillingPage({
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [quota, setQuota] = useState<QuotaError | null>(null);
+  const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
+  const [quotaSummary, setQuotaSummary] = useState<QuotaSummary | null>(null);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [cancelling, setCancelling] = useState(false);
@@ -50,7 +53,8 @@ export default function WorldBillingPage({
     if (!client) return;
     setLoading(true);
     setError(null);
-    setQuota(null);
+    setErrorQuota(null);
+    setQuotaSummary(null);
     getWorldBilling({ client, path: { worldId } }).then((r) => {
       if (r.error) {
         if (isUnauthorizedError(r.error)) {
@@ -58,9 +62,10 @@ export default function WorldBillingPage({
           return;
         }
         setError(errMsg(r.error));
-        setQuota(quotaErrorInfo(r.error));
+        setErrorQuota(quotaErrorInfo(r.error));
       } else {
         setBilling(r.data?.billing ?? null);
+        setQuotaSummary(quotaFromData(r.data));
       }
       setLoading(false);
     });
@@ -106,12 +111,23 @@ export default function WorldBillingPage({
         {error && (
           <QuotaErrorBanner
             message={error}
-            usagePercent={quota?.usagePercent}
+            usagePercent={errorQuota?.usagePercent}
             hint={
-              quota
+              errorQuota
                 ? "Upgrade your plan or free up capacity to continue."
                 : undefined
             }
+          />
+        )}
+        {!error && quotaSummary && quotaSummary.state !== "OK" && (
+          <QuotaErrorBanner
+            message={
+              quotaSummary.state === "THROTTLED"
+                ? "This world has exceeded its plan limits."
+                : "This world is approaching its plan limits."
+            }
+            usagePercent={quotaSummary.usagePercent}
+            hint="Upgrade your plan or free up capacity to continue."
           />
         )}
         {loading && (
@@ -126,7 +142,12 @@ export default function WorldBillingPage({
                 <CardTitle className="text-sm">State</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge variant="secondary">{billing.state}</Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant="secondary">{billing.state}</Badge>
+                  {billing.paymentRequired && (
+                    <Badge variant="destructive">Payment required</Badge>
+                  )}
+                </div>
               </CardContent>
             </Card>
             <Card>
@@ -193,6 +214,30 @@ export default function WorldBillingPage({
                 </div>
               </CardContent>
             </Card>
+            {quotaSummary && quotaSummary.limits.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Plan limits</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="divide-y">
+                    {quotaSummary.limits.map((limit) => (
+                      <div
+                        key={limit.metric}
+                        className="flex justify-between py-2"
+                      >
+                        <span className="text-sm">{limit.metric}</span>
+                        <span className="text-sm font-mono">
+                          {limit.quantity.toLocaleString()} /{" "}
+                          {limit.limitQuantity.toLocaleString()} (
+                          {limit.usagePercent}%)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
