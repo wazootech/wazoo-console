@@ -13,7 +13,9 @@ import {
   errMsg,
   isUnauthorizedError,
   quotaErrorInfo,
+  quotaFromData,
   type QuotaError,
+  type QuotaSummary,
 } from "@/lib/quota-error";
 import { getWorldUsage, type UsageEvent } from "@wazoo/client";
 
@@ -30,7 +32,8 @@ export default function WorldUsagePage({
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [quota, setQuota] = useState<QuotaError | null>(null);
+  const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
+  const [quotaSummary, setQuotaSummary] = useState<QuotaSummary | null>(null);
 
   const tabs = getWorldTabs(worldId);
 
@@ -38,7 +41,8 @@ export default function WorldUsagePage({
     if (!client) return;
     setLoading(true);
     setError(null);
-    setQuota(null);
+    setErrorQuota(null);
+    setQuotaSummary(null);
     getWorldUsage({ client, path: { worldId } }).then((r) => {
       if (r.error) {
         if (isUnauthorizedError(r.error)) {
@@ -46,9 +50,10 @@ export default function WorldUsagePage({
           return;
         }
         setError(errMsg(r.error));
-        setQuota(quotaErrorInfo(r.error));
+        setErrorQuota(quotaErrorInfo(r.error));
       } else if (r.data?.usage) {
         setUsage(r.data.usage);
+        setQuotaSummary(quotaFromData(r.data));
       }
       setLoading(false);
     });
@@ -65,13 +70,25 @@ export default function WorldUsagePage({
         {error && (
           <QuotaErrorBanner
             message={error}
-            usagePercent={quota?.usagePercent}
+            usagePercent={errorQuota?.usagePercent}
             usageLabel="Usage"
             hint={
-              quota
+              errorQuota
                 ? "Reduce usage or raise the plan limit to continue."
                 : undefined
             }
+          />
+        )}
+        {!error && quotaSummary && quotaSummary.state !== "OK" && (
+          <QuotaErrorBanner
+            message={
+              quotaSummary.state === "THROTTLED"
+                ? "This world has exceeded one or more usage limits."
+                : "This world is approaching one or more usage limits."
+            }
+            usagePercent={quotaSummary.usagePercent}
+            usageLabel="Usage"
+            hint="Reduce usage or raise the plan limit to continue."
           />
         )}
         {loading && (
@@ -98,6 +115,30 @@ export default function WorldUsagePage({
                 </div>
               </CardContent>
             </Card>
+            {quotaSummary && quotaSummary.limits.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm">Limits</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="divide-y">
+                    {quotaSummary.limits.map((limit) => (
+                      <div
+                        key={limit.metric}
+                        className="flex justify-between py-2"
+                      >
+                        <span className="text-sm">{limit.metric}</span>
+                        <span className="text-sm font-mono">
+                          {limit.quantity.toLocaleString()} /{" "}
+                          {limit.limitQuantity.toLocaleString()} (
+                          {limit.usagePercent}%)
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </div>
