@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, Check, X } from "lucide-react";
 import { createWorld } from "@wazoo/client";
+import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import {
   validateWorldId,
   isWorldIdTaken,
@@ -191,18 +192,15 @@ export function CreateWorldDialog({
             </Select>
           </div>
           {error && (
-            <div role="alert" className="text-sm text-destructive space-y-1">
-              <p>{error}</p>
-              {limitInfo && (
-                <p>
-                  {limitInfo.usagePercent !== undefined
-                    ? `Database capacity is at ${Math.round(limitInfo.usagePercent)}%. `
-                    : null}
-                  Delete unused worlds or raise the database limit to create
-                  more.
-                </p>
-              )}
-            </div>
+            <QuotaErrorBanner
+              message={error}
+              usagePercent={limitInfo?.usagePercent}
+              hint={
+                limitInfo
+                  ? "Delete unused worlds or raise the database limit to create more."
+                  : undefined
+              }
+            />
           )}
           <div className="flex justify-end gap-2">
             <Button
