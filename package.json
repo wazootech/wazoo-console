@@ -18,7 +18,6 @@
     "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check",
     "health:local": "node scripts/health.mjs",
     "health:qa": "node scripts/health.mjs https://console-qa.wazoo.dev",
-    "test:worlds": "tsx scripts/test-worlds.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
