@@ -138,9 +138,6 @@ jobs:
       - run: npm run test:e2e
         env:
           BASE_URL: https://console-qa.wazoo.dev
-          API_BASE_URL: https://api-qa.wazoo.dev
-          WORLDS_API_URL: https://worlds-api-qa.wazoo.dev
-          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

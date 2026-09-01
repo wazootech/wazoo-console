@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test";
 
-const API_BASE_URL = process.env.API_BASE_URL ?? "https://api.wazoo.dev";
-const WORLDS_API_URL =
-  process.env.WORLDS_API_URL ?? "https://worlds-api.wazoo.dev";
-
+// Console-owned prod smoke: browser behavior that only the console repository
+// can exercise. Cross-service health (wazoo-api, worlds-api) and platform
+// lifecycle assertions live in wazoo-api's platform smoke suite
+// (`npm run smoke:qa`), which owns the deployed platform contract.
 test.describe("prod smoke", () => {
   test("console landing page loads without console errors", async ({
     page,
@@ -37,37 +37,10 @@ test.describe("prod smoke", () => {
     expect(response.status()).toBeLessThan(400);
   });
 
-  test("API health endpoints return ok", async ({ request }) => {
-    for (const url of [
-      `${API_BASE_URL}/health`,
-      `${WORLDS_API_URL}/health`,
-      `/api/health`,
-    ]) {
-      const response = await request.get(url);
-      expect(response.status(), `Expected 200 from ${url}`).toBe(200);
-      const body = await response.json();
-      expect(body.status).toBe("ok");
-    }
-  });
-
-  test("OpenAPI specs are reachable", async ({ request }) => {
-    for (const url of [
-      `${API_BASE_URL}/openapi.json`,
-      `${WORLDS_API_URL}/openapi.json`,
-    ]) {
-      const response = await request.get(url);
-      expect(response.status(), `Expected 200 from ${url}`).toBe(200);
-      const body = await response.json();
-      expect(body.openapi).toBeDefined();
-      expect(body.paths).toBeDefined();
-    }
-  });
-
-  test("unauthenticated API calls return 401", async ({ request }) => {
-    const apiResponse = await request.get(`${API_BASE_URL}/v1/worlds`);
-    expect(apiResponse.status()).toBe(401);
-
-    const worldsResponse = await request.get(`${WORLDS_API_URL}/worlds`);
-    expect(worldsResponse.status()).toBe(401);
+  test("console health proxy returns ok", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.status).toBe("ok");
   });
 });
