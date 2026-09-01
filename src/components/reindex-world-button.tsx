@@ -23,7 +23,7 @@ export function ReindexWorldButton({
     setErrorMsg(null);
 
     const baseUrl =
-      process.env.NEXT_PUBLIC_WORLDS_API_URL ?? "https://worlds-api.wazoo.dev";
+      process.env.NEXT_PUBLIC_WORLDS_API_URL ?? "https://data.wazoo.dev";
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
