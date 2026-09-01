@@ -21,10 +21,10 @@ export function getWorldTabs(worldId: string) {
 export function getWorldsApiUrl(): string {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://api.wazoo.dev";
   if (apiUrl.includes("api-qa.wazoo.dev")) {
-    return "https://worlds-api-qa.wazoo.dev";
+    return "https://data-qa.wazoo.dev";
   }
   if (apiUrl.includes("api.wazoo.dev")) {
-    return "https://worlds-api.wazoo.dev";
+    return "https://data.wazoo.dev";
   }
   return "http://localhost:8787";
 }
