@@ -22,14 +22,45 @@ import {
   X,
 } from "lucide-react";
 
+// Contract shape from POST /worlds/{id}/search (worlds-api#30 D6): the single
+// content text field, score on the normalized 0–1 scale (null in fallback
+// mode), and the required scoreType family.
 interface SearchResult {
+  id?: string;
   subject: string;
   predicate: string;
-  object?: string; // from fallback SQL LIKE
-  content?: string; // from semantic search text
-  score?: number; // from semantic search
   graph?: string;
+  content: string;
+  score: number | null;
+  scoreType?: string;
 }
+
+// Subject-detail rows come from SPARQL bindings, not the search contract.
+interface DetailQuad {
+  subject: string;
+  predicate: string;
+  object: string;
+  graph: string;
+}
+
+const MODE_BADGES: Record<string, { label: string; className: string }> = {
+  semantic: {
+    label: "Semantic Mode (vector)",
+    className: "text-violet-400 bg-violet-950/20 border-violet-900/50",
+  },
+  keyword: {
+    label: "Keyword Mode (full-text)",
+    className: "text-sky-400 bg-sky-950/20 border-sky-900/50",
+  },
+  hybrid: {
+    label: "Hybrid Mode (vector + keyword)",
+    className: "text-emerald-400 bg-emerald-950/20 border-emerald-900/50",
+  },
+  fallback: {
+    label: "Fallback Mode (SQL LIKE)",
+    className: "text-amber-500 bg-amber-950/20 border-amber-900/50",
+  },
+};
 
 export default function SearchPage({
   params,
@@ -41,7 +72,7 @@ export default function SearchPage({
 
   const [token, setToken] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [topK, setTopK] = useState(10);
+  const [limit, setLimit] = useState(10);
   const [minScore, setMinScore] = useState(0.0);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -52,7 +83,7 @@ export default function SearchPage({
   const [labelFilter, setLabelFilter] = useState("");
   const [propFilter, setPropFilter] = useState("");
   const [detailSubject, setDetailSubject] = useState<string | null>(null);
-  const [detailQuads, setDetailQuads] = useState<SearchResult[]>([]);
+  const [detailQuads, setDetailQuads] = useState<DetailQuad[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
 
@@ -79,7 +110,7 @@ export default function SearchPage({
         },
         body: JSON.stringify({
           query: query.trim(),
-          topK,
+          limit,
           minScore,
         }),
       });
@@ -90,7 +121,9 @@ export default function SearchPage({
       }
 
       setResults(data.results || []);
-      setMode(data.mode || "semantic");
+      // mode is required by the contract — surface the mode that actually ran
+      // (semantic / keyword / hybrid / fallback) instead of implying semantic.
+      setMode(data.mode);
       setDetailSubject(null);
       setDetailQuads([]);
     } catch (err: any) {
@@ -105,7 +138,7 @@ export default function SearchPage({
     new Set(
       results
         .filter((r) => r.predicate.includes("#type"))
-        .map((r) => r.object || r.content)
+        .map((r) => r.content)
         .filter((v): v is string => Boolean(v)),
     ),
   ).sort();
@@ -116,9 +149,7 @@ export default function SearchPage({
       const typedSubjects = new Set(
         results
           .filter(
-            (t) =>
-              t.predicate.includes("#type") &&
-              (t.object || t.content) === typeFilter,
+            (t) => t.predicate.includes("#type") && t.content === typeFilter,
           )
           .map((t) => t.subject),
       );
@@ -132,9 +163,7 @@ export default function SearchPage({
     }
     if (
       labelFilter &&
-      !(r.content || r.object || "")
-        .toLowerCase()
-        .includes(labelFilter.toLowerCase())
+      !r.content.toLowerCase().includes(labelFilter.toLowerCase())
     ) {
       return false;
     }
@@ -189,8 +218,8 @@ export default function SearchPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Vector & Hybrid Search"
-          description="Semantically search and query nodes in your World Graph using embeddings"
+          title="World Graph Search"
+          description="Keyword full-text and vector similarity search across the world's graph data, with automatic fallback when the search index is unavailable."
         />
         <NavTabs tabs={tabs} />
 
@@ -234,17 +263,17 @@ export default function SearchPage({
                 {showFilters && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
                     <div className="space-y-1.5">
-                      <Label htmlFor="top-k" className="text-zinc-400 text-xs">
-                        Limit (Top K)
+                      <Label htmlFor="limit" className="text-zinc-400 text-xs">
+                        Limit
                       </Label>
                       <Input
-                        id="top-k"
+                        id="limit"
                         type="number"
                         min={1}
                         max={100}
-                        value={topK}
+                        value={limit}
                         onChange={(e) =>
-                          setTopK(parseInt(e.target.value) || 10)
+                          setLimit(parseInt(e.target.value) || 10)
                         }
                         className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
                       />
@@ -334,10 +363,18 @@ export default function SearchPage({
               <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
                 <Sparkles className="size-4 text-primary" /> Query Results
               </CardTitle>
-              {mode === "fallback" && (
-                <div className="flex items-center gap-1 text-[10px] text-amber-500 bg-amber-950/20 border border-amber-900/50 px-2 py-0.5 rounded">
-                  <AlertTriangle className="size-3 shrink-0" />
-                  Fallback Mode (SQL LIKE)
+              {mode && MODE_BADGES[mode] && (
+                <div
+                  className={`flex items-center gap-1 text-[10px] px-2 py-0.5 rounded border ${
+                    MODE_BADGES[mode].className
+                  }`}
+                >
+                  {mode === "fallback" ? (
+                    <AlertTriangle className="size-3 shrink-0" />
+                  ) : (
+                    <Sparkles className="size-3 shrink-0" />
+                  )}
+                  {MODE_BADGES[mode].label}
                 </div>
               )}
             </CardHeader>
@@ -346,7 +383,7 @@ export default function SearchPage({
 
               {!error && results.length === 0 && !loading && (
                 <div className="py-12 text-center text-zinc-500 text-xs">
-                  Enter a search query to search semantic nodes.
+                  Enter a search query to search the world graph.
                 </div>
               )}
 
@@ -354,7 +391,7 @@ export default function SearchPage({
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
                   <Loader2 className="size-6 animate-spin text-primary" />
                   <p className="text-zinc-400 text-xs">
-                    Performing vector similarity search...
+                    Searching the world graph...
                   </p>
                 </div>
               )}
@@ -379,20 +416,18 @@ export default function SearchPage({
                               Predicate
                             </th>
                             <th className="p-3 border-r border-zinc-800">
-                              Content / Object
+                              Content
                             </th>
-                            {mode !== "fallback" && (
-                              <th className="p-3 border-r border-zinc-800">
-                                Score
-                              </th>
-                            )}
+                            <th className="p-3 border-r border-zinc-800">
+                              Score
+                            </th>
                             <th className="p-3">Graph</th>
                           </tr>
                         </thead>
                         <tbody>
                           {filteredResults.map((r, idx) => (
                             <tr
-                              key={idx}
+                              key={r.id ?? idx}
                               className={`border-b border-zinc-800 last:border-b-0 ${
                                 detailSubject === r.subject
                                   ? "bg-primary/5"
@@ -421,15 +456,11 @@ export default function SearchPage({
                                 {r.predicate}
                               </td>
                               <td className="p-3 border-r border-zinc-800 break-words text-zinc-200">
-                                {r.content || r.object || "—"}
+                                {r.content || "—"}
                               </td>
-                              {mode !== "fallback" && (
-                                <td className="p-3 border-r border-zinc-800 font-semibold text-primary">
-                                  {r.score !== undefined
-                                    ? r.score.toFixed(4)
-                                    : "—"}
-                                </td>
-                              )}
+                              <td className="p-3 border-r border-zinc-800 font-semibold text-primary">
+                                {r.score != null ? r.score.toFixed(4) : "—"}
+                              </td>
                               <td className="p-3 font-mono break-all max-w-[100px]">
                                 {r.graph || "—"}
                               </td>
