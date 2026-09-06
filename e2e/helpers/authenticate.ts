@@ -66,7 +66,8 @@ export async function activateConsoleSession(
   page: Page,
   session: E2eUserSession,
 ): Promise<void> {
-  const baseURL = page.context().options.baseURL ?? process.env.BASE_URL;
+const baseURL =
+    page.context().options?.baseURL ?? process.env.BASE_URL;
   if (!baseURL) throw new Error("baseURL is required to activate a session");
   await page
     .context()

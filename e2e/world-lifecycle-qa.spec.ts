@@ -40,7 +40,7 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
 
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
-    await expect(page.getByText(worldId)).toBeVisible();
+    await expect(page.getByText(worldId, { exact: true })).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
   } finally {
     await auth.deleteWorldViaApi(session, worldId);
