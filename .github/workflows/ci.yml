@@ -39,6 +39,10 @@ jobs:
             fi
             sleep 1
           done
+          # Hermetic allowlist only. Never switch to `npx playwright test` here:
+          # prod-health.spec.ts needs real WorkOS creds + open network (renders
+          # a WorkOS error page with placeholders), and world-lifecycle-qa.spec.ts
+          # needs WAZOO_PLATFORM_ADMIN_TOKEN. Both run in e2e-qa instead.
           BASE_URL=http://localhost:3100 npx playwright test e2e/a11y.spec.ts e2e/create-world.spec.ts e2e/quota-banner.spec.ts e2e/quota-surfaces.spec.ts
         env:
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3100/callback
