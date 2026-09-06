@@ -92,11 +92,17 @@ WORKOS_COOKIE_PASSWORD="local-dev-cookie-password-at-least-32-chars!!"
 NEXT_PUBLIC_WORKOS_REDIRECT_URI="http://localhost:3000/callback"
 NEXT_PUBLIC_API_URL="http://localhost:8080"
 WAZOO_PLATFORM_ADMIN_TOKEN="wzp_..."
+E2E_AUTH_BYPASS_ENABLED="true"
 ```
 
 `WAZOO_PLATFORM_ADMIN_TOKEN` must connect to the local control plane. For
 QA/prod access, the token must be environment-specific and must never be
 committed.
+
+`E2E_AUTH_BYPASS_ENABLED="true"` is opt-in local use of `/api/auth/bypass`
+(passwordless session minting with a platform token). It is disabled by default
+and disabled in every deployed environment except the QA Worker; see
+`secret-registry.md` for the full gate matrix.
 
 ## Local development
 

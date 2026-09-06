@@ -3,6 +3,13 @@ import { NextResponse } from "next/server";
 import { fetchUser, tokenCookieName } from "@/lib/server-auth";
 
 export async function POST(request: Request) {
+  if (process.env.E2E_AUTH_BYPASS_ENABLED !== "true") {
+    return NextResponse.json(
+      { error: { message: "Not found." } },
+      { status: 404 },
+    );
+  }
+
   try {
     const { token } = await request.json();
     if (!token) {
