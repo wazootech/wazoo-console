@@ -1,15 +1,36 @@
 # Secret Registry
 
+## Canonical source: Infisical
+
+As of 2026-09-10, the canonical source for all runtime secrets is the
+[Infisical](https://infisical.com) project configured in the workspace-level
+migration runbook (`infisical-secrets-migration.md` at the root of the
+wazootech workspace repo). That runbook owns the full secret inventory, the
+QA/prod separation, and the cutover sequence.
+
+- Local plaintext files (`.env.local`, `.dev.vars`) are derived, disposable dev
+  copies. Do not treat them as a source of truth; regenerate them from Infisical
+  (`infisical secrets generate .env.local --env dev`) and never copy-paste
+  secret values between machines or environments by hand.
+- CI fetches runtime secrets from Infisical at deploy time via OIDC machine
+  identity (no Infisical credentials are stored in GitHub). The legacy
+  `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
+  cutover; keep only `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and the
+  two Infisical **variables** (`INFISICAL_MACHINE_ID`,
+  `INFISICAL_PROJECT_SLUG`, non-secret) in GitHub.
+- Secret values are never documented here — only their names, owners, and
+  rotation dates.
+
 ## wazoo-console
 
-| Secret                     | Prod Worker | QA Worker | GitHub Secrets | Source       | Security Rule                                                                                                                    |
-| -------------------------- | ----------- | --------- | -------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| WORKOS_CLIENT_ID           | yes         | yes       | yes            | `.env.local` | Identical for staging AuthKit instance                                                                                           |
-| WORKOS_API_KEY             | yes         | yes       | yes            | `.env.local` | Staging API key                                                                                                                  |
-| WORKOS_COOKIE_PASSWORD     | yes         | yes       | yes            | `.env.local` | Environment-specific random 32-byte secret                                                                                       |
-| WAZOO_PLATFORM_ADMIN_TOKEN | yes         | yes       | yes            | `.env.local` | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
+| Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                     |
+| -------------------------- | ------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| WORKOS_CLIENT_ID           | dev, qa, prod | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                           |
+| WORKOS_API_KEY             | dev, qa, prod | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                  |
+| WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                       |
+| WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`.  |
 
-Last audited: 2026-07-25
+Last audited: 2026-09-10
 
 ## WorkOS environment variables
 
@@ -79,10 +100,13 @@ Tokens stored in `~/.local/share/opencode/mcp-auth.json`. These are per-user, no
 ## Deployment flow
 
 1. Push to `main` triggers CI (`ci.yml`)
-2. CI sets `NEXT_PUBLIC_*` env vars for QA builds (lines 82-87)
-3. `wrangler deploy` uploads Worker to Cloudflare
-4. Secrets set via `wrangler secret bulk` (see `secret-registry.md` above)
-5. Runtime vars in `wrangler.jsonc` QA env block provide non-build-time config
+2. CI sets `NEXT_PUBLIC_*` env vars for QA builds
+3. CI fetches runtime secrets from Infisical (OIDC machine identity, `qa` env)
+4. `wrangler deploy` uploads Worker to Cloudflare
+5. Continuous secrets sync is owned by the Infisical Cloudflare Workers Secret
+   Syncs configured in `infisical-secrets-migration.md`; deploys no longer set
+   worker secrets by hand
+6. Runtime vars in `wrangler.jsonc` QA env block provide non-build-time config
 
 ## Local emulator (`@workos/emulate`)
 
