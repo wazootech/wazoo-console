@@ -10,6 +10,7 @@ on:
 permissions:
   contents: read
   packages: write
+  id-token: write
 
 jobs:
   verify:
@@ -116,16 +117,19 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Fetch secrets from Infisical (qa)
+        uses: Infisical/secrets-action@v1.0.17
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: "qa"
       - run: npx @opennextjs/cloudflare build && npx wrangler deploy --env qa
         env:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console-qa.wazoo.dev/callback
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
 
   e2e-qa:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -138,11 +142,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Fetch secrets from Infisical (qa)
+        uses: Infisical/secrets-action@v1.0.17
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: "qa"
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
           BASE_URL: https://console-qa.wazoo.dev
-          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -171,13 +181,16 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Fetch secrets from Infisical (prod)
+        uses: Infisical/secrets-action@v1.0.17
+        with:
+          method: oidc
+          identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
+          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
+          env-slug: "prod"
       - run: npx @opennextjs/cloudflare build && npx wrangler deploy --env=""
         env:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console.wazoo.dev/callback
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WORKOS_CLIENT_ID: ${{ secrets.WORKOS_CLIENT_ID }}
-          WORKOS_API_KEY: ${{ secrets.WORKOS_API_KEY }}
-          WORKOS_COOKIE_PASSWORD: ${{ secrets.WORKOS_COOKIE_PASSWORD }}
-          WAZOO_PLATFORM_ADMIN_TOKEN: ${{ secrets.WAZOO_PLATFORM_ADMIN_TOKEN }}
