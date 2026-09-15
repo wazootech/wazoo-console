@@ -27,6 +27,25 @@ async function signIn(page: Page) {
   );
 }
 
+async function mockWorldMetadata(page: Page, worldId: string) {
+  await page.route(`**/v1/worlds/${worldId}`, (route) =>
+    route.fulfill({
+      json: {
+        world: {
+          uid: "platform-world-row",
+          worldId,
+          worldUid: `w_${worldId}`,
+          displayName: "Test World",
+          region: "auto",
+          state: "ACTIVE",
+          restorable: false,
+          backend: "worlds-api",
+        },
+      },
+    }),
+  );
+}
+
 async function selectToken(page: Page, worldId: string) {
   await page.addInitScript(
     ({ worldId }) => {
@@ -58,12 +77,13 @@ test.describe("invalid world token recovery", () => {
   }) => {
     const worldId = "invalid-sparql-token";
     await signIn(page);
-    await mockApiResponse(page, `/worlds/${worldId}/sparql`, {
+    await mockWorldMetadata(page, worldId);
+    await mockApiResponse(page, `/worlds/w_${worldId}/sparql`, {
       status: 400,
       json: { error: { message: "Missing or invalid API key" } },
     });
 
-    await page.goto(`/worlds/${worldId}/sparql`);
+    await page.goto(`/worlds/w_${worldId}/sparql`);
     await selectToken(page, worldId);
     await page.getByRole("button", { name: "Execute Query" }).click();
     const message = page.getByText("The selected token isn't recognized", {
@@ -80,7 +100,8 @@ test.describe("invalid world token recovery", () => {
   }) => {
     const worldId = "invalid-export-token";
     await signIn(page);
-    await mockApiResponse(page, `/worlds/${worldId}/export**`, {
+    await mockWorldMetadata(page, worldId);
+    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
       status: 403,
       json: { error: { message: "Forbidden" } },
     });
@@ -103,7 +124,8 @@ test.describe("invalid world token recovery", () => {
   }) => {
     const worldId = "backend-export-error";
     await signIn(page);
-    await mockApiResponse(page, `/worlds/${worldId}/export**`, {
+    await mockWorldMetadata(page, worldId);
+    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
       status: 500,
       json: {
         error: { message: "The graph service is temporarily unavailable" },
