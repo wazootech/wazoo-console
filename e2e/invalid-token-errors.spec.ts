@@ -83,7 +83,7 @@ test.describe("invalid world token recovery", () => {
       json: { error: { message: "Missing or invalid API key" } },
     });
 
-    await page.goto(`/worlds/w_${worldId}/sparql`);
+    await page.goto(`/worlds/${worldId}/sparql`);
     await selectToken(page, worldId);
     await page.getByRole("button", { name: "Execute Query" }).click();
     const message = page.getByText("The selected token isn't recognized", {
