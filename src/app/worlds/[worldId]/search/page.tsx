@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use } from "react";
+import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -11,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
 import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import {
   Search,
   Loader2,
@@ -68,6 +70,7 @@ export default function SearchPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -101,7 +104,8 @@ export default function SearchPage({
     setMode(null);
 
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/search`;
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/search`;
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -181,7 +185,8 @@ export default function SearchPage({
     setDetailError(null);
     setDetailQuads([]);
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/sparql`;
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/sparql`;
       const escaped = subject.replace(/[\\"]/g, (m) =>
         m === '"' ? '\\"' : "\\\\",
       );

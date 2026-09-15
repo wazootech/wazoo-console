@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -12,6 +13,7 @@ import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
 import { getWorldsApiUrl, getWorldTabs } from "@/lib/utils";
+import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import {
   AlertCircle,
   ArrowRight,
@@ -86,6 +88,7 @@ export default function ExportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -111,7 +114,8 @@ export default function ExportPage({
     setIsEmpty(false);
 
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/export?format=${encodeURIComponent(
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/export?format=${encodeURIComponent(
         format.mime,
       )}`;
 

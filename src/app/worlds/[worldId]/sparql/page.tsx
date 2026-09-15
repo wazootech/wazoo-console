@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, use, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { WorldTokenSelector } from "@/components/world-token-selector";
@@ -69,6 +71,7 @@ export default function SparqlPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -126,7 +129,8 @@ export default function SparqlPage({
 
     const startTime = performance.now();
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/sparql`;
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/sparql`;
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
