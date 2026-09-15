@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
+import { WorldTokenErrorCard } from "@/components/world-token-error-card";
+import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
 import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
 import Editor from "@monaco-editor/react";
 import { Play, Save, Trash2, Loader2, Sparkles } from "lucide-react";
@@ -77,6 +79,7 @@ export default function SparqlPage({
   const [newQueryName, setNewQueryName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [invalidTokenError, setInvalidTokenError] = useState(false);
   const [result, setResult] = useState<any | null>(null);
   const [timeTakenMs, setTimeTakenMs] = useState<number | null>(null);
 
@@ -117,6 +120,7 @@ export default function SparqlPage({
     }
     setLoading(true);
     setError(null);
+    setInvalidTokenError(false);
     setResult(null);
     setTimeTakenMs(null);
 
@@ -132,13 +136,31 @@ export default function SparqlPage({
         body: JSON.stringify({ query }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data: any = null;
+      try {
+        data = responseText ? JSON.parse(responseText) : null;
+      } catch {
+        data = null;
+      }
+
+      const message =
+        data?.error?.message ||
+        responseText.trim() ||
+        "Failed to execute query";
       if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to execute query");
+        if (
+          isUnrecognizedWorldTokenError(res.status, message, data?.error?.code)
+        ) {
+          setInvalidTokenError(true);
+          return;
+        }
+        throw new Error(message);
       }
 
       setResult(data);
     } catch (e: any) {
+      setInvalidTokenError(false);
       setError(e.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -397,8 +419,12 @@ export default function SparqlPage({
                 )}
               </CardHeader>
               <CardContent className="pt-4">
-                {error && <ErrorCard message={error} />}
-                {!error && !result && !loading && (
+                {invalidTokenError ? (
+                  <WorldTokenErrorCard worldId={worldId} />
+                ) : (
+                  error && <ErrorCard message={error} />
+                )}
+                {!invalidTokenError && !error && !result && !loading && (
                   <p className="text-zinc-500 text-xs py-4 text-center">
                     Execute a query to see results here.
                   </p>
