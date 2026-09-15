@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useState,
+  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
@@ -19,8 +20,13 @@ export type ConsentStatus = "accepted" | "rejected" | null;
  */
 export function readConsent(): ConsentStatus {
   if (typeof window === "undefined") return null;
-  const value = window.localStorage.getItem(consentStorageKey);
-  return value === "accepted" || value === "rejected" ? value : null;
+
+  try {
+    const value = window.localStorage.getItem(consentStorageKey);
+    return value === "accepted" || value === "rejected" ? value : null;
+  } catch {
+    return null;
+  }
 }
 
 interface ConsentContextValue {
@@ -32,10 +38,16 @@ interface ConsentContextValue {
 const ConsentContext = createContext<ConsentContextValue | null>(null);
 
 export function ConsentProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<ConsentStatus>(() => readConsent());
+  const [status, setStatus] = useState<ConsentStatus>(null);
+
+  useEffect(() => {
+    setStatus(readConsent());
+  }, []);
 
   const persist = useCallback((value: "accepted" | "rejected") => {
-    window.localStorage.setItem(consentStorageKey, value);
+    try {
+      window.localStorage.setItem(consentStorageKey, value);
+    } catch {}
     setStatus(value);
   }, []);
 
