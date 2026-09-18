@@ -102,8 +102,8 @@ test.describe("invalid world token recovery", () => {
     await signIn(page);
     await mockWorldMetadata(page, worldId);
     await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
-      status: 403,
-      json: { error: { message: "Forbidden" } },
+      status: 401,
+      json: { error: { message: "Unauthorized" } },
     });
 
     await page.goto(`/worlds/${worldId}/export`);
@@ -117,6 +117,31 @@ test.describe("invalid world token recovery", () => {
     await expect(
       page.getByRole("link", { name: "Create a real token" }),
     ).toHaveAttribute("href", new RegExp(`/worlds/${worldId}/tokens/?$`));
+  });
+
+  test("Export keeps generic forbidden errors out of token recovery", async ({
+    page,
+  }) => {
+    const worldId = "forbidden-export";
+    await signIn(page);
+    await mockWorldMetadata(page, worldId);
+    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
+      status: 403,
+      json: { error: { message: "Forbidden" } },
+    });
+
+    await page.goto(`/worlds/${worldId}/export`);
+    await selectToken(page, worldId);
+    await page.getByText("Turtle", { exact: true }).click();
+
+    await expect(
+      page.getByText("Forbidden", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      page.getByText("The selected token isn't recognized", { exact: false }),
+    ).toHaveCount(0);
   });
 
   test("unexpected Export errors keep the backend message", async ({

@@ -1,10 +1,4 @@
-export function isUnrecognizedWorldTokenError(
-  status: number,
-  message: string,
-  code?: string,
-): boolean {
-  if (status === 401 || status === 403) return true;
-
+function matchesApiKeyAuthMessage(code: string | undefined, message: string) {
   const text = `${code ?? ""} ${message}`
     .toLowerCase()
     .replace(/[\s_-]+/g, " ");
@@ -18,4 +12,17 @@ export function isUnrecognizedWorldTokenError(
       `\\b${apiKey}\\b.{0,48}\\b(?:missing|invalid|absent|required|not provided|not found|not recognized)\\b`,
     ).test(text)
   );
+}
+
+export function isUnrecognizedWorldTokenError(
+  status: number,
+  message: string,
+  code?: string,
+): boolean {
+  if (status === 401) return true;
+  if (status === 403) {
+    return matchesApiKeyAuthMessage(code, message);
+  }
+
+  return matchesApiKeyAuthMessage(code, message);
 }

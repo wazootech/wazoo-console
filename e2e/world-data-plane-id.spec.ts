@@ -78,4 +78,8 @@ test("SPARQL uses the canonical data-plane world UID", async ({ page }) => {
   await expect(page.getByText("Update Successful")).toBeVisible();
   expect(managementLookupCount).toBe(1);
   expect(dataPlanePath).toBe(`/worlds/${WORLD_UID}/sparql`);
+
+  await page.getByRole("button", { name: "Execute Query" }).click();
+  await expect(page.getByText("Update Successful")).toBeVisible();
+  expect(managementLookupCount).toBe(1);
 });
