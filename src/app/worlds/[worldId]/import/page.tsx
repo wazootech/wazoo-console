@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, use, useRef } from "react";
+import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -9,6 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
 import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import {
   Upload,
   FileText,
@@ -31,6 +33,7 @@ export default function ImportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -204,7 +207,8 @@ export default function ImportPage({
     setSuccess(null);
 
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/import`;
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/import`;
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {

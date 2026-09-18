@@ -97,7 +97,7 @@ export function WorldTokenSelector({
                   id="token-select"
                   className="w-full bg-zinc-900 border-zinc-800 text-white"
                 >
-                  <SelectValue placeholder="Select a token or add one..." />
+                  <SelectValue placeholder="Select a token or import one..." />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
                   {tokens.map((t) => (
@@ -112,7 +112,7 @@ export function WorldTokenSelector({
                     value="manual"
                     className="text-primary font-medium"
                   >
-                    + Add token manually
+                    + Import existing token
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -133,12 +133,19 @@ export function WorldTokenSelector({
             onSubmit={handleAddManualToken}
             className="space-y-4 p-4 border border-zinc-800 rounded-lg bg-zinc-900/50"
           >
-            <h3 className="text-sm font-semibold text-white">
-              Add World Access Token
-            </h3>
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-white">
+                Import an existing token
+              </h3>
+              <p className="text-xs text-zinc-400">
+                Generate a token on the Tokens page first, then enter its secret
+                here. This only imports the existing token into this browser; it
+                does not create a token.
+              </p>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="manual-name" className="text-zinc-400">
-                Token Name / Label
+                Local Token Label (optional)
               </Label>
               <Input
                 id="manual-name"
@@ -150,13 +157,13 @@ export function WorldTokenSelector({
             </div>
             <div className="space-y-2">
               <Label htmlFor="manual-token" className="text-zinc-400">
-                Token Secret Key
+                Existing Token Secret
               </Label>
               <div className="relative">
                 <Input
                   id="manual-token"
                   type={showTokenSecret ? "text" : "password"}
-                  placeholder="wzp_..."
+                  placeholder="wzw_..."
                   value={manualToken}
                   onChange={(e) => setManualToken(e.target.value)}
                   className="bg-zinc-900 border-zinc-800 text-white pr-10"
@@ -198,7 +205,7 @@ export function WorldTokenSelector({
                 Cancel
               </Button>
               <Button type="submit" size="sm">
-                Save & Select
+                Import & Select
               </Button>
             </div>
           </form>
@@ -214,7 +221,7 @@ export function WorldTokenSelector({
             >
               Tokens page
             </Link>{" "}
-            to generate one, or select "+ Add token manually" above.
+            to generate one first, then select "+ Import existing token" above.
           </div>
         )}
       </CardContent>

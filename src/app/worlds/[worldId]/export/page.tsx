@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -9,7 +10,10 @@ import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
+import { WorldTokenErrorCard } from "@/components/world-token-error-card";
+import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
 import { getWorldsApiUrl, getWorldTabs } from "@/lib/utils";
+import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import {
   AlertCircle,
   ArrowRight,
@@ -84,6 +88,7 @@ export default function ExportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -93,6 +98,7 @@ export default function ExportPage({
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [invalidTokenError, setInvalidTokenError] = useState(false);
   const [previewContent, setPreviewContent] = useState<string | null>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -104,10 +110,12 @@ export default function ExportPage({
     }
 
     setError(null);
+    setInvalidTokenError(false);
     setIsEmpty(false);
 
     try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${worldId}/export?format=${encodeURIComponent(
+      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/export?format=${encodeURIComponent(
         format.mime,
       )}`;
 
@@ -119,10 +127,29 @@ export default function ExportPage({
       });
 
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(
-          errData.error?.message || `Export failed with status ${res.status}`,
-        );
+        const responseText = await res.text();
+        let errData: any = null;
+        try {
+          errData = responseText ? JSON.parse(responseText) : null;
+        } catch {
+          errData = null;
+        }
+        const message =
+          errData?.error?.message ||
+          responseText.trim() ||
+          `Export failed with status ${res.status}`;
+        if (
+          isUnrecognizedWorldTokenError(
+            res.status,
+            message,
+            errData?.error?.code,
+          )
+        ) {
+          setInvalidTokenError(true);
+          setPreviewContent(null);
+          return null;
+        }
+        throw new Error(message);
       }
 
       const text = await res.text();
@@ -135,6 +162,7 @@ export default function ExportPage({
       setPreviewContent(text);
       return text;
     } catch (err: any) {
+      setInvalidTokenError(false);
       setError(err.message || "An unexpected error occurred during export");
       setPreviewContent(null);
       return null;
@@ -145,6 +173,7 @@ export default function ExportPage({
     setSelectedFormat(format);
     setPreviewContent(null);
     setError(null);
+    setInvalidTokenError(false);
     if (token) {
       setLoading(true);
       await fetchExportData(format);
@@ -210,7 +239,11 @@ export default function ExportPage({
 
         <WorldTokenSelector worldId={worldId} onTokenChange={setToken} />
 
-        {error && <ErrorCard message={error} />}
+        {invalidTokenError ? (
+          <WorldTokenErrorCard worldId={worldId} />
+        ) : (
+          error && <ErrorCard message={error} />
+        )}
 
         {/* Format Selector Grid */}
         <div className="space-y-3">
