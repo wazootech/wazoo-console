@@ -26,9 +26,20 @@ export function SignInGate() {
     try {
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
         body: JSON.stringify({ ageConfirmed: true }),
       });
+      const location = res.headers.get("location");
+      if (
+        res.redirected ||
+        (location && res.status >= 300 && res.status < 400)
+      ) {
+        window.location.assign(location ?? res.url);
+        return;
+      }
       const body = (await res.json().catch(() => ({}))) as {
         url?: string;
         error?: { message?: string };
