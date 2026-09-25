@@ -203,16 +203,17 @@ releases.
 
 ## Required secrets
 
-For CI/CD, the following GitHub Actions secrets must be set:
+For CI/CD, the following GitHub Actions secrets and variables must be set:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID
-CLOUDFLARE_API_TOKEN
-WORKOS_CLIENT_ID
-WORKOS_API_KEY
-WORKOS_COOKIE_PASSWORD
-WAZOO_PLATFORM_ADMIN_TOKEN
+CLOUDFLARE_ACCOUNT_ID     # secret
+CLOUDFLARE_API_TOKEN      # secret
+INFISICAL_MACHINE_ID      # variable (non-secret)
+INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
+
+The `WORKOS_*` values and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub
+secrets: the deploy jobs fetch them from Infisical over OIDC machine identity.
 
 For Cloudflare Worker runtime secrets:
 
@@ -228,10 +229,12 @@ security rules.
 
 ## QA checklist before inviting beta users
 
-1. **Sign-in redirect**: `https://console-qa.wazoo.dev/sign-in/` returns `307`
-   to `https://api.workos.com/user_management/authorize` with
-   `redirect_uri=https%3A%2F%2Fconsole-qa.wazoo.dev%2Fcallback`.
-2. **Production redirect**: Same for `https://console.wazoo.dev/sign-in/`.
+1. **Sign-in redirect**: `https://console-qa.wazoo.dev/` returns `307` to
+   `https://api.workos.com/user_management/authorize` with
+   `redirect_uri=https%3A%2F%2Fconsole-qa.wazoo.dev%2Fcallback`. (`/sign-in/`
+   itself renders the sign-in page with a `200`; the redirect is on the
+   protected routes.)
+2. **Production redirect**: Same for `https://console.wazoo.dev/`.
 3. **Full login flow (manual)**: Complete email/password or OAuth sign-in on the
    WorkOS hosted page, confirm redirect back to the console, and confirm the
    session persists across navigation.

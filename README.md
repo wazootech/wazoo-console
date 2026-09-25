@@ -82,16 +82,19 @@ so the app can render and redirect without exposing production WorkOS/admin
 secrets to pull request code; they are not intended for completing a real
 WorkOS callback.
 
-Required GitHub Actions secrets:
+Required GitHub Actions secrets and variables:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID
-CLOUDFLARE_API_TOKEN
-WORKOS_CLIENT_ID
-WORKOS_API_KEY
-WORKOS_COOKIE_PASSWORD
-WAZOO_PLATFORM_ADMIN_TOKEN
+CLOUDFLARE_ACCOUNT_ID     # secret
+CLOUDFLARE_API_TOKEN      # secret
+INFISICAL_MACHINE_ID      # variable (non-secret)
+INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
+
+`WORKOS_*` and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub secrets: the
+`deploy-qa` and `deploy-prod` jobs fetch them from Infisical at deploy time over
+OIDC machine identity, and the Infisical syncs keep the Worker secrets current.
+See `secret-registry.md` for the inventory and rotation rules.
 
 Required Cloudflare Worker secrets for `wazoo-console`:
 
@@ -104,9 +107,13 @@ WAZOO_PLATFORM_ADMIN_TOKEN
 
 `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WORKOS_REDIRECT_URI` are set by the
 production workflow to `https://api.wazoo.dev` and
-`https://console.wazoo.dev/callback`. After deployment, the `health-qa` CI job
-verifies `https://console.wazoo.dev/api/health` returns `{ "status": "ok" }`.
+`https://console.wazoo.dev/callback`. No CI job runs against production:
+`deploy-prod` only publishes (the `e2e-qa` job covers the QA Worker on every
+`main` push), so verify a production deploy by hand --
+`https://console.wazoo.dev/api/health` must return `{ "status": "ok" }`.
 
-For a full sign-in verification, smoke test `https://console.wazoo.dev/sign-in/`
-and confirm it returns a `307` redirect to hosted WorkOS with the production
-callback URI.
+For a full sign-in verification, smoke test `https://console.wazoo.dev/` and
+confirm it returns a `307` redirect to hosted WorkOS with the production callback
+URI. The redirect lives on the protected routes: `/sign-in/` itself serves the
+sign-in page with a `200`, and Next normalizes the trailing slash
+(`/sign-in` -> `/sign-in/`).
