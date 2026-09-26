@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 interface ReindexWorldButtonProps {
-  worldUid?: string | null;
+  worldId?: string | null;
   token?: string | null;
 }
 
 export function ReindexWorldButton({
-  worldUid,
+  worldId,
   token,
 }: ReindexWorldButtonProps) {
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export function ReindexWorldButton({
     setStatus("idle");
     setErrorMsg(null);
 
-    if (!worldUid) {
+    if (!worldId) {
       setErrorMsg(
         "World provisioning is incomplete: no canonical data-plane ID is available.",
       );
@@ -42,7 +42,7 @@ export function ReindexWorldButton({
 
     try {
       const res = await fetch(
-        `${baseUrl}/worlds/${encodeURIComponent(worldUid)}/reindex`,
+        `${baseUrl}/worlds/${encodeURIComponent(worldId)}/reindex`,
         {
           method: "POST",
           headers,
@@ -72,7 +72,7 @@ export function ReindexWorldButton({
         variant="outline"
         size="sm"
         onClick={handleReindex}
-        disabled={loading || !worldUid}
+        disabled={loading || !worldId}
       >
         {loading ? (
           <Loader2 className="size-4 animate-spin" />
@@ -81,7 +81,7 @@ export function ReindexWorldButton({
         )}
         Reindex World
       </Button>
-      {!worldUid && (
+      {!worldId && (
         <span className="text-xs text-amber-500">
           World provisioning is incomplete; refresh or contact an administrator.
         </span>

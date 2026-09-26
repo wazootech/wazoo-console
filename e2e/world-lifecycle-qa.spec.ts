@@ -20,8 +20,9 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
   const session = await auth.mintE2eUserSession(auth.createRunEmail());
   await auth.activateConsoleSession(page, session);
 
-  const worldId = auth.createRunWorldId();
-  const displayName = `E2E ${worldId}`;
+  const slug = auth.createRunWorldSlug();
+  const displayName = `E2E ${slug}`;
+  let createdWorldId: string | null = null;
 
   try {
     await page.goto("/worlds");
@@ -33,16 +34,33 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await dialog.getByLabel("World ID").fill(worldId);
+    await dialog.getByLabel("World slug").fill(slug);
     await dialog.getByLabel("Display Name").fill(displayName);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
+    const createResponsePromise = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname === "/v1/worlds" && response.request().method() === "POST"
+      );
+    });
     await dialog.getByRole("button", { name: "Create" }).click();
+
+    const createResponse = await createResponsePromise;
+    const createBody = await createResponse.json();
+    expect(createResponse.status(), JSON.stringify(createBody)).toBe(201);
+    const createdWorld = (
+      createBody as {
+        world: { worldId: string; slug: string };
+      }
+    ).world;
+    createdWorldId = createdWorld.worldId;
+    expect(createdWorld.slug).toBe(slug);
 
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
-    await expect(page.getByText(worldId, { exact: true })).toBeVisible();
+    await expect(page.getByText(createdWorldId, { exact: true })).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
   } finally {
-    await auth.deleteWorldViaApi(session, worldId);
+    if (createdWorldId) await auth.deleteWorldViaApi(session, createdWorldId);
   }
 });

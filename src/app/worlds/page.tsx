@@ -26,8 +26,13 @@ export default function WorldsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  const existingWorldIds = useMemo(
-    () => new Set(worlds.map((w) => w.worldId)),
+  const existingWorldSlugs = useMemo(
+    () =>
+      new Set(
+        worlds
+          .map((world) => world.slug)
+          .filter((slug): slug is string => Boolean(slug)),
+      ),
     [worlds],
   );
 
@@ -99,7 +104,7 @@ export default function WorldsPage() {
           <div className="space-y-2">
             {worlds.map((w) => (
               <Link
-                key={w.uid}
+                key={w.worldId}
                 href={`/worlds/${w.worldId}`}
                 className="block rounded-md border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
@@ -126,7 +131,7 @@ export default function WorldsPage() {
           open={showCreate}
           onOpenChange={setShowCreate}
           onCreated={fetchWorlds}
-          existingWorldIds={existingWorldIds}
+          existingWorldSlugs={existingWorldSlugs}
         />
       </div>
     </AppShell>

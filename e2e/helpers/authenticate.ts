@@ -31,8 +31,8 @@ export function createRunEmail(): string {
   return `e2e+${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}@wazoo.dev`;
 }
 
-/** Unique world ID matching /^[a-z][a-z0-9-]{2,62}$/. */
-export function createRunWorldId(): string {
+/** Unique world slug matching /^[a-z][a-z0-9-]{2,62}$/. */
+export function createRunWorldSlug(): string {
   return `e2e-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
@@ -66,8 +66,7 @@ export async function activateConsoleSession(
   page: Page,
   session: E2eUserSession,
 ): Promise<void> {
-const baseURL =
-    page.context().options?.baseURL ?? process.env.BASE_URL;
+  const baseURL = page.context().options?.baseURL ?? process.env.BASE_URL;
   if (!baseURL) throw new Error("baseURL is required to activate a session");
   await page
     .context()
