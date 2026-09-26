@@ -6,6 +6,21 @@ const PROVISIONING_ERROR =
 const dataPlaneIdCache = new Map<string, string>();
 const dataPlaneIdInFlight = new Map<string, Promise<string>>();
 
+/**
+ * Reads a World's canonical data-plane ID from a management response.
+ *
+ * The management plane moved `worldId` from the friendly slug to the canonical
+ * `w_<uuid>` and dropped `worldUid` (wazootech/wazoo-api#62). Preferring
+ * `worldUid` when present keeps the console working against both the old and the
+ * new contract, so the #62 deploy has no breakage window. The structural type
+ * keeps this valid once the generated client drops the removed field.
+ */
+export function canonicalDataPlaneId(
+  world: { worldUid?: string; worldId?: string } | null | undefined,
+): string | undefined {
+  return world?.worldUid ?? world?.worldId;
+}
+
 export async function resolveWorldDataPlaneId(
   client: Client | null,
   worldId: string,
@@ -43,7 +58,7 @@ async function resolveWorldDataPlaneIdUncached(
     throw new Error(readApiError(result.error));
   }
 
-  const dataPlaneWorldId = result.data?.world?.worldUid;
+  const dataPlaneWorldId = canonicalDataPlaneId(result.data?.world);
   if (!dataPlaneWorldId) {
     throw new Error(PROVISIONING_ERROR);
   }

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
+import { canonicalDataPlaneId } from "@/lib/world-data";
 import { getWorldTabs } from "@/lib/utils";
 import { getWorld, type World } from "@wazoo/client";
 
@@ -108,7 +109,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldUid={world.worldUid} />
+            <ReindexWorldButton worldId={canonicalDataPlaneId(world)} />
             <Button
               variant="destructive"
               size="sm"

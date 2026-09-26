@@ -83,3 +83,58 @@ test("SPARQL uses the canonical data-plane world UID", async ({ page }) => {
   await expect(page.getByText("Update Successful")).toBeVisible();
   expect(managementLookupCount).toBe(1);
 });
+
+// Guard for wazootech/wazoo-api#62: once the management plane makes worldId
+// canonical and drops worldUid, the data plane must still receive the
+// canonical id. Before the shim this read `world.worldUid` and would have
+// thrown the provisioning error on every World page.
+test("SPARQL uses the canonical world_id once the platform drops worldUid", async ({
+  page,
+}) => {
+  await signInAndMockSession(page);
+  await page.addInitScript(
+    ({ worldId, token }) => {
+      localStorage.setItem(
+        `wazoo_world_tokens_${worldId}`,
+        JSON.stringify([{ name: "E2E token", token }]),
+      );
+    },
+    { worldId: WORLD_UID, token: WORLD_TOKEN },
+  );
+
+  let managementLookupCount = 0;
+  await page.route(`**/v1/worlds/${WORLD_UID}`, async (route: Route) => {
+    managementLookupCount += 1;
+    return route.fulfill({
+      json: {
+        world: {
+          uid: "platform-world-row",
+          worldId: WORLD_UID,
+          displayName: "Canonical World",
+          region: "auto",
+          state: "ACTIVE",
+          restorable: false,
+          backend: "worlds-api",
+        },
+      },
+    });
+  });
+
+  let dataPlanePath = "";
+  await page.route("**/worlds/*/sparql", async (route: Route) => {
+    if (route.request().resourceType() === "document") {
+      return route.continue();
+    }
+    dataPlanePath = new URL(route.request().url()).pathname;
+    return route.fulfill({
+      json: { ok: true, message: "Graph update executed successfully." },
+    });
+  });
+
+  await page.goto(`/worlds/${WORLD_UID}/sparql`);
+  await page.getByRole("button", { name: "Execute Query" }).click();
+
+  await expect(page.getByText("Update Successful")).toBeVisible();
+  expect(managementLookupCount).toBe(1);
+  expect(dataPlanePath).toBe(`/worlds/${WORLD_UID}/sparql`);
+});
