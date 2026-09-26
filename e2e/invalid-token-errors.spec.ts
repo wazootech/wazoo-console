@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_invalid_token",
+    userId: "usr_e2e_invalid_token",
     email: "invalid-token-e2e@example.com",
     displayName: "Invalid Token E2E",
     state: "ACTIVE",

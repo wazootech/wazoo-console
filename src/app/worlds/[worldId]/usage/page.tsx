@@ -17,7 +17,7 @@ import {
   type QuotaError,
   type QuotaSummary,
 } from "@/lib/quota-error";
-import { getWorldUsage, type UsageEvent } from "@wazoo/client";
+import { getWorldUsage, type WorldUsage } from "@/lib/platform-id-client";
 
 export default function WorldUsagePage({
   params,
@@ -26,10 +26,7 @@ export default function WorldUsagePage({
 }) {
   const { worldId } = use(params);
   const { client, logout } = useAuth();
-  const [usage, setUsage] = useState<{
-    total: Array<{ metric: string; quantity: number }>;
-    events: UsageEvent[];
-  } | null>(null);
+  const [usage, setUsage] = useState<WorldUsage | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
@@ -43,7 +40,7 @@ export default function WorldUsagePage({
     setError(null);
     setErrorQuota(null);
     setQuotaSummary(null);
-    getWorldUsage({ client, path: { worldId } }).then((r) => {
+    getWorldUsage(client, worldId).then((r) => {
       if (r.error) {
         if (isUnauthorizedError(r.error)) {
           logout();

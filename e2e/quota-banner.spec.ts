@@ -13,7 +13,7 @@ import { test, expect } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_quota",
+    userId: "usr_e2e_quota",
     email: "quota-e2e@example.com",
     displayName: "Quota E2E",
     state: "ACTIVE",

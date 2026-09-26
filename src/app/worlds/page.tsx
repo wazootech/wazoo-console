@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Loader2, Globe } from "lucide-react";
 import Link from "next/link";
 import { CreateWorldDialog } from "@/components/create-world-dialog";
-import { listWorlds, type World } from "@wazoo/client";
+import { listWorlds, type WorldResource } from "@/lib/platform-id-client";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ACTIVE: "default",
@@ -21,7 +21,7 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 
 export default function WorldsPage() {
   const { client, logout } = useAuth();
-  const [worlds, setWorlds] = useState<World[]>([]);
+  const [worlds, setWorlds] = useState<WorldResource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
@@ -40,7 +40,7 @@ export default function WorldsPage() {
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await listWorlds({ client });
+    const r = await listWorlds(client);
     if (r.error) {
       if (
         typeof r.error === "object" &&

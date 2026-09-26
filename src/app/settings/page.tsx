@@ -24,9 +24,10 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getHealth } from "@wazoo/client";
+import type { AccountDeletion } from "@/lib/platform-id-client";
 
 interface DeletionInitiated {
-  deletion: { uid: string; expiresAt: string };
+  deletion: AccountDeletion;
   confirmationToken: string;
   message: string;
 }
@@ -66,7 +67,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `wazoo-data-${user?.uid ?? "user"}.json`;
+      a.download = `wazoo-data-${user?.userId ?? "user"}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -148,7 +149,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">User ID</span>
-              <span className="text-sm font-mono">{user?.uid}</span>
+              <span className="text-sm font-mono">{user?.userId}</span>
             </div>
           </CardContent>
         </Card>

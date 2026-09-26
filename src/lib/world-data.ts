@@ -1,4 +1,4 @@
-import { getWorld, type Client } from "@wazoo/client";
+import { getWorld, type Client } from "@/lib/platform-id-client";
 
 const PROVISIONING_ERROR =
   "World provisioning is incomplete: the management API did not return a canonical data-plane ID. Refresh the page; if this persists, ask an administrator to repair or recreate the World.";
@@ -38,7 +38,7 @@ async function resolveWorldDataPlaneIdUncached(
     );
   }
 
-  const result = await getWorld({ client, path: { worldId } });
+  const result = await getWorld(client, worldId);
   if (result.error) {
     throw new Error(readApiError(result.error));
   }

@@ -13,7 +13,7 @@ import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { getWorldTabs } from "@/lib/utils";
-import { getWorld, type World } from "@wazoo/client";
+import { getWorld, type WorldResource } from "@/lib/platform-id-client";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ACTIVE: "default",
@@ -29,7 +29,7 @@ export default function WorldDetailPage({
   const { worldId } = use(params);
   const { client } = useAuth();
   const router = useRouter();
-  const [world, setWorld] = useState<World | null>(null);
+  const [world, setWorld] = useState<WorldResource | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -39,7 +39,7 @@ export default function WorldDetailPage({
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await getWorld({ client, path: { worldId } });
+    const r = await getWorld(client, worldId);
     if (r.error) {
       setError(errMsg(r.error));
     } else {

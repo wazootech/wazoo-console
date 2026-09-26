@@ -80,10 +80,13 @@ export async function deleteWorldViaApi(
   session: E2eUserSession,
   worldId: string,
 ): Promise<void> {
-  const res = await fetch(`${QA_API_BASE}/v1/worlds/${worldId}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${session.token}` },
-  });
+  const res = await fetch(
+    `${QA_API_BASE}/v1/worlds/${encodeURIComponent(worldId)}`,
+    {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${session.token}` },
+    },
+  );
   if (!res.ok && res.status !== 404) {
     console.warn(`world ${worldId} teardown returned ${res.status}`);
   }

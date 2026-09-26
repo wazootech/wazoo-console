@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { fetchUser, getApiBaseUrl, tokenCookieName } from "@/lib/server-auth";
+import type { AccountDeletion } from "@/lib/platform-id-client";
 
 async function authedToken(): Promise<string | null> {
   const cookieStore = await cookies();
@@ -30,7 +31,7 @@ export async function POST() {
   });
 
   const body = (await response.json().catch(() => ({}))) as {
-    deletion?: { uid: string; expiresAt: string };
+    deletion?: AccountDeletion;
     confirmationToken?: string;
     message?: string;
     error?: { message?: string };

@@ -13,7 +13,7 @@ import { test, expect, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_create_world",
+    userId: "usr_e2e_create_world",
     email: "create-world-e2e@example.com",
     displayName: "Create World E2E",
     state: "ACTIVE",
@@ -105,6 +105,13 @@ test.describe("create world dialog", () => {
     await expect(page.getByText(DISPLAY_NAME)).toBeVisible();
     await expect(page.getByText("w_e2e_created")).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
+    const createdWorldLink = page.getByRole("link").filter({
+      hasText: DISPLAY_NAME,
+    });
+    await expect(createdWorldLink).toHaveAttribute(
+      "href",
+      "/worlds/w_e2e_created/",
+    );
 
     expect(createRequestBody).toEqual({
       slug: WORLD_SLUG,

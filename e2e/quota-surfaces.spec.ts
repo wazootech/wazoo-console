@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_quota",
+    userId: "usr_e2e_quota",
     email: "quota-e2e@example.com",
     displayName: "Quota E2E",
     state: "ACTIVE",
@@ -16,9 +16,11 @@ const SESSION_BODY = {
   },
 };
 
+const WORLD_ID = "w_quota_world";
+
 const USAGE_200_BODY = {
   usage: {
-    world: "worlds/quota-world",
+    worldId: WORLD_ID,
     total: [{ metric: "SPARQL_QUERIES", quantity: 12000 }],
     events: [],
   },
@@ -38,7 +40,7 @@ const USAGE_200_BODY = {
 
 const BILLING_200_BODY = {
   billing: {
-    world: "worlds/quota-world",
+    worldId: WORLD_ID,
     state: "ACTIVE",
     provider: "STRIPE",
     customerConfigured: true,
@@ -89,7 +91,7 @@ test.describe("quota banner on usage and billing surfaces", () => {
       route.fulfill({ status: 200, json: USAGE_200_BODY }),
     );
 
-    await page.goto("/worlds/quota-world/usage");
+    await page.goto(`/worlds/${WORLD_ID}/usage`);
     const banner = page.getByRole("alert").filter({ hasText: "usage limits" });
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(
@@ -117,7 +119,7 @@ test.describe("quota banner on usage and billing surfaces", () => {
       route.fulfill({ status: 200, json: BILLING_200_BODY }),
     );
 
-    await page.goto("/worlds/quota-world/billing");
+    await page.goto(`/worlds/${WORLD_ID}/billing`);
     const banner = page.getByRole("alert").filter({ hasText: "plan limits" });
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(

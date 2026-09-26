@@ -19,7 +19,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2, Check, X } from "lucide-react";
-import { createWorld } from "@wazoo/client";
+import { createWorld } from "@/lib/platform-id-client";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { errMsg, isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
@@ -96,9 +96,9 @@ export function CreateWorldDialog({
     setError(null);
     setLimitInfo(null);
     setLoading(true);
-    const r = await createWorld({
-      client,
-      body: { slug, world: { displayName: displayName || slug, region } },
+    const r = await createWorld(client, {
+      slug,
+      world: { displayName: displayName || slug, region },
     });
     if (r.error) {
       if (isUnauthorizedError(r.error)) {

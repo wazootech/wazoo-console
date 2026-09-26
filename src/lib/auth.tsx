@@ -8,7 +8,8 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { createClient, type Client, type User } from "@wazoo/client";
+import { createClient } from "@wazoo/client";
+import type { AuthenticatedUser, Client } from "@/lib/platform-id-client";
 
 function getApiBaseUrl(): string {
   if (typeof window !== "undefined" && (window as any).__WZ_API_URL) {
@@ -19,7 +20,7 @@ function getApiBaseUrl(): string {
 
 interface AuthState {
   token: string | null;
-  user: User | null;
+  user: AuthenticatedUser | null;
   client: Client | null;
   loading: boolean;
   error: string | null;
@@ -33,7 +34,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 type SessionResponse = {
   token: string;
-  user: User;
+  user: AuthenticatedUser;
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {

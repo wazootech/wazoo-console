@@ -3,7 +3,7 @@ import { test, expect, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_world_data",
+    userId: "usr_e2e_world_data",
     email: "world-data-e2e@example.com",
     displayName: "World Data E2E",
     state: "ACTIVE",

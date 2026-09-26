@@ -1,4 +1,4 @@
-import type { User } from "@wazoo/client";
+import type { AuthenticatedUser } from "@/lib/platform-id-client";
 
 export const tokenCookieName = "wazoo_console_token";
 export const ageCookieName = "wazoo_age_confirmed";
@@ -7,7 +7,9 @@ export function getApiBaseUrl(): string {
   return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
 }
 
-export async function fetchUser(token: string): Promise<User | null> {
+export async function fetchUser(
+  token: string,
+): Promise<AuthenticatedUser | null> {
   const response = await fetch(`${getApiBaseUrl()}/v1/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
@@ -15,7 +17,7 @@ export async function fetchUser(token: string): Promise<User | null> {
 
   if (!response.ok) return null;
 
-  const body = (await response.json()) as { user?: User };
+  const body = (await response.json()) as { user?: AuthenticatedUser };
   return body.user ?? null;
 }
 
