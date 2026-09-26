@@ -261,11 +261,11 @@ security rules.
 - Console-specific conventions: see `AGENTS.md` in this repository.
 - Auth and deployment details: see `secret-registry.md`.
 - Private beta signup and allowlist: see
-  `wazootech/wazoopedia/wiki/Private_Beta_Signup.md`.
+  `wazootech/memory/wiki/Private_Beta.md`.
 
 ## Useful links
 
 - [WorkOS Emulate](https://github.com/workos/emulate)
 - [WorkOS AuthKit docs](https://workos.com/docs/authkit)
 - [Cloudflare Workers docs](https://developers.cloudflare.com/workers/)
-- [Wazoopedia](https://github.com/wazootech/wazoopedia)
+- [memory](https://github.com/wazootech/memory)
