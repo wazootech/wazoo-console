@@ -2,9 +2,7 @@ import {
   createPlatformToken as createPlatformTokenRequest,
   createWorld as createWorldRequest,
   createWorldToken as createWorldTokenRequest,
-  deletePlatformToken as deletePlatformTokenRequest,
   deleteWorld as deleteWorldRequest,
-  deleteWorldToken as deleteWorldTokenRequest,
   getWorld as getWorldRequest,
   getWorldBilling as getWorldBillingRequest,
   getWorldUsage as getWorldUsageRequest,
@@ -120,16 +118,6 @@ type ApiResult<T> = {
   error?: unknown;
 };
 
-type PlatformTokenPathRequest = {
-  client: Client;
-  path: { tokenId: string };
-};
-
-type WorldTokenPathRequest = {
-  client: Client;
-  path: { worldId: string; tokenId: string };
-};
-
 export function listWorlds(client: Client) {
   return listWorldsRequest({ client }) as unknown as Promise<
     ApiResult<{ worlds?: WorldResource[] }>
@@ -187,10 +175,10 @@ export function issuePlatformToken(
 }
 
 export function revokePlatformToken(client: Client, tokenId: string) {
-  const invoke = deletePlatformTokenRequest as unknown as (
-    request: PlatformTokenPathRequest,
-  ) => Promise<ApiResult<unknown>>;
-  return invoke({ client, path: { tokenId } });
+  return client.delete({
+    url: `/v1/auth/api-tokens/${encodeURIComponent(tokenId)}`,
+    security: [{ scheme: "bearer", type: "http" }],
+  });
 }
 
 export function fetchWorldTokens(client: Client, worldId: string) {
@@ -212,8 +200,8 @@ export function revokeWorldToken(
   worldId: string,
   tokenId: string,
 ) {
-  const invoke = deleteWorldTokenRequest as unknown as (
-    request: WorldTokenPathRequest,
-  ) => Promise<ApiResult<unknown>>;
-  return invoke({ client, path: { worldId, tokenId } });
+  return client.delete({
+    url: `/v1/worlds/${encodeURIComponent(worldId)}/auth/tokens/${encodeURIComponent(tokenId)}`,
+    security: [{ scheme: "bearer", type: "http" }],
+  });
 }
