@@ -69,12 +69,12 @@ test.describe("quota banner (DATABASE_LIMIT_REACHED)", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    // The dialog pre-fills a suggested world ID; set one explicitly so the
+    // The dialog pre-fills a suggested world slug; set one explicitly so the
     // submitted value is deterministic.
-    await dialog.getByLabel("World ID").fill("quota-limit-e2e");
+    await dialog.getByLabel("World slug").fill("quota-limit-e2e");
     await dialog.getByRole("button", { name: "Create" }).click();
 
-    // The dialog also renders a transient world-ID validation alert, so scope
+    // The dialog also renders a transient world-slug validation alert, so scope
     // to the quota banner itself.
     const alert = dialog
       .getByRole("alert")

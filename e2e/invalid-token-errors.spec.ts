@@ -32,9 +32,7 @@ async function mockWorldMetadata(page: Page, worldId: string) {
     route.fulfill({
       json: {
         world: {
-          uid: "platform-world-row",
           worldId,
-          worldUid: `w_${worldId}`,
           displayName: "Test World",
           region: "auto",
           state: "ACTIVE",
@@ -75,10 +73,10 @@ test.describe("invalid world token recovery", () => {
   test("SPARQL explains how to recover from a missing API key", async ({
     page,
   }) => {
-    const worldId = "invalid-sparql-token";
+    const worldId = "w_invalid_sparql_token";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
-    await mockApiResponse(page, `/worlds/w_${worldId}/sparql`, {
+    await mockApiResponse(page, `/worlds/${worldId}/sparql`, {
       status: 400,
       json: { error: { message: "Missing or invalid API key" } },
     });
@@ -98,10 +96,10 @@ test.describe("invalid world token recovery", () => {
   test("Export explains how to recover from an unauthorized token", async ({
     page,
   }) => {
-    const worldId = "invalid-export-token";
+    const worldId = "w_invalid_export_token";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
-    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
+    await mockApiResponse(page, `/worlds/${worldId}/export**`, {
       status: 401,
       json: { error: { message: "Unauthorized" } },
     });
@@ -122,10 +120,10 @@ test.describe("invalid world token recovery", () => {
   test("Export keeps generic forbidden errors out of token recovery", async ({
     page,
   }) => {
-    const worldId = "forbidden-export";
+    const worldId = "w_forbidden_export";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
-    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
+    await mockApiResponse(page, `/worlds/${worldId}/export**`, {
       status: 403,
       json: { error: { message: "Forbidden" } },
     });
@@ -147,10 +145,10 @@ test.describe("invalid world token recovery", () => {
   test("unexpected Export errors keep the backend message", async ({
     page,
   }) => {
-    const worldId = "backend-export-error";
+    const worldId = "w_backend_export_error";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
-    await mockApiResponse(page, `/worlds/w_${worldId}/export**`, {
+    await mockApiResponse(page, `/worlds/${worldId}/export**`, {
       status: 500,
       json: {
         error: { message: "The graph service is temporarily unavailable" },

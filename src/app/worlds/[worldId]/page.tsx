@@ -108,7 +108,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldUid={world.worldUid} />
+            <ReindexWorldButton worldId={world.worldId} />
             <Button
               variant="destructive"
               size="sm"

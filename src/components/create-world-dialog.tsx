@@ -23,10 +23,10 @@ import { createWorld } from "@wazoo/client";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { errMsg, isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
-  validateWorldId,
-  isWorldIdTaken,
-  suggestWorldId,
-} from "@/lib/world-id";
+  validateWorldSlug,
+  isWorldSlugTaken,
+  suggestWorldSlug,
+} from "@/lib/world-slug";
 
 const regionOptions = [
   { value: "auto", label: "Automatic" },
@@ -46,18 +46,18 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
-  existingWorldIds: Set<string>;
+  existingWorldSlugs: Set<string>;
 }
 
 export function CreateWorldDialog({
   open,
   onOpenChange,
   onCreated,
-  existingWorldIds,
+  existingWorldSlugs,
 }: Props) {
   const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
-  const [worldId, setWorldId] = useState("");
+  const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [region, setRegion] = useState("auto");
   const [loading, setLoading] = useState(false);
@@ -66,21 +66,21 @@ export function CreateWorldDialog({
     null,
   );
 
-  const debouncedWorldId = useDebounce(worldId, 250);
-  const validationError = validateWorldId(debouncedWorldId);
+  const debouncedSlug = useDebounce(slug, 250);
+  const validationError = validateWorldSlug(debouncedSlug);
   const taken =
     !validationError &&
-    debouncedWorldId &&
-    isWorldIdTaken(debouncedWorldId, existingWorldIds);
+    debouncedSlug &&
+    isWorldSlugTaken(debouncedSlug, existingWorldSlugs);
   const canSubmit =
     !loading &&
-    !validateWorldId(worldId) &&
-    !isWorldIdTaken(worldId, existingWorldIds) &&
-    worldId.length > 0;
+    !validateWorldSlug(slug) &&
+    !isWorldSlugTaken(slug, existingWorldSlugs) &&
+    slug.length > 0;
 
   useEffect(() => {
     if (open) {
-      setWorldId(suggestWorldId(existingWorldIds));
+      setSlug(suggestWorldSlug(existingWorldSlugs));
       setDisplayName("");
       setRegion("auto");
       setError(null);
@@ -98,7 +98,7 @@ export function CreateWorldDialog({
     setLoading(true);
     const r = await createWorld({
       client,
-      body: { worldId, world: { displayName: displayName || worldId, region } },
+      body: { slug, world: { displayName: displayName || slug, region } },
     });
     if (r.error) {
       if (isUnauthorizedError(r.error)) {
@@ -122,22 +122,22 @@ export function CreateWorldDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="worldId">World ID</Label>
+            <Label htmlFor="slug">World slug</Label>
             <Input
-              id="worldId"
+              id="slug"
               placeholder="my-world"
-              value={worldId}
-              onChange={(e) => setWorldId(e.target.value)}
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
               disabled={loading}
               required
-              aria-describedby="world-id-feedback world-id-hint"
+              aria-describedby="world-slug-feedback world-slug-hint"
               aria-invalid={!!validationError || !!taken}
             />
-            <p id="world-id-hint" className="text-xs text-muted-foreground">
+            <p id="world-slug-hint" className="text-xs text-muted-foreground">
               Lowercase letters, digits, and hyphens. 3-63 characters.
             </p>
             <div
-              id="world-id-feedback"
+              id="world-slug-feedback"
               className="flex items-center gap-1.5 min-h-5"
             >
               {validationError && (
@@ -156,7 +156,7 @@ export function CreateWorldDialog({
                   <X className="size-3" /> Already taken.
                 </span>
               )}
-              {!validationError && !taken && worldId && (
+              {!validationError && !taken && slug && (
                 <span className="text-xs text-emerald-500 flex items-center gap-1">
                   <Check className="size-3" /> Available
                 </span>

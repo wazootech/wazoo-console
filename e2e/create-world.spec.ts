@@ -21,7 +21,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "my-e2e-world";
+const WORLD_SLUG = "my-e2e-world";
 const DISPLAY_NAME = "My E2E World";
 
 async function signInAndMockSession(page: Page) {
@@ -39,7 +39,7 @@ async function signInAndMockSession(page: Page) {
   );
 }
 
-/** Asserts the dialog's transient world-ID feedback alert contains `text`. */
+/** Asserts the dialog's transient world-slug feedback alert contains `text`. */
 async function expectIdAlert(
   dialog: ReturnType<Page["getByRole"]>,
   text: string,
@@ -64,10 +64,10 @@ test.describe("create world dialog", () => {
             ? {
                 worlds: [
                   {
-                    uid: "w_e2e_created",
-                    worldId: WORLD_ID,
+                    worldId: "w_e2e_created",
                     displayName: DISPLAY_NAME,
                     state: "ACTIVE",
+                    slug: WORLD_SLUG,
                   },
                 ],
               }
@@ -80,10 +80,10 @@ test.describe("create world dialog", () => {
         status: 201,
         json: {
           world: {
-            uid: "w_e2e_created",
-            worldId: WORLD_ID,
+            worldId: "w_e2e_created",
             displayName: DISPLAY_NAME,
             state: "ACTIVE",
+            slug: WORLD_SLUG,
           },
         },
       });
@@ -96,23 +96,23 @@ test.describe("create world dialog", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await dialog.getByLabel("World ID").fill(WORLD_ID);
+    await dialog.getByLabel("World slug").fill(WORLD_SLUG);
     await dialog.getByLabel("Display Name").fill(DISPLAY_NAME);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
     await dialog.getByRole("button", { name: "Create" }).click();
 
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(DISPLAY_NAME)).toBeVisible();
-    await expect(page.getByText(WORLD_ID)).toBeVisible();
+    await expect(page.getByText("w_e2e_created")).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
 
     expect(createRequestBody).toEqual({
-      worldId: WORLD_ID,
+      slug: WORLD_SLUG,
       world: { displayName: DISPLAY_NAME, region: "auto" },
     });
   });
 
-  test("disables Create and shows validation errors for invalid World IDs", async ({
+  test("disables Create and shows validation errors for invalid World slugs", async ({
     page,
   }) => {
     await signInAndMockSession(page);
@@ -126,10 +126,10 @@ test.describe("create world dialog", () => {
     await page.getByRole("button", { name: "Create your first World" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    const idInput = dialog.getByLabel("World ID");
+    const idInput = dialog.getByLabel("World slug");
 
     const cases: Array<{ value: string; message: string }> = [
-      { value: "", message: "World ID is required." },
+      { value: "", message: "World slug is required." },
       { value: "Hello", message: "Must start with a lowercase letter." },
       {
         value: "my_world",
@@ -148,14 +148,14 @@ test.describe("create world dialog", () => {
       ).toBeDisabled();
     }
 
-    // A valid ID resolves the feedback to "Available" and re-enables Create.
+    // A valid slug resolves the feedback to "Available" and re-enables Create.
     await idInput.fill("valid-world");
     await expect(dialog.getByText("Available")).toBeVisible();
     await expect(idInput).toHaveAttribute("aria-invalid", "false");
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
   });
 
-  test("shows 'Already taken.' and disables Create when the World ID exists", async ({
+  test("shows 'Already taken.' and disables Create when the World slug exists", async ({
     page,
   }) => {
     await signInAndMockSession(page);
@@ -165,10 +165,10 @@ test.describe("create world dialog", () => {
           json: {
             worlds: [
               {
-                uid: "w_e2e_existing",
-                worldId: "already-taken",
+                worldId: "w_canonical_existing",
                 displayName: "Existing",
                 state: "ACTIVE",
+                slug: "already-taken",
               },
             ],
           },
@@ -181,7 +181,7 @@ test.describe("create world dialog", () => {
     await page.getByRole("button", { name: "Create World" }).click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    const idInput = dialog.getByLabel("World ID");
+    const idInput = dialog.getByLabel("World slug");
 
     await idInput.fill("already-taken");
     await expectIdAlert(dialog, "Already taken.");
@@ -193,7 +193,7 @@ test.describe("create world dialog", () => {
     {
       status: 400,
       code: "INVALID_ARGUMENT",
-      message: "World ID is already in use.",
+      message: "World slug is already in use.",
     },
     {
       status: 502,
@@ -219,7 +219,7 @@ test.describe("create world dialog", () => {
       const dialog = page.getByRole("dialog");
       await expect(dialog).toBeVisible();
 
-      await dialog.getByLabel("World ID").fill("some-world");
+      await dialog.getByLabel("World slug").fill("some-world");
       await dialog.getByRole("button", { name: "Create" }).click();
 
       await expect(dialog).toBeVisible();
@@ -249,7 +249,7 @@ test.describe("create world dialog", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await dialog.getByLabel("World ID").fill("expired-session");
+    await dialog.getByLabel("World slug").fill("expired-session");
     await dialog.getByRole("button", { name: "Create" }).click();
 
     await page.waitForURL("**/sign-in**");

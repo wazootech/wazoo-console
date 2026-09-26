@@ -11,8 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "friendly-world-id";
-const WORLD_UID = "w_canonical_data_plane_world";
+const WORLD_ID = "w_canonical_data_plane_world";
 const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
@@ -30,7 +29,7 @@ async function signInAndMockSession(page: Page) {
   );
 }
 
-test("SPARQL uses the canonical data-plane world UID", async ({ page }) => {
+test("SPARQL uses the canonical worldId", async ({ page }) => {
   await signInAndMockSession(page);
   await page.addInitScript(
     ({ worldId, token }) => {
@@ -48,9 +47,8 @@ test("SPARQL uses the canonical data-plane world UID", async ({ page }) => {
     return route.fulfill({
       json: {
         world: {
-          uid: "platform-world-row",
           worldId: WORLD_ID,
-          worldUid: WORLD_UID,
+          slug: "friendly-world",
           displayName: "Friendly World",
           region: "auto",
           state: "ACTIVE",
@@ -77,7 +75,7 @@ test("SPARQL uses the canonical data-plane world UID", async ({ page }) => {
 
   await expect(page.getByText("Update Successful")).toBeVisible();
   expect(managementLookupCount).toBe(1);
-  expect(dataPlanePath).toBe(`/worlds/${WORLD_UID}/sparql`);
+  expect(dataPlanePath).toBe(`/worlds/${WORLD_ID}/sparql`);
 
   await page.getByRole("button", { name: "Execute Query" }).click();
   await expect(page.getByText("Update Successful")).toBeVisible();
