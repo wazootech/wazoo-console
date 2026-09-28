@@ -3,7 +3,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    userId: "usr_e2e_token_lifecycle",
+    id: "00000000-0000-4000-8000-000000000015",
     email: "token-lifecycle-e2e@example.com",
     displayName: "Token Lifecycle E2E",
     state: "ACTIVE",
@@ -11,7 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_e2e_token_lifecycle";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000003";
 
 async function signInAndMockSession(page: Page) {
   const baseURL = test.info().project.use.baseURL;
@@ -31,7 +31,7 @@ async function signInAndMockSession(page: Page) {
 test("platform token issue and revocation use tokenId", async ({ page }) => {
   await signInAndMockSession(page);
 
-  const tokenId = "pt_e2e_platform_token";
+  const tokenId = "00000000-0000-4000-8000-000000000016";
   let issuedBody: Record<string, unknown> | null = null;
   let revokedPath = "";
   let exists = false;
@@ -43,7 +43,7 @@ test("platform token issue and revocation use tokenId", async ({ page }) => {
       return route.fulfill({
         json: {
           tokens: exists
-            ? [{ tokenId, name: "release-key", scope: "worlds:read" }]
+            ? [{ id: tokenId, name: "release-key", scope: "worlds:read" }]
             : [],
         },
       });
@@ -53,7 +53,7 @@ test("platform token issue and revocation use tokenId", async ({ page }) => {
       exists = true;
       return route.fulfill({
         status: 201,
-        json: { tokenId, name: "release-key", token: "wzp_e2e_issued" },
+        json: { id: tokenId, name: "release-key", token: "wzp_e2e_issued" },
       });
     }
     if (request.method() === "DELETE") {
@@ -85,7 +85,7 @@ test("world token issue and revocation use worldId and tokenId", async ({
 }) => {
   await signInAndMockSession(page);
 
-  const tokenId = "wt_e2e_world_token";
+  const tokenId = "00000000-0000-4000-8000-000000000017";
   let revokedPath = "";
   let exists = true;
   await page.route(
@@ -97,7 +97,7 @@ test("world token issue and revocation use worldId and tokenId", async ({
         return route.fulfill({
           json: {
             tokens: exists
-              ? [{ tokenId, name: "reader", worldId: WORLD_ID }]
+              ? [{ id: tokenId, name: "reader", worldId: WORLD_ID }]
               : [],
           },
         });
@@ -108,7 +108,7 @@ test("world token issue and revocation use worldId and tokenId", async ({
           status: 201,
           json: {
             token: {
-              tokenId,
+              id: tokenId,
               name: "reader",
               worldId: WORLD_ID,
               token: "wzw_e2e_issued",

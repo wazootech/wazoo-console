@@ -3,7 +3,7 @@ import { test, expect, type Page } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    userId: "usr_e2e_invalid_token",
+    id: "00000000-0000-4000-8000-000000000023",
     email: "invalid-token-e2e@example.com",
     displayName: "Invalid Token E2E",
     state: "ACTIVE",
@@ -32,7 +32,8 @@ async function mockWorldMetadata(page: Page, worldId: string) {
     route.fulfill({
       json: {
         world: {
-          worldId,
+          id: worldId,
+          name: `worlds/${worldId}`,
           displayName: "Test World",
           region: "auto",
           state: "ACTIVE",
@@ -73,7 +74,7 @@ test.describe("invalid world token recovery", () => {
   test("SPARQL explains how to recover from a missing API key", async ({
     page,
   }) => {
-    const worldId = "w_invalid_sparql_token";
+    const worldId = "w_00000000-0000-4000-8000-000000000006";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
     await mockApiResponse(page, `/worlds/${worldId}/sparql`, {
@@ -96,7 +97,7 @@ test.describe("invalid world token recovery", () => {
   test("Export explains how to recover from an unauthorized token", async ({
     page,
   }) => {
-    const worldId = "w_invalid_export_token";
+    const worldId = "w_00000000-0000-4000-8000-000000000007";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
     await mockApiResponse(page, `/worlds/${worldId}/export**`, {
@@ -120,7 +121,7 @@ test.describe("invalid world token recovery", () => {
   test("Export keeps generic forbidden errors out of token recovery", async ({
     page,
   }) => {
-    const worldId = "w_forbidden_export";
+    const worldId = "w_00000000-0000-4000-8000-000000000008";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
     await mockApiResponse(page, `/worlds/${worldId}/export**`, {
@@ -145,7 +146,7 @@ test.describe("invalid world token recovery", () => {
   test("unexpected Export errors keep the backend message", async ({
     page,
   }) => {
-    const worldId = "w_backend_export_error";
+    const worldId = "w_00000000-0000-4000-8000-000000000009";
     await signIn(page);
     await mockWorldMetadata(page, worldId);
     await mockApiResponse(page, `/worlds/${worldId}/export**`, {

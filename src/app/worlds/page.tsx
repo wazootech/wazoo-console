@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
@@ -25,16 +25,6 @@ export default function WorldsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-
-  const existingWorldSlugs = useMemo(
-    () =>
-      new Set(
-        worlds
-          .map((world) => world.slug)
-          .filter((slug): slug is string => Boolean(slug)),
-      ),
-    [worlds],
-  );
 
   async function fetchWorlds() {
     if (!client) return;
@@ -104,8 +94,8 @@ export default function WorldsPage() {
           <div className="space-y-2">
             {worlds.map((w) => (
               <Link
-                key={w.worldId}
-                href={`/worlds/${w.worldId}`}
+                key={w.id}
+                href={`/worlds/${w.id}`}
                 className="block rounded-md border bg-card text-card-foreground shadow hover:bg-accent/50 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <CardContent className="flex items-center gap-4 py-4">
@@ -119,7 +109,7 @@ export default function WorldsPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground truncate">
-                      {w.worldId}
+                      {w.id}
                     </p>
                   </div>
                 </CardContent>
@@ -131,7 +121,6 @@ export default function WorldsPage() {
           open={showCreate}
           onOpenChange={setShowCreate}
           onCreated={fetchWorlds}
-          existingWorldSlugs={existingWorldSlugs}
         />
       </div>
     </AppShell>

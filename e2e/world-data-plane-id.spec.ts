@@ -3,7 +3,7 @@ import { test, expect, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    userId: "usr_e2e_world_data",
+    id: "00000000-0000-4000-8000-000000000018",
     email: "world-data-e2e@example.com",
     displayName: "World Data E2E",
     state: "ACTIVE",
@@ -11,7 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_canonical_data_plane_world";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000005";
 const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
@@ -47,8 +47,8 @@ test("SPARQL uses the canonical worldId", async ({ page }) => {
     return route.fulfill({
       json: {
         world: {
-          worldId: WORLD_ID,
-          slug: "friendly-world",
+          id: WORLD_ID,
+          name: `worlds/${WORLD_ID}`,
           displayName: "Friendly World",
           region: "auto",
           state: "ACTIVE",

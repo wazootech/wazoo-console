@@ -15,7 +15,7 @@ import {
 export type { Client };
 
 export interface AuthenticatedUser {
-  userId: string;
+  id: string;
   email: string;
   displayName: string | null;
   state: "ACTIVE";
@@ -23,13 +23,13 @@ export interface AuthenticatedUser {
 }
 
 export interface AccountDeletion {
-  deletionId: string;
+  id: string;
   expiresAt: string;
 }
 
 export interface WorldResource {
-  worldId: string;
-  slug?: string;
+  name: string;
+  id: string;
   displayName: string;
   region: string;
   state: "ACTIVE" | "SUSPENDED" | "DELETED";
@@ -42,15 +42,13 @@ export interface WorldResource {
 }
 
 export interface WorldCreateInput {
-  slug: string;
   world: {
     displayName: string;
-    region?: string;
   };
 }
 
 export interface WorldUsageEvent {
-  eventId: string;
+  id: string;
   name: string;
   metric: string;
   quantity: number;
@@ -78,7 +76,7 @@ export interface WorldBilling {
 }
 
 export interface PlatformToken {
-  tokenId: string;
+  id: string;
   name: string;
   scope?: string;
   last_used_at?: string | null;
@@ -93,13 +91,13 @@ export interface PlatformTokenCreateInput {
 }
 
 export interface PlatformTokenSecret {
-  tokenId: string;
+  id: string;
   name: string;
   token: string;
 }
 
 export interface WorldToken {
-  tokenId: string;
+  id: string;
   name: string;
   namespace?: string;
   worldId?: string;
@@ -108,7 +106,7 @@ export interface WorldToken {
 }
 
 export interface WorldTokenSecret {
-  tokenId: string;
+  id: string;
   name: string;
   token: string;
 }

@@ -43,7 +43,7 @@ async function resolveWorldDataPlaneIdUncached(
     throw new Error(readApiError(result.error));
   }
 
-  const dataPlaneWorldId = result.data?.world?.worldId;
+  const dataPlaneWorldId = result.data?.world?.id;
   if (!dataPlaneWorldId) {
     throw new Error(PROVISIONING_ERROR);
   }

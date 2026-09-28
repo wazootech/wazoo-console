@@ -30,7 +30,7 @@ export default function WorldTokensPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newToken, setNewToken] = useState<{
-    tokenId: string;
+    id: string;
     name: string;
     token: string;
   } | null>(null);
@@ -67,7 +67,7 @@ export default function WorldTokensPage({
     if (t) {
       const tokenStr = t.token ?? "";
       setNewToken({
-        tokenId: t.tokenId,
+        id: t.id,
         name: t.name,
         token: tokenStr,
       });
@@ -76,9 +76,9 @@ export default function WorldTokensPage({
     fetchTokens();
   }
 
-  async function handleRevoke(tokenId: string) {
+  async function handleRevoke(id: string) {
     if (!client) return;
-    await revokeWorldToken(client, worldId, tokenId);
+    await revokeWorldToken(client, worldId, id);
     fetchTokens();
   }
 
@@ -113,11 +113,11 @@ export default function WorldTokensPage({
           <div className="space-y-2">
             {tokens.map((t) => (
               <TokenListItem
-                key={t.tokenId}
+                key={t.id}
                 name={t.name}
-                tokenId={t.tokenId}
+                id={t.id}
                 typeBadge="World Token"
-                onRevoke={() => handleRevoke(t.tokenId)}
+                onRevoke={() => handleRevoke(t.id)}
               />
             ))}
           </div>

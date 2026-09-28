@@ -25,6 +25,12 @@ jobs:
       - run: npm ci
       - run: npm run format:check
       - run: npm run typecheck
+      - name: Reject legacy platform identity names
+        run: |
+          if grep -R -n -E '\buid\b|world_uid|worldUid|_uid\b' src/ e2e/; then
+            echo "Legacy platform identity found."
+            exit 1
+          fi
       - run: npm run build
         env:
           NEXT_PUBLIC_API_URL: http://127.0.0.1:4101

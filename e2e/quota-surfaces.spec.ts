@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    userId: "usr_e2e_quota",
+    id: "00000000-0000-4000-8000-000000000024",
     email: "quota-e2e@example.com",
     displayName: "Quota E2E",
     state: "ACTIVE",
@@ -16,7 +16,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_quota_world";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000010";
 
 const USAGE_200_BODY = {
   usage: {

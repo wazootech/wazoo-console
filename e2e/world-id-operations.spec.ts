@@ -3,7 +3,7 @@ import { expect, test, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    userId: "usr_e2e_world_operations",
+    id: "00000000-0000-4000-8000-000000000019",
     email: "world-operations-e2e@example.com",
     displayName: "World Operations E2E",
     state: "ACTIVE",
@@ -11,10 +11,10 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_canonical_operations_world";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000004";
 const WORLD = {
-  worldId: WORLD_ID,
-  slug: "friendly-world-name",
+  id: WORLD_ID,
+  name: `worlds/${WORLD_ID}`,
   displayName: "Canonical World",
   region: "auto",
   state: "ACTIVE",
@@ -97,7 +97,7 @@ test("usage requests the management API with worldId", async ({ page }) => {
           total: [{ metric: "queries", quantity: 17 }],
           events: [
             {
-              eventId: "evt_e2e_world_usage",
+              id: "00000000-0000-4000-8000-000000000020",
               name: "query-request",
               metric: "queries",
               quantity: 1,

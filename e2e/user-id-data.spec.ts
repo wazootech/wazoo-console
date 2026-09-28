@@ -1,7 +1,7 @@
 import { createServer, type Server } from "node:http";
 import { expect, test, type Page } from "@playwright/test";
 
-const USER_ID = "usr_e2e_export_account";
+const USER_ID = "00000000-0000-4000-8000-000000000025";
 const CONFIRMATION_TOKEN = "confirm-e2e-account-deletion";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4101";
 const API_PORT = Number(new URL(API_BASE_URL).port || 80);
@@ -35,7 +35,7 @@ test.beforeAll(async () => {
     if (request.method === "GET" && url.pathname === "/v1/users/me") {
       return respondJson(response, 200, {
         user: {
-          userId: USER_ID,
+          id: USER_ID,
           email: "account-id-e2e@example.com",
           displayName: "Account ID E2E",
           state: "ACTIVE",
@@ -45,16 +45,16 @@ test.beforeAll(async () => {
     }
     if (request.method === "GET" && url.pathname === "/v1/users/me/export") {
       return respondJson(response, 200, {
-        user: { userId: USER_ID },
-        worlds: [{ worldId: "w_exported_world" }],
-        apiTokens: [{ tokenId: "pt_exported_token" }],
-        usageEvents: [{ eventId: "evt_exported_usage" }],
+        user: { id: USER_ID },
+        worlds: [{ id: "w_00000000-0000-4000-8000-000000000011" }],
+        apiTokens: [{ id: "00000000-0000-4000-8000-000000000012" }],
+        usageEvents: [{ id: "00000000-0000-4000-8000-000000000013" }],
       });
     }
     if (request.method === "POST" && url.pathname === "/v1/users/me/deletion") {
       return respondJson(response, 201, {
         deletion: {
-          deletionId: "del_e2e_account",
+          id: "00000000-0000-4000-8000-000000000014",
           expiresAt: "2026-01-01T00:15:00Z",
         },
         confirmationToken: CONFIRMATION_TOKEN,
@@ -120,10 +120,10 @@ test("account export and deletion use explicit identifiers", async ({
   let exportBody = "";
   for await (const chunk of exportStream) exportBody += chunk.toString();
   expect(JSON.parse(exportBody)).toMatchObject({
-    user: { userId: USER_ID },
-    worlds: [{ worldId: "w_exported_world" }],
-    apiTokens: [{ tokenId: "pt_exported_token" }],
-    usageEvents: [{ eventId: "evt_exported_usage" }],
+    user: { id: USER_ID },
+    worlds: [{ id: "w_00000000-0000-4000-8000-000000000011" }],
+    apiTokens: [{ id: "00000000-0000-4000-8000-000000000012" }],
+    usageEvents: [{ id: "00000000-0000-4000-8000-000000000013" }],
   });
 
   await page.getByRole("button", { name: "Delete account" }).click();

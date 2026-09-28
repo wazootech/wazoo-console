@@ -6,83 +6,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { createWorld } from "@/lib/platform-id-client";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { errMsg, isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
-import {
-  validateWorldSlug,
-  isWorldSlugTaken,
-  suggestWorldSlug,
-} from "@/lib/world-slug";
-
-const regionOptions = [
-  { value: "auto", label: "Automatic" },
-  { value: "us-east", label: "US East" },
-] as const;
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
-}
-
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
-  existingWorldSlugs: Set<string>;
-}
 
 export function CreateWorldDialog({
   open,
   onOpenChange,
   onCreated,
-  existingWorldSlugs,
-}: Props) {
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void;
+}) {
   const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
-  const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [region, setRegion] = useState("auto");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitInfo, setLimitInfo] = useState<{ usagePercent?: number } | null>(
     null,
   );
 
-  const debouncedSlug = useDebounce(slug, 250);
-  const validationError = validateWorldSlug(debouncedSlug);
-  const taken =
-    !validationError &&
-    debouncedSlug &&
-    isWorldSlugTaken(debouncedSlug, existingWorldSlugs);
-  const canSubmit =
-    !loading &&
-    !validateWorldSlug(slug) &&
-    !isWorldSlugTaken(slug, existingWorldSlugs) &&
-    slug.length > 0;
+  const canSubmit = !loading && displayName.trim().length > 0;
 
   useEffect(() => {
     if (open) {
-      setSlug(suggestWorldSlug(existingWorldSlugs));
       setDisplayName("");
-      setRegion("auto");
       setError(null);
       setLimitInfo(null);
       setLoading(false);
@@ -97,8 +53,7 @@ export function CreateWorldDialog({
     setLimitInfo(null);
     setLoading(true);
     const r = await createWorld(client, {
-      slug,
-      world: { displayName: displayName || slug, region },
+      world: { displayName: displayName.trim() },
     });
     if (r.error) {
       if (isUnauthorizedError(r.error)) {
@@ -122,49 +77,7 @@ export function CreateWorldDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="slug">World slug</Label>
-            <Input
-              id="slug"
-              placeholder="my-world"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              disabled={loading}
-              required
-              aria-describedby="world-slug-feedback world-slug-hint"
-              aria-invalid={!!validationError || !!taken}
-            />
-            <p id="world-slug-hint" className="text-xs text-muted-foreground">
-              Lowercase letters, digits, and hyphens. 3-63 characters.
-            </p>
-            <div
-              id="world-slug-feedback"
-              className="flex items-center gap-1.5 min-h-5"
-            >
-              {validationError && (
-                <span
-                  role="alert"
-                  className="text-xs text-destructive flex items-center gap-1"
-                >
-                  <X className="size-3" /> {validationError}
-                </span>
-              )}
-              {!validationError && taken && (
-                <span
-                  role="alert"
-                  className="text-xs text-destructive flex items-center gap-1"
-                >
-                  <X className="size-3" /> Already taken.
-                </span>
-              )}
-              {!validationError && !taken && slug && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1">
-                  <Check className="size-3" /> Available
-                </span>
-              )}
-            </div>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
+            <Label htmlFor="displayName">Display name</Label>
             <Input
               ref={displayNameRef}
               id="displayName"
@@ -172,25 +85,11 @@ export function CreateWorldDialog({
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               disabled={loading}
+              required
             />
             <p className="text-xs text-muted-foreground">
               A human-readable name for this world. You can change it later.
             </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="region">Region</Label>
-            <Select value={region} onValueChange={setRegion} disabled={loading}>
-              <SelectTrigger id="region">
-                <SelectValue placeholder="Select a region" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {regionOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
           {error && (
             <QuotaErrorBanner

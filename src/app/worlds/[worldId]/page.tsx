@@ -91,11 +91,11 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${world.worldId}`}
+                aria-label={`Copy world ID ${world.id}`}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
-                {world.worldId}
+                {world.id}
                 {copied ? (
                   <Check className="size-3 text-green-400" />
                 ) : (
@@ -108,7 +108,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldId={world.worldId} />
+            <ReindexWorldButton worldId={world.id} />
             <Button
               variant="destructive"
               size="sm"

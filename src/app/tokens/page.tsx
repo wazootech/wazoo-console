@@ -35,7 +35,7 @@ export default function TokensPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newSecret, setNewSecret] = useState<{
-    tokenId: string;
+    id: string;
     name: string;
     token: string;
   } | null>(null);
@@ -58,9 +58,9 @@ export default function TokensPage() {
     fetchTokens();
   }, [client]);
 
-  async function handleRevoke(tokenId: string) {
+  async function handleRevoke(id: string) {
     if (!client) return;
-    const res = await revokePlatformToken(client, tokenId);
+    const res = await revokePlatformToken(client, id);
     if (res.error) {
       setError(errMsg(res.error));
       return;
@@ -99,14 +99,14 @@ export default function TokensPage() {
           <div className="space-y-2">
             {tokens.map((t) => (
               <TokenListItem
-                key={t.tokenId}
+                key={t.id}
                 name={t.name}
-                tokenId={t.tokenId}
+                id={t.id}
                 typeBadge="Platform Token"
                 scopes={
                   t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined
                 }
-                onRevoke={() => handleRevoke(t.tokenId)}
+                onRevoke={() => handleRevoke(t.id)}
               />
             ))}
           </div>
@@ -121,8 +121,8 @@ export default function TokensPage() {
         <CreateTokenDialog
           open={showCreate}
           onOpenChange={setShowCreate}
-          onCreated={(tokenId, name, token) => {
-            setNewSecret({ tokenId, name, token });
+          onCreated={(id, name, token) => {
+            setNewSecret({ id, name, token });
             fetchTokens();
           }}
         />
@@ -138,7 +138,7 @@ function CreateTokenDialog({
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onCreated: (tokenId: string, name: string, token: string) => void;
+  onCreated: (id: string, name: string, token: string) => void;
 }) {
   const { client, user } = useAuth();
   const [name, setName] = useState("");
@@ -167,7 +167,7 @@ function CreateTokenDialog({
       setName("");
       setScope("");
       onOpenChange(false);
-      onCreated(d.tokenId, d.name, d.token);
+      onCreated(d.id, d.name, d.token);
     } else {
       setError("No token in response");
     }

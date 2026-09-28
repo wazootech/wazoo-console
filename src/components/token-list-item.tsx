@@ -8,7 +8,7 @@ import { useState } from "react";
 
 interface TokenListItemProps {
   name: string;
-  tokenId: string;
+  id: string;
   scopes?: string[];
   typeBadge?: string;
   onRevoke: () => void;
@@ -16,7 +16,7 @@ interface TokenListItemProps {
 
 export function TokenListItem({
   name,
-  tokenId,
+  id,
   scopes,
   typeBadge,
   onRevoke,
@@ -24,7 +24,7 @@ export function TokenListItem({
   const [copied, setCopied] = useState(false);
 
   function handleCopyTokenId() {
-    navigator.clipboard.writeText(tokenId);
+    navigator.clipboard.writeText(id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -52,9 +52,7 @@ export function TokenListItem({
           </div>
 
           <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
-            <span className="truncate max-w-[280px] sm:max-w-xs">
-              {tokenId}
-            </span>
+            <span className="truncate max-w-[280px] sm:max-w-xs">{id}</span>
             <button
               type="button"
               onClick={handleCopyTokenId}

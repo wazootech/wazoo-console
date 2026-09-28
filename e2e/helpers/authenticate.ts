@@ -31,9 +31,9 @@ export function createRunEmail(): string {
   return `e2e+${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}@wazoo.dev`;
 }
 
-/** Unique world slug matching /^[a-z][a-z0-9-]{2,62}$/. */
-export function createRunWorldSlug(): string {
-  return `e2e-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+/** Unique display name for a disposable QA world. */
+export function createRunWorldDisplayName(): string {
+  return `E2E World ${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
 }
 
 /**

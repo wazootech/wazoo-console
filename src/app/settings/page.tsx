@@ -67,7 +67,7 @@ export default function SettingsPage() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `wazoo-data-${user?.userId ?? "user"}.json`;
+      a.download = `wazoo-data-${user?.id ?? "user"}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -149,7 +149,7 @@ export default function SettingsPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">User ID</span>
-              <span className="text-sm font-mono">{user?.userId}</span>
+              <span className="text-sm font-mono">{user?.id}</span>
             </div>
           </CardContent>
         </Card>
