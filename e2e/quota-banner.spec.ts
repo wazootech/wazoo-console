@@ -13,7 +13,7 @@ import { test, expect } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_quota",
+    id: "00000000-0000-4000-8000-000000000022",
     email: "quota-e2e@example.com",
     displayName: "Quota E2E",
     state: "ACTIVE",
@@ -69,13 +69,10 @@ test.describe("quota banner (DATABASE_LIMIT_REACHED)", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    // The dialog pre-fills a suggested world slug; set one explicitly so the
-    // submitted value is deterministic.
-    await dialog.getByLabel("World slug").fill("quota-limit-e2e");
+    await dialog.getByLabel("Display name").fill("Quota limit E2E");
     await dialog.getByRole("button", { name: "Create" }).click();
 
-    // The dialog also renders a transient world-slug validation alert, so scope
-    // to the quota banner itself.
+    // Scope to the quota banner itself.
     const alert = dialog
       .getByRole("alert")
       .filter({ hasText: "database limit" });

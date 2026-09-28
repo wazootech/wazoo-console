@@ -12,12 +12,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { getWorldTabs, saveLocalWorldToken } from "@/lib/utils";
+import type { WorldToken } from "@/lib/platform-id-client";
 import {
-  listWorldTokens,
-  createWorldToken,
-  deleteWorldToken,
-  type WorldToken,
-} from "@wazoo/client";
+  fetchWorldTokens,
+  issueWorldToken,
+  revokeWorldToken,
+} from "@/lib/platform-id-client";
 
 export default function WorldTokensPage({
   params,
@@ -30,7 +30,7 @@ export default function WorldTokensPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [newToken, setNewToken] = useState<{
-    uid: string;
+    id: string;
     name: string;
     token: string;
   } | null>(null);
@@ -42,7 +42,7 @@ export default function WorldTokensPage({
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await listWorldTokens({ client, path: { worldId } });
+    const r = await fetchWorldTokens(client, worldId);
     if (r.error) {
       setError(errMsg(r.error));
     } else {
@@ -58,16 +58,16 @@ export default function WorldTokensPage({
   async function handleCreate() {
     if (!client) return;
     setError(null);
-    const r = await createWorldToken({ client, path: { worldId } });
+    const r = await issueWorldToken(client, worldId);
     if (r.error) {
       setError(errMsg(r.error));
       return;
     }
     const t = r.data?.token;
     if (t) {
-      const tokenStr = (t as WorldToken & { token: string }).token ?? "";
+      const tokenStr = t.token ?? "";
       setNewToken({
-        uid: t.uid,
+        id: t.id,
         name: t.name,
         token: tokenStr,
       });
@@ -76,9 +76,9 @@ export default function WorldTokensPage({
     fetchTokens();
   }
 
-  async function handleRevoke(tokenUid: string) {
+  async function handleRevoke(id: string) {
     if (!client) return;
-    await deleteWorldToken({ client, path: { worldId, tokenUid } });
+    await revokeWorldToken(client, worldId, id);
     fetchTokens();
   }
 
@@ -113,11 +113,11 @@ export default function WorldTokensPage({
           <div className="space-y-2">
             {tokens.map((t) => (
               <TokenListItem
-                key={t.uid}
+                key={t.id}
                 name={t.name}
-                uid={t.uid}
+                id={t.id}
                 typeBadge="World Token"
-                onRevoke={() => handleRevoke(t.uid)}
+                onRevoke={() => handleRevoke(t.id)}
               />
             ))}
           </div>

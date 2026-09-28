@@ -8,7 +8,7 @@ import { test, expect, type Page } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_quota",
+    id: "00000000-0000-4000-8000-000000000024",
     email: "quota-e2e@example.com",
     displayName: "Quota E2E",
     state: "ACTIVE",
@@ -16,9 +16,11 @@ const SESSION_BODY = {
   },
 };
 
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000010";
+
 const USAGE_200_BODY = {
   usage: {
-    world: "worlds/quota-world",
+    worldId: WORLD_ID,
     total: [{ metric: "SPARQL_QUERIES", quantity: 12000 }],
     events: [],
   },
@@ -27,6 +29,7 @@ const USAGE_200_BODY = {
     usagePercent: 120,
     limits: [
       {
+        id: "limit_sparql_1",
         metric: "SPARQL_QUERIES",
         quantity: 12000,
         limitQuantity: 10000,
@@ -38,7 +41,8 @@ const USAGE_200_BODY = {
 
 const BILLING_200_BODY = {
   billing: {
-    world: "worlds/quota-world",
+    id: "billing_world_1",
+    worldId: WORLD_ID,
     state: "ACTIVE",
     provider: "STRIPE",
     customerConfigured: true,
@@ -50,12 +54,14 @@ const BILLING_200_BODY = {
     usagePercent: 92,
     limits: [
       {
+        id: "limit_worlds_1",
         metric: "MAX_WORLDS",
         quantity: 9,
         limitQuantity: 10,
         usagePercent: 90,
       },
       {
+        id: "limit_sparql_2",
         metric: "SPARQL_QUERIES",
         quantity: 9200,
         limitQuantity: 10000,
@@ -89,7 +95,7 @@ test.describe("quota banner on usage and billing surfaces", () => {
       route.fulfill({ status: 200, json: USAGE_200_BODY }),
     );
 
-    await page.goto("/worlds/quota-world/usage");
+    await page.goto(`/worlds/${WORLD_ID}/usage`);
     const banner = page.getByRole("alert").filter({ hasText: "usage limits" });
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(
@@ -117,7 +123,7 @@ test.describe("quota banner on usage and billing surfaces", () => {
       route.fulfill({ status: 200, json: BILLING_200_BODY }),
     );
 
-    await page.goto("/worlds/quota-world/billing");
+    await page.goto(`/worlds/${WORLD_ID}/billing`);
     const banner = page.getByRole("alert").filter({ hasText: "plan limits" });
     await expect(banner).toBeVisible();
     await expect(banner).toContainText(

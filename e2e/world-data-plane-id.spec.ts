@@ -3,7 +3,7 @@ import { test, expect, type Page, type Route } from "@playwright/test";
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_world_data",
+    id: "00000000-0000-4000-8000-000000000018",
     email: "world-data-e2e@example.com",
     displayName: "World Data E2E",
     state: "ACTIVE",
@@ -11,7 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_canonical_data_plane_world";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000005";
 const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
@@ -29,7 +29,9 @@ async function signInAndMockSession(page: Page) {
   );
 }
 
-test("SPARQL uses the canonical worldId", async ({ page }) => {
+test("SPARQL uses the canonical world ID without a metadata lookup", async ({
+  page,
+}) => {
   await signInAndMockSession(page);
   await page.addInitScript(
     ({ worldId, token }) => {
@@ -44,19 +46,7 @@ test("SPARQL uses the canonical worldId", async ({ page }) => {
   let managementLookupCount = 0;
   await page.route(`**/v1/worlds/${WORLD_ID}`, async (route: Route) => {
     managementLookupCount += 1;
-    return route.fulfill({
-      json: {
-        world: {
-          worldId: WORLD_ID,
-          slug: "friendly-world",
-          displayName: "Friendly World",
-          region: "auto",
-          state: "ACTIVE",
-          restorable: false,
-          backend: "worlds-api",
-        },
-      },
-    });
+    return route.fulfill({ json: { world: { id: WORLD_ID } } });
   });
 
   let dataPlanePath = "";
@@ -74,10 +64,10 @@ test("SPARQL uses the canonical worldId", async ({ page }) => {
   await page.getByRole("button", { name: "Execute Query" }).click();
 
   await expect(page.getByText("Update Successful")).toBeVisible();
-  expect(managementLookupCount).toBe(1);
+  expect(managementLookupCount).toBe(0);
   expect(dataPlanePath).toBe(`/worlds/${WORLD_ID}/sparql`);
 
   await page.getByRole("button", { name: "Execute Query" }).click();
   await expect(page.getByText("Update Successful")).toBeVisible();
-  expect(managementLookupCount).toBe(1);
+  expect(managementLookupCount).toBe(0);
 });

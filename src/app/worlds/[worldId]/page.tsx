@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
-import { getWorldTabs } from "@/lib/utils";
-import { getWorld, type World } from "@wazoo/client";
+import { getLocalWorldTokens, getWorldTabs } from "@/lib/utils";
+import { getWorld, type WorldResource } from "@/lib/platform-id-client";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ACTIVE: "default",
@@ -29,17 +29,26 @@ export default function WorldDetailPage({
   const { worldId } = use(params);
   const { client } = useAuth();
   const router = useRouter();
-  const [world, setWorld] = useState<World | null>(null);
+  const [world, setWorld] = useState<WorldResource | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [worldToken, setWorldToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = getLocalWorldTokens(worldId).find(
+      (savedToken) =>
+        typeof savedToken.token === "string" && savedToken.token.length > 0,
+    )?.token;
+    setWorldToken(token ?? null);
+  }, [worldId]);
 
   async function fetchWorld() {
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await getWorld({ client, path: { worldId } });
+    const r = await getWorld(client, worldId);
     if (r.error) {
       setError(errMsg(r.error));
     } else {
@@ -91,11 +100,11 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${world.worldId}`}
+                aria-label={`Copy world ID ${world.id}`}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
-                {world.worldId}
+                {world.id}
                 {copied ? (
                   <Check className="size-3 text-green-400" />
                 ) : (
@@ -108,7 +117,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldId={world.worldId} />
+            <ReindexWorldButton worldId={world.id} token={worldToken} />
             <Button
               variant="destructive"
               size="sm"

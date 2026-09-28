@@ -16,6 +16,7 @@ export interface QuotaError {
  * shapes until a release ships them.
  */
 export interface QuotaLimitSummary {
+  id: string;
   metric: string;
   quantity: number;
   limitQuantity: number;

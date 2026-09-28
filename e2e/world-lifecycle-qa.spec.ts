@@ -20,8 +20,7 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
   const session = await auth.mintE2eUserSession(auth.createRunEmail());
   await auth.activateConsoleSession(page, session);
 
-  const slug = auth.createRunWorldSlug();
-  const displayName = `E2E ${slug}`;
+  const displayName = auth.createRunWorldDisplayName();
   let createdWorldId: string | null = null;
 
   try {
@@ -34,8 +33,7 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await dialog.getByLabel("World slug").fill(slug);
-    await dialog.getByLabel("Display Name").fill(displayName);
+    await dialog.getByLabel("Display name").fill(displayName);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
     const createResponsePromise = page.waitForResponse((response) => {
       const url = new URL(response.url());
@@ -48,14 +46,22 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const createResponse = await createResponsePromise;
     const createBody = await createResponse.json();
     expect(createResponse.status(), JSON.stringify(createBody)).toBe(201);
-    const createdWorld = (
-      createBody as {
-        world: { worldId: string; slug: string };
-      }
-    ).world;
-    createdWorldId = createdWorld.worldId;
-    expect(createdWorld.slug).toBe(slug);
+    expect(createBody).toEqual({
+      world: expect.objectContaining({
+        id: expect.any(String),
+        displayName,
+      }),
+    });
+    const createdWorld = (createBody as { world: { id: string } }).world;
+    createdWorldId = createdWorld.id;
+    expect(createdWorld.id).toMatch(
+      /^w_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    );
 
+    await expect(dialog.getByTestId("created-world-id")).toHaveText(
+      createdWorldId,
+    );
+    await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
     await expect(page.getByText(createdWorldId, { exact: true })).toBeVisible();

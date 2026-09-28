@@ -1,11 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import type { User } from "@wazoo/client";
+import type { AuthenticatedUser } from "@/lib/platform-id-client";
 import { fetchUser, tokenCookieName } from "@/lib/server-auth";
 
 interface SessionResponse {
   token: string;
-  user: User;
+  user: AuthenticatedUser;
 }
 
 export async function GET(): Promise<NextResponse<SessionResponse | unknown>> {

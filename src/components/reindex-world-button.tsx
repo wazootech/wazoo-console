@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 interface ReindexWorldButtonProps {
-  worldId?: string | null;
-  token?: string | null;
+  worldId: string;
+  token: string | null;
 }
 
 export function ReindexWorldButton({
@@ -22,10 +22,8 @@ export function ReindexWorldButton({
     setStatus("idle");
     setErrorMsg(null);
 
-    if (!worldId) {
-      setErrorMsg(
-        "World provisioning is incomplete: no canonical data-plane ID is available.",
-      );
+    if (!token) {
+      setErrorMsg("Create a World Access Token to reindex this world.");
       setStatus("error");
       setLoading(false);
       return;
@@ -35,10 +33,8 @@ export function ReindexWorldButton({
       process.env.NEXT_PUBLIC_WORLDS_API_URL ?? "https://data.wazoo.dev";
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
     };
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
 
     try {
       const res = await fetch(
@@ -72,7 +68,7 @@ export function ReindexWorldButton({
         variant="outline"
         size="sm"
         onClick={handleReindex}
-        disabled={loading || !worldId}
+        disabled={loading}
       >
         {loading ? (
           <Loader2 className="size-4 animate-spin" />
@@ -81,11 +77,6 @@ export function ReindexWorldButton({
         )}
         Reindex World
       </Button>
-      {!worldId && (
-        <span className="text-xs text-amber-500">
-          World provisioning is incomplete; refresh or contact an administrator.
-        </span>
-      )}
       {status === "success" && (
         <span className="text-xs text-emerald-400 flex items-center gap-1">
           <CheckCircle className="size-3.5" /> Reindexed

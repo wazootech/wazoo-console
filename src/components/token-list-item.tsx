@@ -8,7 +8,7 @@ import { useState } from "react";
 
 interface TokenListItemProps {
   name: string;
-  uid?: string;
+  id: string;
   scopes?: string[];
   typeBadge?: string;
   onRevoke: () => void;
@@ -16,16 +16,15 @@ interface TokenListItemProps {
 
 export function TokenListItem({
   name,
-  uid,
+  id,
   scopes,
   typeBadge,
   onRevoke,
 }: TokenListItemProps) {
   const [copied, setCopied] = useState(false);
 
-  function handleCopyUid() {
-    if (!uid) return;
-    navigator.clipboard.writeText(uid);
+  function handleCopyTokenId() {
+    navigator.clipboard.writeText(id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -52,24 +51,22 @@ export function TokenListItem({
             )}
           </div>
 
-          {uid && (
-            <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
-              <span className="truncate max-w-[280px] sm:max-w-xs">{uid}</span>
-              <button
-                type="button"
-                onClick={handleCopyUid}
-                className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
-                aria-label="Copy Token UID"
-                title="Copy Token UID"
-              >
-                {copied ? (
-                  <Check className="size-3 text-emerald-400" />
-                ) : (
-                  <Copy className="size-3" />
-                )}
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5 text-xs text-zinc-400 font-mono">
+            <span className="truncate max-w-[280px] sm:max-w-xs">{id}</span>
+            <button
+              type="button"
+              onClick={handleCopyTokenId}
+              className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
+              aria-label="Copy Token ID"
+              title="Copy Token ID"
+            >
+              {copied ? (
+                <Check className="size-3 text-emerald-400" />
+              ) : (
+                <Copy className="size-3" />
+              )}
+            </button>
+          </div>
 
           {scopes && scopes.length > 0 && (
             <div className="flex gap-1 pt-1 flex-wrap">

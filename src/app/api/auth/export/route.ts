@@ -46,7 +46,7 @@ export async function GET() {
     status: 200,
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="wazoo-data-${user.uid}.json"`,
+      "Content-Disposition": `attachment; filename="wazoo-data-${user.id}.json"`,
     },
   });
 }

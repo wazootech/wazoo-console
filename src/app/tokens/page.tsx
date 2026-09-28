@@ -19,12 +19,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2, Plus, Trash2 } from "lucide-react";
+import type { PlatformToken } from "@/lib/platform-id-client";
 import {
-  listPlatformTokens,
-  createPlatformToken,
-  deletePlatformToken,
-  type PlatformToken,
-} from "@wazoo/client";
+  fetchPlatformTokens,
+  issuePlatformToken,
+  revokePlatformToken,
+} from "@/lib/platform-id-client";
 
 import { ScopeSelector } from "@/components/scope-selector";
 
@@ -35,7 +35,7 @@ export default function TokensPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newSecret, setNewSecret] = useState<{
-    uid: string;
+    id: string;
     name: string;
     token: string;
   } | null>(null);
@@ -45,7 +45,7 @@ export default function TokensPage() {
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await listPlatformTokens({ client });
+    const r = await fetchPlatformTokens(client);
     if (r.error) {
       setError(errMsg(r.error));
     } else {
@@ -58,9 +58,9 @@ export default function TokensPage() {
     fetchTokens();
   }, [client]);
 
-  async function handleRevoke(tokenName: string) {
+  async function handleRevoke(id: string) {
     if (!client) return;
-    const res = await deletePlatformToken({ client, path: { tokenName } });
+    const res = await revokePlatformToken(client, id);
     if (res.error) {
       setError(errMsg(res.error));
       return;
@@ -99,14 +99,14 @@ export default function TokensPage() {
           <div className="space-y-2">
             {tokens.map((t) => (
               <TokenListItem
-                key={t.uid}
+                key={t.id}
                 name={t.name}
-                uid={t.uid}
+                id={t.id}
                 typeBadge="Platform Token"
                 scopes={
                   t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined
                 }
-                onRevoke={() => handleRevoke(t.name)}
+                onRevoke={() => handleRevoke(t.id)}
               />
             ))}
           </div>
@@ -121,8 +121,8 @@ export default function TokensPage() {
         <CreateTokenDialog
           open={showCreate}
           onOpenChange={setShowCreate}
-          onCreated={(uid, name, token) => {
-            setNewSecret({ uid, name, token });
+          onCreated={(id, name, token) => {
+            setNewSecret({ id, name, token });
             fetchTokens();
           }}
         />
@@ -138,7 +138,7 @@ function CreateTokenDialog({
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
-  onCreated: (uid: string, name: string, token: string) => void;
+  onCreated: (id: string, name: string, token: string) => void;
 }) {
   const { client, user } = useAuth();
   const [name, setName] = useState("");
@@ -152,13 +152,10 @@ function CreateTokenDialog({
     if (!client || !isScopeValid) return;
     setError(null);
     setLoading(true);
-    const r = await createPlatformToken({
-      client,
-      body: {
-        email: user?.email ?? undefined,
-        name,
-        scope: scope || undefined,
-      },
+    const r = await issuePlatformToken(client, {
+      email: user?.email ?? undefined,
+      name,
+      scope: scope || undefined,
     });
     if (r.error) {
       setError(errMsg(r.error));
@@ -170,7 +167,7 @@ function CreateTokenDialog({
       setName("");
       setScope("");
       onOpenChange(false);
-      onCreated(d.uid, d.name, d.token);
+      onCreated(d.id, d.name, d.token);
     } else {
       setError("No token in response");
     }

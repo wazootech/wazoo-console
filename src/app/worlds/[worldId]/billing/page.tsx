@@ -27,7 +27,7 @@ import {
   type QuotaError,
   type QuotaSummary,
 } from "@/lib/quota-error";
-import { getWorldBilling, type Billing } from "@wazoo/client";
+import { getWorldBilling, type WorldBilling } from "@/lib/platform-id-client";
 
 export default function WorldBillingPage({
   params,
@@ -36,7 +36,7 @@ export default function WorldBillingPage({
 }) {
   const { worldId } = use(params);
   const { client, logout } = useAuth();
-  const [billing, setBilling] = useState<Billing | null>(null);
+  const [billing, setBilling] = useState<WorldBilling | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
@@ -55,7 +55,7 @@ export default function WorldBillingPage({
     setError(null);
     setErrorQuota(null);
     setQuotaSummary(null);
-    getWorldBilling({ client, path: { worldId } }).then((r) => {
+    getWorldBilling(client, worldId).then((r) => {
       if (r.error) {
         if (isUnauthorizedError(r.error)) {
           logout();
@@ -81,7 +81,7 @@ export default function WorldBillingPage({
         { method: "POST" },
       );
       const body = (await res.json().catch(() => ({}))) as {
-        billing?: Billing;
+        billing?: WorldBilling;
         error?: { message?: string };
       };
       if (!res.ok || !body.billing) {
@@ -222,10 +222,7 @@ export default function WorldBillingPage({
                 <CardContent>
                   <div className="divide-y">
                     {quotaSummary.limits.map((limit) => (
-                      <div
-                        key={limit.metric}
-                        className="flex justify-between py-2"
-                      >
+                      <div key={limit.id} className="flex justify-between py-2">
                         <span className="text-sm">{limit.metric}</span>
                         <span className="text-sm font-mono">
                           {limit.quantity.toLocaleString()} /{" "}

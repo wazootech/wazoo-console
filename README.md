@@ -25,6 +25,10 @@ WAZOO_PLATFORM_ADMIN_TOKEN="wzp_..."
 NEXT_PUBLIC_API_URL="http://localhost:8080"
 ```
 
+## Platform ID contract boundary
+
+The pinned `@wazoo/client` 0.2.0 release does not yet expose the complete semantic-ID client types required by this cutover. `src/lib/platform-id-client.ts` isolates the expected regenerated-client boundary; it has one explicit-ID contract and no legacy fallback. Until upstream API and generated-client changes reach `main`, keep local verification changes confined to this worktree's ignored `node_modules/@wazoo/client` and restore them afterward. The temporary verification patch changed only the two token-revocation path templates in that ignored install; the package was reinstalled from the lockfile after Playwright verified those paths. Do not commit generated-client patches or promote this branch before QA and production contracts are verified together.
+
 Local auth uses the official [WorkOS Emulate](https://github.com/workos/emulate)
 server instead of the real WorkOS API. We chose `@workos/emulate` over
 general-purpose emulators (e.g. `vercel-labs/emulate`) because it is

@@ -1,19 +1,12 @@
-import { test, expect, type Page, type Route } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 
-// Hermetic regression tests for the create-world dialog (issue #80). Every API
-// call the page makes (session + worlds) is mocked at the browser level, so
-// this spec runs against any environment (local `next start` in CI, or a
-// deployed console) without touching real backends or needing an authenticated
-// session.
-//
-// The only server-side requirement is the `wazoo_console_token` cookie, which
-// lets the auth middleware pass; the session endpoint itself is intercepted so
-// no real platform token or user is needed.
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000001";
+const DISPLAY_NAME = "My E2E World";
 
 const SESSION_BODY = {
   token: "e2e-platform-token",
   user: {
-    uid: "usr_e2e_create_world",
+    id: "00000000-0000-4000-8000-000000000021",
     email: "create-world-e2e@example.com",
     displayName: "Create World E2E",
     state: "ACTIVE",
@@ -21,8 +14,15 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_SLUG = "my-e2e-world";
-const DISPLAY_NAME = "My E2E World";
+const WORLD = {
+  id: WORLD_ID,
+  name: `worlds/${WORLD_ID}`,
+  displayName: DISPLAY_NAME,
+  region: "auto",
+  state: "ACTIVE",
+  restorable: false,
+  backend: "worlds-api",
+};
 
 async function signInAndMockSession(page: Page) {
   const baseURL = test.info().project.use.baseURL;
@@ -39,18 +39,8 @@ async function signInAndMockSession(page: Page) {
   );
 }
 
-/** Asserts the dialog's transient world-slug feedback alert contains `text`. */
-async function expectIdAlert(
-  dialog: ReturnType<Page["getByRole"]>,
-  text: string,
-) {
-  await expect(
-    dialog.getByRole("alert").filter({ hasText: text }),
-  ).toBeVisible();
-}
-
 test.describe("create world dialog", () => {
-  test("creates a world: dialog closes and the list refreshes with the new row", async ({
+  test("creates a world with a server-minted id and refreshes the list", async ({
     page,
   }) => {
     await signInAndMockSession(page);
@@ -60,140 +50,64 @@ test.describe("create world dialog", () => {
     await page.route("**/v1/worlds", async (route: Route) => {
       if (route.request().method() === "GET") {
         return route.fulfill({
-          json: created
-            ? {
-                worlds: [
-                  {
-                    worldId: "w_e2e_created",
-                    displayName: DISPLAY_NAME,
-                    state: "ACTIVE",
-                    slug: WORLD_SLUG,
-                  },
-                ],
-              }
-            : { worlds: [] },
+          json: created ? { worlds: [WORLD] } : { worlds: [] },
         });
       }
       createRequestBody = route.request().postDataJSON();
       created = true;
-      return route.fulfill({
-        status: 201,
-        json: {
-          world: {
-            worldId: "w_e2e_created",
-            displayName: DISPLAY_NAME,
-            state: "ACTIVE",
-            slug: WORLD_SLUG,
-          },
-        },
-      });
+      return route.fulfill({ status: 201, json: { world: WORLD } });
     });
 
     await page.goto("/worlds");
     await expect(page.getByText("No Worlds yet.")).toBeVisible();
-
     await page.getByRole("button", { name: "Create your first World" }).click();
+
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-
-    await dialog.getByLabel("World slug").fill(WORLD_SLUG);
-    await dialog.getByLabel("Display Name").fill(DISPLAY_NAME);
+    await dialog.getByLabel("Display name").fill(DISPLAY_NAME);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
     await dialog.getByRole("button", { name: "Create" }).click();
 
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("status")).toContainText(
+      "World created successfully.",
+    );
+    await expect(dialog.getByTestId("created-world-id")).toHaveText(WORLD_ID);
     await expect(page.getByText(DISPLAY_NAME)).toBeVisible();
-    await expect(page.getByText("w_e2e_created")).toBeVisible();
+    await dialog.getByRole("button", { name: "Done" }).click();
+    await expect(dialog).not.toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
-
+    await expect(
+      page.getByRole("link").filter({ hasText: DISPLAY_NAME }),
+    ).toHaveAttribute("href", `/worlds/${WORLD_ID}/`);
     expect(createRequestBody).toEqual({
-      slug: WORLD_SLUG,
-      world: { displayName: DISPLAY_NAME, region: "auto" },
+      world: { displayName: DISPLAY_NAME },
     });
   });
 
-  test("disables Create and shows validation errors for invalid World slugs", async ({
-    page,
-  }) => {
+  test("asks only for a display name", async ({ page }) => {
     await signInAndMockSession(page);
     await page.route("**/v1/worlds", (route) =>
-      route.fulfill({
-        json: { worlds: [] },
-      }),
+      route.fulfill({ json: { worlds: [] } }),
     );
 
     await page.goto("/worlds");
     await page.getByRole("button", { name: "Create your first World" }).click();
     const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    const idInput = dialog.getByLabel("World slug");
-
-    const cases: Array<{ value: string; message: string }> = [
-      { value: "", message: "World slug is required." },
-      { value: "Hello", message: "Must start with a lowercase letter." },
-      {
-        value: "my_world",
-        message: "Only lowercase letters, digits, and hyphens allowed.",
-      },
-      { value: "ab", message: "Must be at least 3 characters." },
-      { value: "a".repeat(64), message: "Must be 63 characters or fewer." },
-    ];
-
-    for (const { value, message } of cases) {
-      await idInput.fill(value);
-      await expectIdAlert(dialog, message);
-      await expect(idInput).toHaveAttribute("aria-invalid", "true");
-      await expect(
-        dialog.getByRole("button", { name: "Create" }),
-      ).toBeDisabled();
-    }
-
-    // A valid slug resolves the feedback to "Available" and re-enables Create.
-    await idInput.fill("valid-world");
-    await expect(dialog.getByText("Available")).toBeVisible();
-    await expect(idInput).toHaveAttribute("aria-invalid", "false");
-    await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
-  });
-
-  test("shows 'Already taken.' and disables Create when the World slug exists", async ({
-    page,
-  }) => {
-    await signInAndMockSession(page);
-    await page.route("**/v1/worlds", (route) => {
-      if (route.request().method() === "GET") {
-        return route.fulfill({
-          json: {
-            worlds: [
-              {
-                worldId: "w_canonical_existing",
-                displayName: "Existing",
-                state: "ACTIVE",
-                slug: "already-taken",
-              },
-            ],
-          },
-        });
-      }
-      return route.fulfill({ status: 500, json: {} });
-    });
-
-    await page.goto("/worlds");
-    await page.getByRole("button", { name: "Create World" }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-    const idInput = dialog.getByLabel("World slug");
-
-    await idInput.fill("already-taken");
-    await expectIdAlert(dialog, "Already taken.");
-    await expect(idInput).toHaveAttribute("aria-invalid", "true");
+    await expect(dialog.getByLabel("Display name")).toBeVisible();
+    await expect(dialog.getByLabel("World ID")).toHaveCount(0);
+    await expect(dialog.getByLabel("World slug")).toHaveCount(0);
+    await expect(dialog.getByLabel("Region")).toHaveCount(0);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeDisabled();
+    await dialog.getByLabel("Display name").fill("New World");
+    await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
   });
 
   for (const { status, code, message } of [
     {
-      status: 400,
-      code: "INVALID_ARGUMENT",
-      message: "World slug is already in use.",
+      status: 409,
+      code: "ALREADY_EXISTS",
+      message: "The worlds-api id already exists for a world.",
     },
     {
       status: 502,
@@ -201,7 +115,7 @@ test.describe("create world dialog", () => {
       message: "Failed to provision the world.",
     },
   ]) {
-    test(`keeps the dialog open and renders the ${status} server error`, async ({
+    test(`keeps the dialog open and displays the ${status} response`, async ({
       page,
     }) => {
       await signInAndMockSession(page);
@@ -217,19 +131,14 @@ test.describe("create world dialog", () => {
         .getByRole("button", { name: "Create your first World" })
         .click();
       const dialog = page.getByRole("dialog");
-      await expect(dialog).toBeVisible();
-
-      await dialog.getByLabel("World slug").fill("some-world");
+      await dialog.getByLabel("Display name").fill(DISPLAY_NAME);
       await dialog.getByRole("button", { name: "Create" }).click();
-
       await expect(dialog).toBeVisible();
-      await expectIdAlert(dialog, message);
+      await expect(dialog.getByRole("alert")).toContainText(message);
     });
   }
 
-  test("logs out (redirects to /sign-out) on a 401 from create", async ({
-    page,
-  }) => {
+  test("logs out on a 401 from create", async ({ page }) => {
     await signInAndMockSession(page);
     await page.route("**/v1/worlds", (route) => {
       if (route.request().method() === "GET") {
@@ -246,12 +155,8 @@ test.describe("create world dialog", () => {
 
     await page.goto("/worlds");
     await page.getByRole("button", { name: "Create your first World" }).click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
-
-    await dialog.getByLabel("World slug").fill("expired-session");
-    await dialog.getByRole("button", { name: "Create" }).click();
-
+    await page.getByLabel("Display name").fill(DISPLAY_NAME);
+    await page.getByRole("button", { name: "Create", exact: true }).click();
     await page.waitForURL("**/sign-in**");
   });
 });

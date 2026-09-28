@@ -12,7 +12,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { deleteWorld } from "@wazoo/client";
+import { deleteWorld } from "@/lib/platform-id-client";
 
 interface Props {
   open: boolean;
@@ -36,7 +36,7 @@ export function DeleteWorldDialog({
     if (confirm !== worldId || !client) return;
     setError(null);
     setLoading(true);
-    const r = await deleteWorld({ client, path: { worldId } });
+    const r = await deleteWorld(client, worldId);
     if (r.error) {
       setError(errMsg(r.error));
     } else {
