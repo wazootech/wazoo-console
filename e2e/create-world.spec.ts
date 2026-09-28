@@ -68,9 +68,14 @@ test.describe("create world dialog", () => {
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
     await dialog.getByRole("button", { name: "Create" }).click();
 
-    await expect(dialog).not.toBeVisible();
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByRole("status")).toContainText(
+      "World created successfully.",
+    );
+    await expect(dialog.getByTestId("created-world-id")).toHaveText(WORLD_ID);
     await expect(page.getByText(DISPLAY_NAME)).toBeVisible();
-    await expect(page.getByText(WORLD_ID, { exact: true })).toBeVisible();
+    await dialog.getByRole("button", { name: "Done" }).click();
+    await expect(dialog).not.toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
     await expect(
       page.getByRole("link").filter({ hasText: DISPLAY_NAME }),
@@ -122,7 +127,9 @@ test.describe("create world dialog", () => {
       });
 
       await page.goto("/worlds");
-      await page.getByRole("button", { name: "Create your first World" }).click();
+      await page
+        .getByRole("button", { name: "Create your first World" })
+        .click();
       const dialog = page.getByRole("dialog");
       await dialog.getByLabel("Display name").fill(DISPLAY_NAME);
       await dialog.getByRole("button", { name: "Create" }).click();
@@ -149,9 +156,7 @@ test.describe("create world dialog", () => {
     await page.goto("/worlds");
     await page.getByRole("button", { name: "Create your first World" }).click();
     await page.getByLabel("Display name").fill(DISPLAY_NAME);
-    await page
-      .getByRole("button", { name: "Create", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Create", exact: true }).click();
     await page.waitForURL("**/sign-in**");
   });
 });

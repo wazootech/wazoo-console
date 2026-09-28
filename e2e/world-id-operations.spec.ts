@@ -12,6 +12,7 @@ const SESSION_BODY = {
 };
 
 const WORLD_ID = "w_00000000-0000-4000-8000-000000000004";
+const WORLD_TOKEN = "wzw_e2e_world_token";
 const WORLD = {
   id: WORLD_ID,
   name: `worlds/${WORLD_ID}`,
@@ -37,19 +38,26 @@ async function signInAndMockSession(page: Page) {
   );
 }
 
-async function mockWorldMetadata(page: Page) {
-  await page.route(`**/v1/worlds/${WORLD_ID}`, (route: Route) =>
-    route.fulfill({ json: { world: WORLD } }),
-  );
-}
-
-test("world detail, reindex, and deletion use worldId", async ({ page }) => {
+test("world detail and deletion use worldId; reindex keeps world-token auth", async ({
+  page,
+}) => {
   await signInAndMockSession(page);
+  await page.addInitScript(
+    ({ worldId, token }) => {
+      localStorage.setItem(
+        `wazoo_world_tokens_${worldId}`,
+        JSON.stringify([{ name: "E2E token", token }]),
+      );
+    },
+    { worldId: WORLD_ID, token: WORLD_TOKEN },
+  );
 
   let worldDetailPath = "";
   let reindexPath = "";
+  let reindexAuthorization = "";
   await page.route("**/worlds/*/reindex", async (route: Route) => {
     reindexPath = new URL(route.request().url()).pathname;
+    reindexAuthorization = route.request().headers().authorization ?? "";
     await route.fulfill({ json: { ok: true } });
   });
 
@@ -76,6 +84,7 @@ test("world detail, reindex, and deletion use worldId", async ({ page }) => {
   await page.getByRole("button", { name: "Reindex World" }).click();
   await expect(page.getByText("Reindexed")).toBeVisible();
   expect(reindexPath).toBe(`/worlds/${WORLD_ID}/reindex`);
+  expect(reindexAuthorization).toBe(`Bearer ${WORLD_TOKEN}`);
 
   await page.getByRole("button", { name: "Delete", exact: true }).click();
   const dialog = page.getByRole("dialog");
@@ -118,7 +127,9 @@ test("usage requests the management API with worldId", async ({ page }) => {
   expect(usagePath).toBe(`/v1/worlds/${WORLD_ID}/usage`);
 });
 
-test("search resolves and sends the canonical worldId", async ({ page }) => {
+test("search sends the canonical worldId without a metadata lookup", async ({
+  page,
+}) => {
   await signInAndMockSession(page);
   await page.addInitScript(
     ({ worldId }) => {
@@ -129,7 +140,11 @@ test("search resolves and sends the canonical worldId", async ({ page }) => {
     },
     { worldId: WORLD_ID },
   );
-  await mockWorldMetadata(page);
+  let metadataLookupCount = 0;
+  await page.route(`**/v1/worlds/${WORLD_ID}`, (route: Route) => {
+    metadataLookupCount += 1;
+    return route.fulfill({ json: { world: WORLD } });
+  });
 
   let dataPlanePath = "";
   await page.route("**/worlds/*/search", async (route: Route) => {
@@ -144,4 +159,5 @@ test("search resolves and sends the canonical worldId", async ({ page }) => {
   await page.getByPlaceholder(/Find references/).fill("canonical world");
   await page.getByRole("button", { name: "Search", exact: true }).click();
   await expect.poll(() => dataPlanePath).toBe(`/worlds/${WORLD_ID}/search`);
+  expect(metadataLookupCount).toBe(0);
 });

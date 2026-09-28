@@ -29,6 +29,7 @@ const USAGE_200_BODY = {
     usagePercent: 120,
     limits: [
       {
+        id: "limit_sparql_1",
         metric: "SPARQL_QUERIES",
         quantity: 12000,
         limitQuantity: 10000,
@@ -40,6 +41,7 @@ const USAGE_200_BODY = {
 
 const BILLING_200_BODY = {
   billing: {
+    id: "billing_world_1",
     worldId: WORLD_ID,
     state: "ACTIVE",
     provider: "STRIPE",
@@ -52,12 +54,14 @@ const BILLING_200_BODY = {
     usagePercent: 92,
     limits: [
       {
+        id: "limit_worlds_1",
         metric: "MAX_WORLDS",
         quantity: 9,
         limitQuantity: 10,
         usagePercent: 90,
       },
       {
+        id: "limit_sparql_2",
         metric: "SPARQL_QUERIES",
         quantity: 9200,
         limitQuantity: 10000,

@@ -222,10 +222,7 @@ export default function WorldBillingPage({
                 <CardContent>
                   <div className="divide-y">
                     {quotaSummary.limits.map((limit) => (
-                      <div
-                        key={limit.metric}
-                        className="flex justify-between py-2"
-                      >
+                      <div key={limit.id} className="flex justify-between py-2">
                         <span className="text-sm">{limit.metric}</span>
                         <span className="text-sm font-mono">
                           {limit.quantity.toLocaleString()} /{" "}

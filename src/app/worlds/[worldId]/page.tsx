@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
-import { getWorldTabs } from "@/lib/utils";
+import { getLocalWorldTokens, getWorldTabs } from "@/lib/utils";
 import { getWorld, type WorldResource } from "@/lib/platform-id-client";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
@@ -34,6 +34,15 @@ export default function WorldDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [worldToken, setWorldToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const token = getLocalWorldTokens(worldId).find(
+      (savedToken) =>
+        typeof savedToken.token === "string" && savedToken.token.length > 0,
+    )?.token;
+    setWorldToken(token ?? null);
+  }, [worldId]);
 
   async function fetchWorld() {
     if (!client) return;
@@ -108,7 +117,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldId={world.id} />
+            <ReindexWorldButton worldId={world.id} token={worldToken} />
             <Button
               variant="destructive"
               size="sm"

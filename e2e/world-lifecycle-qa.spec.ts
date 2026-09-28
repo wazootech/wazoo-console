@@ -46,13 +46,22 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const createResponse = await createResponsePromise;
     const createBody = await createResponse.json();
     expect(createResponse.status(), JSON.stringify(createBody)).toBe(201);
-    expect(createBody).toEqual({ world: { displayName } });
+    expect(createBody).toEqual({
+      world: expect.objectContaining({
+        id: expect.any(String),
+        displayName,
+      }),
+    });
     const createdWorld = (createBody as { world: { id: string } }).world;
     createdWorldId = createdWorld.id;
     expect(createdWorld.id).toMatch(
       /^w_[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
 
+    await expect(dialog.getByTestId("created-world-id")).toHaveText(
+      createdWorldId,
+    );
+    await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
     await expect(page.getByText(createdWorldId, { exact: true })).toBeVisible();

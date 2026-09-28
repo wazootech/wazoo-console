@@ -67,6 +67,7 @@ export interface WorldUsage {
 }
 
 export interface WorldBilling {
+  id: string;
   worldId: string;
   state: string;
   provider: string;
