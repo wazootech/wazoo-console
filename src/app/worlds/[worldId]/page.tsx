@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
+import { WorldTokenSelector } from "@/components/world-token-selector";
 import { getWorldTabs } from "@/lib/utils";
 import {
   getWorldIdentity,
@@ -38,6 +39,7 @@ export default function WorldDetailPage({
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
+  const [worldToken, setWorldToken] = useState<string | null>(null);
 
   async function fetchWorld() {
     if (!client) return;
@@ -60,7 +62,7 @@ export default function WorldDetailPage({
 
   function copyWorldId() {
     if (!world) return;
-    navigator.clipboard.writeText(world.id);
+    navigator.clipboard.writeText(worldId);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -96,11 +98,11 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${world.id}`}
+                aria-label={`Copy world ID ${worldId}`}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
-                {world.id}
+                {worldId}
                 {copied ? (
                   <Check className="size-3 text-green-400" />
                 ) : (
@@ -113,7 +115,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldId={world.id} />
+            <ReindexWorldButton worldId={worldId} token={worldToken} />
             <Button
               variant="destructive"
               size="sm"
@@ -123,6 +125,7 @@ export default function WorldDetailPage({
             </Button>
           </div>
         </div>
+        <WorldTokenSelector worldId={worldId} onTokenChange={setWorldToken} />
         <NavTabs tabs={tabs} />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>

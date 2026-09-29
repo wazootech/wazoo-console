@@ -70,6 +70,14 @@ export async function getWorldIdentity(
         status,
       };
     }
+    if (world.id !== worldId) {
+      return {
+        error: invalidWorldResponse(
+          "The Worlds API returned a world ID that does not match the requested world ID.",
+        ),
+        status,
+      };
+    }
 
     return { data: world, status };
   } catch (error) {

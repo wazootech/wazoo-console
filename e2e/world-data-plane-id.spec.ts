@@ -1,4 +1,4 @@
-import { test, expect, type Page, type Route } from "@playwright/test";
+import { expect, test, type Page, type Route } from "@playwright/test";
 
 const SESSION_BODY = {
   token: "e2e-platform-token",
@@ -11,8 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const ROUTE_WORLD_ID = "world-route-identity";
-const DATA_PLANE_WORLD_ID = "w_canonical_data_plane_world";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000001";
 const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
@@ -28,10 +27,6 @@ async function signInAndMockSession(page: Page) {
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({ json: SESSION_BODY }),
   );
-}
-
-test("SPARQL uses the canonical worldId", async ({ page }) => {
-  await signInAndMockSession(page);
   await page.addInitScript(
     ({ worldId, token }) => {
       localStorage.setItem(
@@ -39,45 +34,39 @@ test("SPARQL uses the canonical worldId", async ({ page }) => {
         JSON.stringify([{ name: "E2E token", token }]),
       );
     },
-    { worldId: ROUTE_WORLD_ID, token: WORLD_TOKEN },
+    { worldId: WORLD_ID, token: WORLD_TOKEN },
   );
+}
+
+test("SPARQL sends the route worldId directly to the data plane", async ({
+  page,
+}) => {
+  await signInAndMockSession(page);
 
   let managementLookupCount = 0;
-  await page.route(`**/v1/worlds/${ROUTE_WORLD_ID}`, async (route: Route) => {
+  await page.route("**/v1/worlds/**", async (route: Route) => {
     managementLookupCount += 1;
-    return route.fulfill({
-      json: {
-        world: {
-          id: DATA_PLANE_WORLD_ID,
-          displayName: "Friendly World",
-          region: "auto",
-          state: "ACTIVE",
-          restorable: false,
-          backend: "worlds-api",
-        },
-      },
-    });
+    return route.continue();
   });
 
   let dataPlanePath = "";
+  let dataPlaneAuthorization = "";
   await page.route("**/worlds/*/sparql", async (route: Route) => {
     if (route.request().resourceType() === "document") {
       return route.continue();
     }
     dataPlanePath = new URL(route.request().url()).pathname;
+    dataPlaneAuthorization = route.request().headers().authorization ?? "";
     return route.fulfill({
       json: { ok: true, message: "Graph update executed successfully." },
     });
   });
 
-  await page.goto(`/worlds/${ROUTE_WORLD_ID}/sparql`);
+  await page.goto(`/worlds/${WORLD_ID}/sparql`);
   await page.getByRole("button", { name: "Execute Query" }).click();
 
   await expect(page.getByText("Update Successful")).toBeVisible();
-  expect(managementLookupCount).toBe(1);
-  expect(dataPlanePath).toBe(`/worlds/${DATA_PLANE_WORLD_ID}/sparql`);
-
-  await page.getByRole("button", { name: "Execute Query" }).click();
-  await expect(page.getByText("Update Successful")).toBeVisible();
-  expect(managementLookupCount).toBe(1);
+  expect(managementLookupCount).toBe(0);
+  expect(dataPlanePath).toBe(`/worlds/${WORLD_ID}/sparql`);
+  expect(dataPlaneAuthorization).toBe(`Bearer ${WORLD_TOKEN}`);
 });

@@ -11,8 +11,8 @@ const SESSION_BODY = {
   },
 };
 
-const ROUTE_WORLD_ID = "world-route-id";
-const CANONICAL_WORLD_ID = "w_server_minted_id";
+const WORLD_ID = "w_00000000-0000-4000-8000-000000000001";
+const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
   const baseURL = test.info().project.use.baseURL;
@@ -27,20 +27,29 @@ async function signInAndMockSession(page: Page) {
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({ json: SESSION_BODY }),
   );
+  await page.addInitScript(
+    ({ worldId, token }) => {
+      localStorage.setItem(
+        `wazoo_world_tokens_${worldId}`,
+        JSON.stringify([{ name: "E2E token", token }]),
+      );
+    },
+    { worldId: WORLD_ID, token: WORLD_TOKEN },
+  );
 }
 
-test("detail and reindex use the server-returned world.id while keeping worldId routes", async ({
+test("detail and reindex use the same server-minted world ID", async ({
   page,
 }) => {
   await signInAndMockSession(page);
 
   let managementPath = "";
-  await page.route(`**/v1/worlds/${ROUTE_WORLD_ID}`, async (route: Route) => {
+  await page.route(`**/v1/worlds/${WORLD_ID}`, async (route: Route) => {
     managementPath = new URL(route.request().url()).pathname;
     return route.fulfill({
       json: {
         world: {
-          id: CANONICAL_WORLD_ID,
+          id: WORLD_ID,
           displayName: "Canonical World",
           region: "auto",
           state: "ACTIVE",
@@ -52,23 +61,27 @@ test("detail and reindex use the server-returned world.id while keeping worldId 
   });
 
   let reindexPath = "";
+  let reindexOrigin = "";
+  let reindexAuthorization = "";
   await page.route("**/worlds/*/reindex", async (route: Route) => {
     reindexPath = new URL(route.request().url()).pathname;
-    return route.fulfill({ json: { ok: true } });
+    reindexOrigin = new URL(route.request().url()).origin;
+    reindexAuthorization = route.request().headers().authorization ?? "";
+    return route.fulfill({ json: { ok: true, status: "completed" } });
   });
 
-  await page.goto(`/worlds/${ROUTE_WORLD_ID}`);
+  await page.goto(`/worlds/${WORLD_ID}`);
   await expect(
     page.getByRole("heading", { name: "Canonical World" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", {
-      name: `Copy world ID ${CANONICAL_WORLD_ID}`,
-    }),
+    page.getByRole("button", { name: `Copy world ID ${WORLD_ID}` }),
   ).toBeVisible();
-  expect(managementPath).toBe(`/v1/worlds/${ROUTE_WORLD_ID}`);
+  expect(managementPath).toBe(`/v1/worlds/${WORLD_ID}`);
 
   await page.getByRole("button", { name: "Reindex World" }).click();
   await expect(page.getByText("Reindexed")).toBeVisible();
-  expect(reindexPath).toBe(`/worlds/${CANONICAL_WORLD_ID}/reindex`);
+  expect(reindexPath).toBe(`/worlds/${WORLD_ID}/reindex`);
+  expect(reindexOrigin).toBe("https://data-qa.wazoo.dev");
+  expect(reindexAuthorization).toBe(`Bearer ${WORLD_TOKEN}`);
 });

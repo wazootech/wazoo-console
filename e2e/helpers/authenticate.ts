@@ -6,8 +6,15 @@ import type { Page } from "@playwright/test";
 // produces and hand it to the browser as the `wazoo_console_token` cookie.
 // Everything downstream of the sign-in page is genuine.
 
-const QA_API_BASE =
-  process.env.WAZOO_E2E_API_BASE_URL ?? "https://api-qa.wazoo.dev";
+function requireE2eApiBase(): string {
+  const apiBase = process.env.WAZOO_E2E_API_BASE_URL;
+  if (!apiBase) {
+    throw new Error(
+      "WAZOO_E2E_API_BASE_URL must be explicitly set for live E2E API calls",
+    );
+  }
+  return apiBase.replace(/\/+$/, "");
+}
 
 export interface E2eUserSession {
   email: string;
@@ -43,7 +50,7 @@ export function createRunWorldDisplayName(): string {
 export async function mintE2eUserSession(
   email: string,
 ): Promise<E2eUserSession> {
-  const res = await fetch(`${QA_API_BASE}/v1/auth/workos-session`, {
+  const res = await fetch(`${requireE2eApiBase()}/v1/auth/workos-session`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${requireAdminToken()}`,
@@ -79,7 +86,7 @@ export async function deleteWorldViaApi(
   session: E2eUserSession,
   worldId: string,
 ): Promise<void> {
-  const res = await fetch(`${QA_API_BASE}/v1/worlds/${worldId}`, {
+  const res = await fetch(`${requireE2eApiBase()}/v1/worlds/${worldId}`, {
     method: "DELETE",
     headers: { Authorization: `Bearer ${session.token}` },
   });
