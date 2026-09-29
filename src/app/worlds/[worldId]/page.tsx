@@ -13,7 +13,11 @@ import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { getWorldTabs } from "@/lib/utils";
-import { getWorld, type World } from "@wazoo/client";
+import {
+  getWorldIdentity,
+  worldIdentityErrorMessage,
+  type WorldIdentity,
+} from "@/lib/world-identity";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ACTIVE: "default",
@@ -29,7 +33,7 @@ export default function WorldDetailPage({
   const { worldId } = use(params);
   const { client } = useAuth();
   const router = useRouter();
-  const [world, setWorld] = useState<World | null>(null);
+  const [world, setWorld] = useState<WorldIdentity | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -39,11 +43,11 @@ export default function WorldDetailPage({
     if (!client) return;
     setLoading(true);
     setError(null);
-    const r = await getWorld({ client, path: { worldId } });
-    if (r.error) {
-      setError(errMsg(r.error));
+    const r = await getWorldIdentity(client, worldId);
+    if (r.error !== undefined) {
+      setError(worldIdentityErrorMessage(r.error));
     } else {
-      setWorld(r.data?.world ?? null);
+      setWorld(r.data ?? null);
     }
     setLoading(false);
   }
@@ -55,7 +59,8 @@ export default function WorldDetailPage({
   const tabs = getWorldTabs(worldId);
 
   function copyWorldId() {
-    navigator.clipboard.writeText(worldId);
+    if (!world) return;
+    navigator.clipboard.writeText(world.id);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -91,11 +96,11 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${world.worldId}`}
+                aria-label={`Copy world ID ${world.id}`}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
-                {world.worldId}
+                {world.id}
                 {copied ? (
                   <Check className="size-3 text-green-400" />
                 ) : (
@@ -108,7 +113,7 @@ export default function WorldDetailPage({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <ReindexWorldButton worldId={world.worldId} />
+            <ReindexWorldButton worldId={world.id} />
             <Button
               variant="destructive"
               size="sm"
@@ -180,10 +185,4 @@ export default function WorldDetailPage({
       </div>
     </AppShell>
   );
-}
-
-function errMsg(err: unknown): string {
-  if (typeof err === "object" && err !== null && "error" in err)
-    return (err as { error: { message: string } }).error.message;
-  return "Unknown error";
 }
