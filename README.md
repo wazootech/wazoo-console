@@ -117,3 +117,7 @@ confirm it returns a `307` redirect to hosted WorkOS with the production callbac
 URI. The redirect lives on the protected routes: `/sign-in/` itself serves the
 sign-in page with a `200`, and Next normalizes the trailing slash
 (`/sign-in` -> `/sign-in/`).
+
+## E2E tests
+
+Playwright's console base URL defaults to http://localhost:3000; start the local server before `pnpm run test:e2e`; live account/world specs make real API writes and therefore require explicitly setting `WAZOO_E2E_API_BASE_URL` (and `WAZOO_PLATFORM_ADMIN_TOKEN`); the QA workflow explicitly sets that URL to https://api-qa.wazoo.dev; and `BASE_URL` should only be set to a hosted console when intentionally targeting that environment.

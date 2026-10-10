@@ -5,3 +5,5 @@ allowBuilds:
   # Prebuilt @img/sharp-* binaries cover every platform we run on; the
   # install script only matters for building libvips from source.
   sharp: false
+minimumReleaseAgeExclude:
+  - '@jsr/wazoo__client@0.3.1'

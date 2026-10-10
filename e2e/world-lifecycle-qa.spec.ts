@@ -14,14 +14,24 @@ test.skip(
   "WAZOO_PLATFORM_ADMIN_TOKEN is required to run against the live QA environment",
 );
 
+function readCreatedWorldId(value: unknown): string | null {
+  if (typeof value !== "object" || value === null || !("world" in value)) {
+    return null;
+  }
+  const world = value.world;
+  if (typeof world !== "object" || world === null || !("id" in world)) {
+    return null;
+  }
+  return typeof world.id === "string" ? world.id : null;
+}
+
 test("creates a world through the console UI and sees it ACTIVE in the list", async ({
   page,
 }) => {
   const session = await auth.mintE2eUserSession(auth.createRunEmail());
   await auth.activateConsoleSession(page, session);
 
-  const slug = auth.createRunWorldSlug();
-  const displayName = `E2E ${slug}`;
+  const displayName = auth.createRunWorldDisplayName();
   let createdWorldId: string | null = null;
 
   try {
@@ -34,8 +44,7 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await dialog.getByLabel("World slug").fill(slug);
-    await dialog.getByLabel("Display Name").fill(displayName);
+    await dialog.getByLabel("Display name").fill(displayName);
     await expect(dialog.getByRole("button", { name: "Create" })).toBeEnabled();
     const createResponsePromise = page.waitForResponse((response) => {
       const url = new URL(response.url());
@@ -46,19 +55,32 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     await dialog.getByRole("button", { name: "Create" }).click();
 
     const createResponse = await createResponsePromise;
-    const createBody = await createResponse.json();
+    const createBody: unknown = await createResponse.json();
     expect(createResponse.status(), JSON.stringify(createBody)).toBe(201);
-    const createdWorld = (
-      createBody as {
-        world: { worldId: string; slug: string };
-      }
-    ).world;
-    createdWorldId = createdWorld.worldId;
-    expect(createdWorld.slug).toBe(slug);
+    expect(createResponse.request().postDataJSON()).toEqual({
+      world: { displayName },
+    });
+    createdWorldId = readCreatedWorldId(createBody);
+    if (!createdWorldId) {
+      throw new Error("The create response did not include world.id.");
+    }
 
+    await expect(dialog.getByRole("status")).toHaveText(
+      "World created successfully.",
+    );
+    await expect(
+      dialog.getByText(createdWorldId, { exact: true }),
+    ).toBeVisible();
+    await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
-    await expect(page.getByText(createdWorldId, { exact: true })).toBeVisible();
+    // The ID also renders in a <code> block outside the list, so scope the
+    // check to this world's row.
+    await expect(
+      page
+        .getByRole("link", { name: displayName })
+        .getByText(createdWorldId, { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
   } finally {
     if (createdWorldId) await auth.deleteWorldViaApi(session, createdWorldId);

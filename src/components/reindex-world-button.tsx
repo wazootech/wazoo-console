@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { getWorldsApiUrl } from "@/lib/utils";
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 
 interface ReindexWorldButtonProps {
@@ -31,8 +32,7 @@ export function ReindexWorldButton({
       return;
     }
 
-    const baseUrl =
-      process.env.NEXT_PUBLIC_WORLDS_API_URL ?? "https://data.wazoo.dev";
+    const baseUrl = getWorldsApiUrl();
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
@@ -72,7 +72,7 @@ export function ReindexWorldButton({
         variant="outline"
         size="sm"
         onClick={handleReindex}
-        disabled={loading || !worldId}
+        disabled={loading || !worldId || !token}
       >
         {loading ? (
           <Loader2 className="size-4 animate-spin" />

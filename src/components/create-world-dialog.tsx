@@ -6,83 +6,44 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Check, X } from "lucide-react";
-import { createWorld } from "@wazoo/client";
+import { Loader2 } from "lucide-react";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
-import { errMsg, isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
+import { isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
-  validateWorldSlug,
-  isWorldSlugTaken,
-  suggestWorldSlug,
-} from "@/lib/world-slug";
-
-const regionOptions = [
-  { value: "auto", label: "Automatic" },
-  { value: "us-east", label: "US East" },
-] as const;
-
-function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-  return debounced;
-}
-
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onCreated: () => void;
-  existingWorldSlugs: Set<string>;
-}
+  createWorldByDisplayName,
+  worldIdentityErrorMessage,
+} from "@/lib/world-identity";
 
 export function CreateWorldDialog({
   open,
   onOpenChange,
   onCreated,
-  existingWorldSlugs,
-}: Props) {
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onCreated: () => void;
+}) {
   const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
-  const [slug, setSlug] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [region, setRegion] = useState("auto");
+  const [createdWorldId, setCreatedWorldId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [limitInfo, setLimitInfo] = useState<{ usagePercent?: number } | null>(
     null,
   );
 
-  const debouncedSlug = useDebounce(slug, 250);
-  const validationError = validateWorldSlug(debouncedSlug);
-  const taken =
-    !validationError &&
-    debouncedSlug &&
-    isWorldSlugTaken(debouncedSlug, existingWorldSlugs);
-  const canSubmit =
-    !loading &&
-    !validateWorldSlug(slug) &&
-    !isWorldSlugTaken(slug, existingWorldSlugs) &&
-    slug.length > 0;
+  const canSubmit = !loading && displayName.trim().length > 0;
 
   useEffect(() => {
     if (open) {
-      setSlug(suggestWorldSlug(existingWorldSlugs));
       setDisplayName("");
-      setRegion("auto");
+      setCreatedWorldId(null);
       setError(null);
       setLimitInfo(null);
       setLoading(false);
@@ -96,20 +57,21 @@ export function CreateWorldDialog({
     setError(null);
     setLimitInfo(null);
     setLoading(true);
-    const r = await createWorld({
-      client,
-      body: { slug, world: { displayName: displayName || slug, region } },
-    });
-    if (r.error) {
-      if (isUnauthorizedError(r.error)) {
+    const result = await createWorldByDisplayName(client, displayName.trim());
+    if (result.error !== undefined) {
+      if (isUnauthorizedError(result.error)) {
         logout();
         return;
       }
-      setError(errMsg(r.error));
-      setLimitInfo(quotaErrorInfo(r.error));
-    } else {
-      onOpenChange(false);
+      setError(worldIdentityErrorMessage(result.error));
+      setLimitInfo(quotaErrorInfo(result.error));
+    } else if (result.data) {
+      setCreatedWorldId(result.data.id);
       onCreated();
+    } else {
+      setError(
+        "The Worlds API did not return the created world's canonical ID.",
+      );
     }
     setLoading(false);
   }
@@ -120,104 +82,65 @@ export function CreateWorldDialog({
         <DialogHeader>
           <DialogTitle>Create World</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="slug">World slug</Label>
-            <Input
-              id="slug"
-              placeholder="my-world"
-              value={slug}
-              onChange={(e) => setSlug(e.target.value)}
-              disabled={loading}
-              required
-              aria-describedby="world-slug-feedback world-slug-hint"
-              aria-invalid={!!validationError || !!taken}
-            />
-            <p id="world-slug-hint" className="text-xs text-muted-foreground">
-              Lowercase letters, digits, and hyphens. 3-63 characters.
-            </p>
-            <div
-              id="world-slug-feedback"
-              className="flex items-center gap-1.5 min-h-5"
-            >
-              {validationError && (
-                <span
-                  role="alert"
-                  className="text-xs text-destructive flex items-center gap-1"
-                >
-                  <X className="size-3" /> {validationError}
-                </span>
-              )}
-              {!validationError && taken && (
-                <span
-                  role="alert"
-                  className="text-xs text-destructive flex items-center gap-1"
-                >
-                  <X className="size-3" /> Already taken.
-                </span>
-              )}
-              {!validationError && !taken && slug && (
-                <span className="text-xs text-emerald-500 flex items-center gap-1">
-                  <Check className="size-3" /> Available
-                </span>
-              )}
+        {createdWorldId ? (
+          <div className="space-y-4">
+            <p role="status">World created successfully.</p>
+            <div className="space-y-2">
+              <p className="text-sm font-medium">World ID</p>
+              <code className="block break-all rounded-md border bg-muted p-3 text-sm">
+                {createdWorldId}
+              </code>
+            </div>
+            <div className="flex justify-end">
+              <Button type="button" onClick={() => onOpenChange(false)}>
+                Done
+              </Button>
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="displayName">Display Name</Label>
-            <Input
-              ref={displayNameRef}
-              id="displayName"
-              placeholder="My World"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              disabled={loading}
-            />
-            <p className="text-xs text-muted-foreground">
-              A human-readable name for this world. You can change it later.
-            </p>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="region">Region</Label>
-            <Select value={region} onValueChange={setRegion} disabled={loading}>
-              <SelectTrigger id="region">
-                <SelectValue placeholder="Select a region" />
-              </SelectTrigger>
-              <SelectContent position="popper">
-                {regionOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {error && (
-            <QuotaErrorBanner
-              message={error}
-              usagePercent={limitInfo?.usagePercent}
-              hint={
-                limitInfo
-                  ? "Delete unused worlds or raise the database limit to create more."
-                  : undefined
-              }
-            />
-          )}
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!canSubmit}>
-              {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-              Create
-            </Button>
-          </div>
-        </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="displayName">Display name</Label>
+              <Input
+                ref={displayNameRef}
+                id="displayName"
+                placeholder="My World"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                disabled={loading}
+                required
+              />
+              <p className="text-xs text-muted-foreground">
+                A human-readable name for this world. You can change it later.
+              </p>
+            </div>
+            {error && (
+              <QuotaErrorBanner
+                message={error}
+                usagePercent={limitInfo?.usagePercent}
+                hint={
+                  limitInfo
+                    ? "Delete unused worlds or raise the database limit to create more."
+                    : undefined
+                }
+              />
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!canSubmit}>
+                {loading ? <Loader2 className="size-4 animate-spin" /> : null}
+                Create
+              </Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
