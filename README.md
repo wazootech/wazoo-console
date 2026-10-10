@@ -5,8 +5,8 @@ Management-plane UI for the Wazoo private beta.
 ## Local dev
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -34,7 +34,7 @@ SSO, and webhooks. `vercel-labs/emulate` does not include a WorkOS service.
 Start the emulator alongside the dev server:
 
 ```sh
-npm run dev:emulate:workos
+pnpm run dev:emulate:workos
 ```
 
 The emulator serves WorkOS at [http://localhost:4100](http://localhost:4100)
@@ -50,8 +50,8 @@ redirect flow works locally. Seed users are defined in
 
 ## Health checks
 
-- Local: `npm run health:local`
-- QA: `npm run health:qa`
+- Local: `pnpm run health:local`
+- QA: `pnpm run health:qa`
 
 The `/api/health` endpoint returns `{ "status": "ok" }` and a `200` status.
 
@@ -120,4 +120,4 @@ sign-in page with a `200`, and Next normalizes the trailing slash
 
 ## E2E tests
 
-Playwright's console base URL defaults to http://localhost:3000; start the local server before `npm run test:e2e`; live account/world specs make real API writes and therefore require explicitly setting `WAZOO_E2E_API_BASE_URL` (and `WAZOO_PLATFORM_ADMIN_TOKEN`); the QA workflow explicitly sets that URL to https://api-qa.wazoo.dev; and `BASE_URL` should only be set to a hosted console when intentionally targeting that environment.
+Playwright's console base URL defaults to http://localhost:3000; start the local server before `pnpm run test:e2e`; live account/world specs make real API writes and therefore require explicitly setting `WAZOO_E2E_API_BASE_URL` (and `WAZOO_PLATFORM_ADMIN_TOKEN`); the QA workflow explicitly sets that URL to https://api-qa.wazoo.dev; and `BASE_URL` should only be set to a hosted console when intentionally targeting that environment.

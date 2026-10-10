@@ -108,8 +108,13 @@ and disabled in every deployed environment except the QA Worker; see
 
 ### Install dependencies
 
+This repo uses [pnpm](https://pnpm.io); the version is pinned by
+`packageManager` in `package.json`. Install pnpm with `npm install -g pnpm`
+(Corepack cannot run pnpm 12 yet). pnpm links packages from one shared store,
+so installing in each new worktree takes seconds.
+
 ```sh
-npm install
+pnpm install
 ```
 
 ### Start the WorkOS emulator
@@ -121,7 +126,7 @@ authentication. We chose it over general-purpose emulators such as
 feature-complete for AuthKit login, MFA, SSO, and webhook flows.
 
 ```sh
-npm run dev:emulate:workos
+pnpm run dev:emulate:workos
 ```
 
 The emulator runs on `http://localhost:4100` and accepts any
@@ -136,7 +141,7 @@ The emulator runs on `http://localhost:4100` and accepts any
 In a second terminal, from the same worktree:
 
 ```sh
-npm run dev
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -159,8 +164,8 @@ this:
 ```text
 Terminal 1: wazoo-api      -> npm run dev      (or docker compose up)
 Terminal 2: worlds-api      -> npm run dev      (or docker compose up)
-Terminal 3: workos-emulate -> npm run dev:emulate:workos
-Terminal 4: wazoo-console  -> npm run dev
+Terminal 3: workos-emulate -> pnpm run dev:emulate:workos
+Terminal 4: wazoo-console  -> pnpm run dev
 ```
 
 Make sure `NEXT_PUBLIC_API_URL` and `WAZOO_PLATFORM_ADMIN_TOKEN` point at the
@@ -172,16 +177,16 @@ local `wazoo-api` instance.
 - Keep operational screens dense, clear, and task-focused.
 - Follow the `package.json` scripts for dev, build, typecheck, formatting, and
   deploy commands.
-- Run `npm run typecheck` and the narrowest relevant build for code changes.
-- Run `npm run format` before committing.
+- Run `pnpm run typecheck` and the narrowest relevant build for code changes.
+- Run `pnpm run format` before committing.
 - Do not commit `.env.local` or other secret files.
 - Keep line endings as LF.
 
 ## Testing
 
-- Type check: `npm run typecheck`
-- Format check: `npm run format:check`
-- Health check: `npm run health:local`
+- Type check: `pnpm run typecheck`
+- Format check: `pnpm run format:check`
+- Health check: `pnpm run health:local`
 
 Manual QA is required for the hosted WorkOS auth flow because Cloudflare
 Turnstile CAPTCHA blocks headless browsers.
@@ -250,7 +255,7 @@ security rules.
 1. Open or claim an issue.
 2. Create a feature worktree.
 3. Make focused, atomic commits.
-4. Run `npm run typecheck` and `npm run format:check`.
+4. Run `pnpm run typecheck` and `pnpm run format:check`.
 5. Push your branch and open a pull request.
 6. Wait for CI to pass.
 7. Request review from a maintainer.
