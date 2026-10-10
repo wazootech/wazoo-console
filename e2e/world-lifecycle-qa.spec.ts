@@ -74,7 +74,13 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     await dialog.getByRole("button", { name: "Done" }).click();
     await expect(dialog).not.toBeVisible();
     await expect(page.getByText(displayName)).toBeVisible();
-    await expect(page.getByText(createdWorldId, { exact: true })).toBeVisible();
+    // The ID also renders in a <code> block outside the list, so scope the
+    // check to this world's row.
+    await expect(
+      page
+        .getByRole("link", { name: displayName })
+        .getByText(createdWorldId, { exact: true }),
+    ).toBeVisible();
     await expect(page.getByText("ACTIVE")).toBeVisible();
   } finally {
     if (createdWorldId) await auth.deleteWorldViaApi(session, createdWorldId);
