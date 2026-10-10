@@ -1,0 +1,7 @@
+# pnpm 12 blocks dependency build scripts unless listed here.
+allowBuilds:
+  esbuild: true
+  workerd: true
+  # Prebuilt @img/sharp-* binaries cover every platform we run on; the
+  # install script only matters for building libvips from source.
+  sharp: false

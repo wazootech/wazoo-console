@@ -5,8 +5,8 @@ Management-plane UI for the Wazoo private beta.
 ## Local dev
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
@@ -34,7 +34,7 @@ SSO, and webhooks. `vercel-labs/emulate` does not include a WorkOS service.
 Start the emulator alongside the dev server:
 
 ```sh
-npm run dev:emulate:workos
+pnpm run dev:emulate:workos
 ```
 
 The emulator serves WorkOS at [http://localhost:4100](http://localhost:4100)
@@ -50,8 +50,8 @@ redirect flow works locally. Seed users are defined in
 
 ## Health checks
 
-- Local: `npm run health:local`
-- QA: `npm run health:qa`
+- Local: `pnpm run health:local`
+- QA: `pnpm run health:qa`
 
 The `/api/health` endpoint returns `{ "status": "ok" }` and a `200` status.
 

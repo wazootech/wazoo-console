@@ -18,21 +18,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npm run format:check
-      - run: npm run typecheck
-      - run: npm run build
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run format:check
+      - run: pnpm run typecheck
+      - run: pnpm run build
         env:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
       - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+        run: pnpm exec playwright install --with-deps chromium
       - name: Run UI regression checks (a11y + quota banners)
         run: |
-          npx next start -p 3100 &
+          pnpm exec next start -p 3100 &
           for i in $(seq 1 60); do
             if curl -sf -o /dev/null http://localhost:3100/sign-in; then
               echo "Server ready after ${i}s"
@@ -40,11 +41,11 @@ jobs:
             fi
             sleep 1
           done
-          # Hermetic allowlist only. Never switch to `npx playwright test` here:
+          # Hermetic allowlist only. Never run bare `pnpm exec playwright test` here:
           # prod-health.spec.ts needs real WorkOS creds + open network (renders
           # a WorkOS error page with placeholders), and world-lifecycle-qa.spec.ts
           # needs WAZOO_PLATFORM_ADMIN_TOKEN. Both run in e2e-qa instead.
-          BASE_URL=http://localhost:3100 npx playwright test e2e/a11y.spec.ts e2e/create-world.spec.ts e2e/quota-banner.spec.ts e2e/quota-surfaces.spec.ts
+          BASE_URL=http://localhost:3100 pnpm exec playwright test e2e/a11y.spec.ts e2e/create-world.spec.ts e2e/quota-banner.spec.ts e2e/quota-surfaces.spec.ts
         env:
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3100/callback
           WORKOS_CLIENT_ID: client_preview_placeholder
@@ -57,14 +58,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: >-
-          npx @opennextjs/cloudflare build &&
-          npx wrangler deploy --config wrangler.preview.jsonc --name "wazoo-console-pr-${{ github.event.pull_request.number }}"
+          pnpm exec opennextjs-cloudflare build &&
+          pnpm exec wrangler deploy --config wrangler.preview.jsonc --name "wazoo-console-pr-${{ github.event.pull_request.number }}"
           --var "NEXT_PUBLIC_API_URL:https://api-qa.wazoo.dev"
           --var "NEXT_PUBLIC_WORKOS_REDIRECT_URI:https://wazoo-console-pr-${{ github.event.pull_request.number }}.ethan-r-davidson.workers.dev/callback"
           --var "WORKOS_CLIENT_ID:client_preview_placeholder"
@@ -81,11 +83,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: |
           worker_name="wazoo-console-pr-${{ github.event.pull_request.number }}"
           response="$(
@@ -112,11 +115,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Fetch secrets from Infisical (qa)
         uses: Infisical/secrets-action@v1.0.17
         with:
@@ -124,7 +128,7 @@ jobs:
           identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "qa"
-      - run: npx @opennextjs/cloudflare build && npx wrangler deploy --env qa
+      - run: pnpm exec opennextjs-cloudflare build && pnpm exec wrangler deploy --env qa
         env:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console-qa.wazoo.dev/callback
@@ -137,11 +141,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Fetch secrets from Infisical (qa)
         uses: Infisical/secrets-action@v1.0.17
         with:
@@ -150,8 +155,8 @@ jobs:
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "qa"
           secret-name: WAZOO_PLATFORM_ADMIN_TOKEN
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run test:e2e
         env:
           BASE_URL: https://console-qa.wazoo.dev
 
@@ -177,11 +182,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - name: Fetch secrets from Infisical (prod)
         uses: Infisical/secrets-action@v1.0.17
         with:
@@ -189,7 +195,7 @@ jobs:
           identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "prod"
-      - run: npx @opennextjs/cloudflare build && npx wrangler deploy --env=""
+      - run: pnpm exec opennextjs-cloudflare build && pnpm exec wrangler deploy --env=""
         env:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console.wazoo.dev/callback
