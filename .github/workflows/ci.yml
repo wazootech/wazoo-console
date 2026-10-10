@@ -155,6 +155,7 @@ jobs:
           identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "qa"
+          secret-name: WAZOO_PLATFORM_ADMIN_TOKEN
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
         env:
