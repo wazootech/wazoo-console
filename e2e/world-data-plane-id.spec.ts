@@ -11,7 +11,7 @@ const SESSION_BODY = {
   },
 };
 
-const WORLD_ID = "w_00000000-0000-4000-8000-000000000001";
+const WORLD_ID = "w_00000000000000000000000001";
 const WORLD_TOKEN = "wzw_e2e_world_token";
 
 async function signInAndMockSession(page: Page) {
