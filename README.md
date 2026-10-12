@@ -85,8 +85,10 @@ WorkOS callback.
 Required GitHub Actions secrets and variables:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # secret
-CLOUDFLARE_API_TOKEN      # secret
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*); preview jobs still
+                          # read the secret copy until wayfinder #174
+CLOUDFLARE_API_TOKEN      # secret; used only by PR preview jobs (wayfinder #174).
+                          # deploy-qa/deploy-prod fetch it from Infisical instead
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```

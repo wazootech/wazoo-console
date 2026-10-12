@@ -211,8 +211,10 @@ releases.
 For CI/CD, the following GitHub Actions secrets and variables must be set:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # secret
-CLOUDFLARE_API_TOKEN      # secret
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*); preview jobs still
+                          # read the secret copy until wayfinder #174
+CLOUDFLARE_API_TOKEN      # secret; used only by PR preview jobs (wayfinder #174).
+                          # deploy-qa/deploy-prod fetch it from Infisical instead
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
