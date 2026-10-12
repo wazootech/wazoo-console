@@ -219,7 +219,7 @@ export default function SearchPage({
       <div className="space-y-6">
         <PageHeader
           title="World Graph Search"
-          description="Keyword full-text and vector similarity search across the world's graph data, with automatic fallback when the search index is unavailable."
+          description="Full-text search across the world's graph data, with automatic fallback when the search index is unavailable. The badge on each result set shows which mode actually ran."
         />
         <NavTabs tabs={tabs} />
 

@@ -363,7 +363,7 @@ export default function ImportPage({
                       placeholder={
                         pasteType === "json"
                           ? '[{"subject": "https://example.org/alice", "predicate": "https://schema.org/givenName", "object": "Alice"}]'
-                          : "One text chunk per line. Each line becomes a chunk indexed for full-text and vector search."
+                          : "One text chunk per line. Each line becomes a chunk indexed for full-text search."
                       }
                       rows={8}
                       className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
