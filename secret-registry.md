@@ -15,20 +15,24 @@ QA/prod separation, and the cutover sequence.
 - CI fetches runtime secrets from Infisical at deploy time via OIDC machine
   identity (no Infisical credentials are stored in GitHub). The legacy
   `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
-  cutover; keep only `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`, and the
-  two Infisical **variables** (`INFISICAL_MACHINE_ID`,
-  `INFISICAL_PROJECT_SLUG`, non-secret) in GitHub.
+  cutover. `deploy-qa` and `deploy-prod` fetch only `CLOUDFLARE_API_TOKEN`
+  from Infisical (named `secret-name`) and read `CLOUDFLARE_ACCOUNT_ID` from a
+  repository **variable**. The GitHub secret `CLOUDFLARE_API_TOKEN` (and
+  `CLOUDFLARE_ACCOUNT_ID`) remains only for the PR `deploy-preview` and
+  `cleanup-preview` jobs until the preview artifact handoff (wayfinder #174)
+  lands. GitHub also keeps the two Infisical **variables**
+  (`INFISICAL_MACHINE_ID`, `INFISICAL_PROJECT_SLUG`, non-secret).
 - Secret values are never documented here — only their names, owners, and
   rotation dates.
 
 ## wazoo-console
 
-| Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                     |
-| -------------------------- | ------------- | ----------- | --------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| WORKOS_CLIENT_ID           | dev, qa, prod | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                           |
-| WORKOS_API_KEY             | dev, qa, prod | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                  |
-| WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                       |
-| WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`.  |
+| Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                    |
+| -------------------------- | ------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| WORKOS_CLIENT_ID           | dev, qa, prod | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                          |
+| WORKOS_API_KEY             | dev, qa, prod | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
+| WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
+| WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
 
 Last audited: 2026-09-10
 
@@ -101,7 +105,8 @@ Tokens stored in `~/.local/share/opencode/mcp-auth.json`. These are per-user, no
 
 1. Push to `main` triggers CI (`ci.yml`)
 2. CI sets `NEXT_PUBLIC_*` env vars for QA builds
-3. CI fetches runtime secrets from Infisical (OIDC machine identity, `qa` env)
+3. CI fetches only the named `CLOUDFLARE_API_TOKEN` from Infisical (OIDC
+   machine identity, `qa` env)
 4. `wrangler deploy` uploads Worker to Cloudflare
 5. Continuous secrets sync is owned by the Infisical Cloudflare Workers Secret
    Syncs configured in `infisical-secrets-migration.md`; deploys no longer set
