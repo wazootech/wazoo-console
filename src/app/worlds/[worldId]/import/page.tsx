@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, use, useRef } from "react";
-import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -10,7 +9,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
 import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
-import { resolveWorldDataPlaneId } from "@/lib/world-data";
 import {
   Upload,
   FileText,
@@ -33,7 +31,6 @@ export default function ImportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const { client } = useAuth();
   const tabs = getWorldTabs(worldId);
 
   const [token, setToken] = useState<string | null>(null);
@@ -207,8 +204,7 @@ export default function ImportPage({
     setSuccess(null);
 
     try {
-      const dataPlaneWorldId = await resolveWorldDataPlaneId(client, worldId);
-      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(dataPlaneWorldId)}/import`;
+      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(worldId)}/import`;
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
@@ -367,7 +363,7 @@ export default function ImportPage({
                       placeholder={
                         pasteType === "json"
                           ? '[{"subject": "https://example.org/alice", "predicate": "https://schema.org/givenName", "object": "Alice"}]'
-                          : "One text chunk per line. Each line becomes a chunk indexed for full-text and vector search."
+                          : "One text chunk per line. Each line becomes a chunk indexed for full-text search."
                       }
                       rows={8}
                       className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
