@@ -75,8 +75,8 @@ const EXPORT_FORMATS: ExportFormat[] = [
     mime: "text/plain",
     ext: ".txt",
     description:
-      "Raw text chunk lines imported or inferred for full-text and vector search.",
-    example: "Document content text line for semantic search and indexing.",
+      "Raw text chunk lines imported or inferred for full-text search.",
+    example: "Document content text line for search and indexing.",
   },
 ];
 
