@@ -31,12 +31,6 @@ export const VALID_PLATFORM_SCOPES: ScopeDefinition[] = [
     isDefault: true,
   },
   {
-    name: "worlds.admin",
-    label: "Worlds (Admin)",
-    description: "Perform administrative world operations",
-    isDefault: false,
-  },
-  {
     name: "usage.read",
     label: "Usage (Read)",
     description: "Access usage events and quota details",
