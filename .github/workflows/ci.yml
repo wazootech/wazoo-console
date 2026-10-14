@@ -87,6 +87,7 @@ jobs:
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "qa"
           secret-name: CLOUDFLARE_API_TOKEN
+          secret-path: /ci
       - run: pnpm exec opennextjs-cloudflare build && pnpm exec wrangler deploy --env qa
         env:
           NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
@@ -155,6 +156,7 @@ jobs:
           project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
           env-slug: "prod"
           secret-name: CLOUDFLARE_API_TOKEN
+          secret-path: /ci
       - run: pnpm exec opennextjs-cloudflare build && pnpm exec wrangler deploy --env=""
         env:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev

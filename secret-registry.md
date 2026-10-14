@@ -16,7 +16,7 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
   identity (no Infisical credentials are stored in GitHub). The legacy
   `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
   cutover. `deploy-qa` and `deploy-prod` fetch only `CLOUDFLARE_API_TOKEN`
-  from Infisical (named `secret-name`) and read `CLOUDFLARE_ACCOUNT_ID` from a
+  from the vault folder `/ci` (named `secret-name`, `secret-path: /ci`) and read `CLOUDFLARE_ACCOUNT_ID` from a
   repository **variable**. No workflow reads a `secrets.CLOUDFLARE_*` value: the
   PR `deploy-preview` and `cleanup-preview` jobs were the last users, and they
   are retired, so the repo secret they used is retired with them. GitHub also
@@ -34,7 +34,7 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 | WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
 | WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
 | WORLDS_API_ADMIN_KEY       | dev, qa, prod | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it: the console reaches worlds through wazoo-api.                            |
-| CLOUDFLARE_API_TOKEN       | qa, prod      | yes         | yes       | —          | CI deploy credential. Bound on the Worker only because the sync sources the project root; no console code reads it.             |
+| CLOUDFLARE_API_TOKEN       | qa, prod      | stale, pending removal | stale, pending removal | —          | CI deploy credential. Lives at vault folder `/ci`, deliberately outside any sync's scope; no console code reads it. Until the stale root-level copy and the leftover Worker bindings are removed (separately), the Workers still carry a binding from the old root-scope sync. |
 | GOOGLE_SERVICE_ACCOUNT_KEY | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it.                                                                         |
 | RESEND_API_KEY             | qa only       | no          | yes       | —          | Bound on QA only. No console code reads it; the console sends mail through wazoo-api.                                           |
 
@@ -108,8 +108,8 @@ Tokens stored in `~/.local/share/opencode/mcp-auth.json`. These are per-user, no
 
 1. Push to `main` triggers CI (`ci.yml`)
 2. CI sets `NEXT_PUBLIC_*` env vars for QA builds
-3. CI fetches only the named `CLOUDFLARE_API_TOKEN` from Infisical (OIDC
-   machine identity, `qa` env)
+3. CI fetches only the named `CLOUDFLARE_API_TOKEN` from the Infisical
+   folder `/ci` (OIDC machine identity, `qa` env)
 4. `wrangler deploy` uploads Worker to Cloudflare
 5. Continuous secrets sync is owned by the Infisical Cloudflare Workers Secret
    Syncs configured in the Infisical dashboard (see the vault record in

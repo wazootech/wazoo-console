@@ -219,6 +219,10 @@ INFISICAL_PROJECT_SLUG    # variable (non-secret)
 The `WORKOS_*` values and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub
 secrets: the deploy jobs fetch them from Infisical over OIDC machine identity.
 
+The deploy credential `CLOUDFLARE_API_TOKEN` lives at the Infisical folder `/ci`,
+deliberately outside any Worker secret sync's scope; the deploy jobs fetch it
+with `secret-path: /ci`.
+
 For Cloudflare Worker runtime secrets:
 
 ```sh
