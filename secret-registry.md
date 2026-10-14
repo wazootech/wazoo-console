@@ -3,10 +3,10 @@
 ## Canonical source: Infisical
 
 As of 2026-09-10, the canonical source for all runtime secrets is the
-[Infisical](https://infisical.com) project configured in the workspace-level
-migration runbook (`infisical-secrets-migration.md` at the root of the
-wazootech workspace repo). That runbook owns the full secret inventory, the
-QA/prod separation, and the cutover sequence.
+[Infisical](https://infisical.com) project `wazoo-n-jx-j`. That project's
+topology — its environments, folder layout, live inventory, the Cloudflare
+Worker syncs, and the rule for where a new secret goes — is recorded in the
+private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 
 - Local plaintext files (`.env.local`, `.dev.vars`) are derived, disposable dev
   copies. Do not treat them as a source of truth; regenerate them from Infisical
@@ -33,8 +33,12 @@ QA/prod separation, and the cutover sequence.
 | WORKOS_API_KEY             | dev, qa, prod | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
 | WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
 | WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
+| WORLDS_API_ADMIN_KEY       | dev, qa, prod | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it: the console reaches worlds through wazoo-api.                            |
+| CLOUDFLARE_API_TOKEN       | qa, prod      | yes         | yes       | —          | CI deploy credential. Bound on the Worker only because the sync sources the project root; no console code reads it.             |
+| GOOGLE_SERVICE_ACCOUNT_KEY | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it.                                                                         |
+| RESEND_API_KEY             | qa only       | no          | yes       | —          | Bound on QA only. No console code reads it; the console sends mail through wazoo-api.                                           |
 
-Last audited: 2026-09-10
+Last audited: 2026-09-10 (secret table re-measured 2026-10-13)
 
 ## WorkOS environment variables
 
@@ -109,8 +113,8 @@ Tokens stored in `~/.local/share/opencode/mcp-auth.json`. These are per-user, no
    machine identity, `qa` env)
 4. `wrangler deploy` uploads Worker to Cloudflare
 5. Continuous secrets sync is owned by the Infisical Cloudflare Workers Secret
-   Syncs configured in `infisical-secrets-migration.md`; deploys no longer set
-   worker secrets by hand
+   Syncs configured in the Infisical dashboard (see the vault record in
+   `wazootech/memory`); deploys no longer set worker secrets by hand
 6. Runtime vars in `wrangler.jsonc` QA env block provide non-build-time config
 
 ## Local emulator (`@workos/emulate`)
