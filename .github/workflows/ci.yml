@@ -2,7 +2,7 @@ name: CI
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, closed]
+    types: [opened, synchronize, reopened]
   push:
     branches: [main]
   workflow_dispatch:
@@ -14,17 +14,16 @@ permissions:
 
 jobs:
   contract-lint:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v7
       - name: Credential-free contract lint (R1-R5)
-        uses: wazootech/workspace-cli/skills/contract-lint@9841b8de3539b5350ec85b527018afb256480b16
+        uses: wazootech/workspace-cli/skills/contract-lint@f6b4e491b78a6ebe4c31560088eefcfd9f5ba4ba
 
   verify:
-    if: github.event_name != 'pull_request' || github.event.action != 'closed'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -67,63 +66,6 @@ jobs:
           WORKOS_CLIENT_ID: client_preview_placeholder
           WORKOS_API_KEY: sk_test_preview_placeholder
           WORKOS_COOKIE_PASSWORD: preview-cookie-password-at-least-32-bytes
-
-  deploy-preview:
-    if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    needs: verify
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: >-
-          pnpm exec opennextjs-cloudflare build &&
-          pnpm exec wrangler deploy --config wrangler.preview.jsonc --name "wazoo-console-pr-${{ github.event.pull_request.number }}"
-          --var "NEXT_PUBLIC_API_URL:https://api-qa.wazoo.dev"
-          --var "NEXT_PUBLIC_WORKOS_REDIRECT_URI:https://wazoo-console-pr-${{ github.event.pull_request.number }}.ethan-r-davidson.workers.dev/callback"
-          --var "WORKOS_CLIENT_ID:client_preview_placeholder"
-          --var "WORKOS_API_KEY:sk_test_preview_placeholder"
-          --var "WORKOS_COOKIE_PASSWORD:preview-cookie-password-at-least-32-bytes"
-        env:
-          NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
-          NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://wazoo-console-pr-${{ github.event.pull_request.number }}.ethan-r-davidson.workers.dev/callback
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-
-  cleanup-preview:
-    if: github.event_name == 'pull_request' && github.event.action == 'closed'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: |
-          worker_name="wazoo-console-pr-${{ github.event.pull_request.number }}"
-          response="$(
-            curl -sS -X DELETE \
-              "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/${worker_name}" \
-              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}"
-          )"
-
-          echo "${response}"
-
-          if echo "${response}" | grep -q '"success":\s*true'; then
-            echo "Deleted ${worker_name}."
-          elif echo "${response}" | grep -q '10007'; then
-            echo "${worker_name} was already deleted or does not exist."
-          fi
-          exit 0
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   deploy-qa:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'

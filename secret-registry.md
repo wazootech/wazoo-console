@@ -17,11 +17,11 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
   `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
   cutover. `deploy-qa` and `deploy-prod` fetch only `CLOUDFLARE_API_TOKEN`
   from Infisical (named `secret-name`) and read `CLOUDFLARE_ACCOUNT_ID` from a
-  repository **variable**. The GitHub secret `CLOUDFLARE_API_TOKEN` (and
-  `CLOUDFLARE_ACCOUNT_ID`) remains only for the PR `deploy-preview` and
-  `cleanup-preview` jobs until the preview artifact handoff (wayfinder #174)
-  lands. GitHub also keeps the two Infisical **variables**
-  (`INFISICAL_MACHINE_ID`, `INFISICAL_PROJECT_SLUG`, non-secret).
+  repository **variable**. No workflow reads a `secrets.CLOUDFLARE_*` value: the
+  PR `deploy-preview` and `cleanup-preview` jobs were the last users, and they
+  are retired, so the repo secret they used is retired with them. GitHub also
+  keeps the two Infisical **variables** (`INFISICAL_MACHINE_ID`,
+  `INFISICAL_PROJECT_SLUG`, non-secret).
 - Secret values are never documented here — only their names, owners, and
   rotation dates.
 
@@ -47,7 +47,7 @@ Last audited: 2026-09-10 (secret table re-measured 2026-10-13)
 | `NEXT_PUBLIC_WORKOS_REDIRECT_URI` | QA: `https://console-qa.wazoo.dev/callback` | Inlined at build time via Webpack. Set as env var before `next build`. |
 | `NEXT_PUBLIC_API_URL`             | QA: `https://api-qa.wazoo.dev`              | Inlined at build time.                                                 |
 | `WORKOS_REDIRECT_URI`             | Auto-derived from `NEXT_PUBLIC_*`           | Used by `@workos-inc/authkit-nextjs` middleware.                       |
-| `E2E_AUTH_BYPASS_ENABLED`         | QA Worker: `true`; Prod/preview: unset      | Runtime-only gate for `POST /api/auth/bypass` (see below).             |
+| `E2E_AUTH_BYPASS_ENABLED`         | QA Worker: `true`; Prod: unset              | Runtime-only gate for `POST /api/auth/bypass` (see below).             |
 
 ## Bypass auth gate
 
@@ -60,7 +60,6 @@ returns 404.
 - **Production Worker** (`console.wazoo.dev`): var unset -> route disabled.
 - **QA Worker** (`console-qa.wazoo.dev`): var set in `wrangler.jsonc`
   `env.qa.vars` -> route enabled (used by the live world-creation e2e gate).
-- **Preview Workers** (`wazoo-console-pr-N`): var unset -> route disabled.
 - **Local dev**: opt-in via `.env.local` (`E2E_AUTH_BYPASS_ENABLED=true`);
   unset by default.
 

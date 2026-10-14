@@ -197,7 +197,7 @@ Production deploys are human-in-the-loop.
 
 1. Push the reviewed branch to GitHub.
 2. Create a pull request.
-3. Wait for CI to pass (`verify`, `deploy-preview`).
+3. Wait for CI to pass (`verify`, `contract-lint`).
 4. Merge to `main`.
 5. Pushes to `main` automatically deploy to the QA environment.
 6. Verify `https://console-qa.wazoo.dev`.
@@ -211,10 +211,7 @@ releases.
 For CI/CD, the following GitHub Actions secrets and variables must be set:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*); preview jobs still
-                          # read the secret copy until wayfinder #174
-CLOUDFLARE_API_TOKEN      # secret; used only by PR preview jobs (wayfinder #174).
-                          # deploy-qa/deploy-prod fetch it from Infisical instead
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*)
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
