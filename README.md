@@ -74,21 +74,16 @@ Pushes to `main` also trigger `deploy-qa`, which publishes the
 `wazoo-console-qa` Worker to the `qa` Wrangler environment and points it at
 `api-qa.wazoo.dev`. Verify the QA Worker before dispatching a production deploy.
 
-Pull requests deploy preview Workers with `wrangler.preview.jsonc`, which keeps
-`workers_dev` enabled and defines no custom-domain routes. Do not deploy PR
-previews with the production Wrangler config, because it owns
-`console.wazoo.dev`. Preview deploys use non-secret AuthKit placeholder values
-so the app can render and redirect without exposing production WorkOS/admin
-secrets to pull request code; they are not intended for completing a real
-WorkOS callback.
+Pull requests do not deploy. A PR-triggered job must not hold a deploy
+credential, and the shared Infisical machine identity refuses OIDC requests from
+a pull-request context, so PR workflows stop at `contract-lint` and `verify`.
+PR preview Workers are retired; `wrangler.preview.jsonc` is no longer referenced
+by CI.
 
 Required GitHub Actions secrets and variables:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*); preview jobs still
-                          # read the secret copy until wayfinder #174
-CLOUDFLARE_API_TOKEN      # secret; used only by PR preview jobs (wayfinder #174).
-                          # deploy-qa/deploy-prod fetch it from Infisical instead
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*)
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
