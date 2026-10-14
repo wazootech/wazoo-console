@@ -19,6 +19,7 @@
     "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check",
     "health:local": "node scripts/health.mjs",
     "health:qa": "node scripts/health.mjs https://console-qa.wazoo.dev",
+    "canary:prod": "node scripts/prod-canary.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {
