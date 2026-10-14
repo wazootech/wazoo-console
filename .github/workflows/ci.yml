@@ -160,3 +160,17 @@ jobs:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev
           NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console.wazoo.dev/callback
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+
+  canary-prod:
+    if: github.event_name == 'workflow_dispatch'
+    needs: deploy-prod
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Credential-free production canary (read-only GETs)
+        run: node scripts/prod-canary.mjs
