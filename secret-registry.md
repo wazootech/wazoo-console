@@ -8,10 +8,11 @@ topology — its environments, folder layout, live inventory, the Cloudflare
 Worker syncs, and the rule for where a new secret goes — is recorded in the
 private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 
-- Local plaintext files (`.env.local`, `.dev.vars`) are derived, disposable dev
-  copies. Do not treat them as a source of truth; regenerate them from Infisical
-  (`infisical secrets generate .env.local --env dev`) and never copy-paste
-  secret values between machines or environments by hand.
+- There is no `dev` environment in the vault. Local development brings its own
+  resources: a gitignored `.env.local` copied from `.env.local.example` (the
+  WorkOS emulator values there are placeholders, not credentials). Never copy
+  vault values (`qa`, `prod`) into local files, or between machines or
+  environments by hand.
 - CI fetches runtime secrets from Infisical at deploy time via OIDC machine
   identity (no Infisical credentials are stored in GitHub). The legacy
   `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
@@ -29,11 +30,11 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 
 | Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                    |
 | -------------------------- | ------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| WORKOS_CLIENT_ID           | dev, qa, prod | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                          |
-| WORKOS_API_KEY             | dev, qa, prod | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
+| WORKOS_CLIENT_ID           | qa, prod      | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                          |
+| WORKOS_API_KEY             | qa, prod      | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
 | WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
 | WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
-| WORLDS_API_ADMIN_KEY       | dev, qa, prod | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it: the console reaches worlds through wazoo-api.                            |
+| WORLDS_API_ADMIN_KEY       | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it: the console reaches worlds through wazoo-api.                            |
 | CLOUDFLARE_API_TOKEN       | qa, prod      | stale, pending removal | stale, pending removal | —          | CI deploy credential. Lives at vault folder `/ci`, deliberately outside any sync's scope; no console code reads it. Until the stale root-level copy and the leftover Worker bindings are removed (separately), the Workers still carry a binding from the old root-scope sync. |
 | GOOGLE_SERVICE_ACCOUNT_KEY | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it.                                                                         |
 | RESEND_API_KEY             | qa only       | no          | yes       | —          | Bound on QA only. No console code reads it; the console sends mail through wazoo-api.                                           |
