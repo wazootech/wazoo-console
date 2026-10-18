@@ -28,18 +28,23 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 
 ## wazoo-console
 
+The console Worker sync (`wazoo-console` prod, `wazoo-console-qa` qa) reads the
+vault folder `/wazoo-console` and publishes exactly the four values below
+(measured 2026-10-18).
+
 | Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                    |
 | -------------------------- | ------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | WORKOS_CLIENT_ID           | qa, prod      | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                          |
 | WORKOS_API_KEY             | qa, prod      | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
 | WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
 | WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
-| WORLDS_API_ADMIN_KEY       | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it: the console reaches worlds through wazoo-api.                            |
-| CLOUDFLARE_API_TOKEN       | qa, prod      | stale, pending removal | stale, pending removal | —          | CI deploy credential. Lives at vault folder `/ci`, deliberately outside any sync's scope; no console code reads it. Until the stale root-level copy and the leftover Worker bindings are removed (separately), the Workers still carry a binding from the old root-scope sync. |
-| GOOGLE_SERVICE_ACCOUNT_KEY | qa, prod      | yes         | yes       | —          | Bound by the root-scope sync. No console code reads it.                                                                         |
-| RESEND_API_KEY             | qa only       | no          | yes       | —          | Bound on QA only. No console code reads it; the console sends mail through wazoo-api.                                           |
 
-Last audited: 2026-09-10 (secret table re-measured 2026-10-13)
+`CLOUDFLARE_API_TOKEN`, `GOOGLE_SERVICE_ACCOUNT_KEY`, `WORLDS_API_ADMIN_KEY` and
+(on QA) `RESEND_API_KEY` used to be bound here by the old root-scope sync. No
+console code reads them, and they were deleted from both Workers on 2026-10-18.
+The deploy credential lives only at vault folder `/ci`.
+
+Last audited: 2026-10-18
 
 ## WorkOS environment variables
 
