@@ -187,13 +187,17 @@ export default function ImportPage({
       setError("Please select or add a World Access Token first.");
       return;
     }
+    // State set in this function is not visible until the next render, so
+    // choose the payload and content type locally instead of reading state back.
+    let payload = fileContent;
+    let payloadType = contentType;
     if (mode === "paste") {
       if (!pasteContent.trim()) {
         setError("Paste some content to import.");
         return;
       }
-      setFileContent(pasteContent);
-      setContentType(pasteType === "json" ? "application/json" : "text/plain");
+      payload = pasteContent;
+      payloadType = pasteType === "json" ? "application/json" : "text/plain";
     } else if (!fileContent) {
       setError("No file content loaded to import.");
       return;
@@ -212,8 +216,8 @@ export default function ImportPage({
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          data: fileContent,
-          contentType,
+          data: payload,
+          contentType: payloadType,
         }),
       });
 
