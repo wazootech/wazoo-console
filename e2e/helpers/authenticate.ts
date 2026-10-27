@@ -94,3 +94,49 @@ export async function deleteWorldViaApi(
     console.warn(`world ${worldId} teardown returned ${res.status}`);
   }
 }
+
+/**
+ * Mints a world token through the platform, as the console's token page does.
+ * The UI keeps world tokens in the browser, so specs seed this into
+ * localStorage (`wazoo_world_tokens_<worldId>`) before opening data pages.
+ */
+export async function createWorldTokenViaApi(
+  session: E2eUserSession,
+  worldId: string,
+): Promise<string> {
+  const res = await fetch(
+    `${requireE2eApiBase()}/v1/worlds/${worldId}/auth/tokens`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${session.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`world token mint failed (${res.status})`);
+  }
+  const body = (await res.json()) as { token?: string | { token?: string } };
+  const token = typeof body.token === "string" ? body.token : body.token?.token;
+  if (!token) throw new Error("world token response had no token");
+  return token;
+}
+
+export interface UserPlan {
+  plan: string;
+  dailyRowWrites: number | null;
+  rowsWrittenToday: number | null;
+}
+
+/** Reads the signed-in user's plan and today's write usage. */
+export async function getUserPlanViaApi(
+  session: E2eUserSession,
+): Promise<UserPlan> {
+  const res = await fetch(`${requireE2eApiBase()}/v1/users/me/plan`, {
+    headers: { Authorization: `Bearer ${session.token}` },
+  });
+  if (!res.ok) throw new Error(`plan read failed (${res.status})`);
+  return (await res.json()) as UserPlan;
+}
