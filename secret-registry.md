@@ -73,10 +73,24 @@ returns 404.
 
 | URI                                     | Default | Notes                   |
 | --------------------------------------- | ------- | ----------------------- |
-| `http://localhost:3000/callback`        | yes     | Local dev               |
+| `http://localhost:3000/callback`        | no      | Local dev               |
 | `https://console-qa.wazoo.dev/callback` | no      | QA Worker               |
-| `https://console.wazoo.dev/callback`    | no      | Production              |
+| `https://console.wazoo.dev/callback`    | yes     | Production              |
 | `https://console.wazoo.tech/callback`   | no      | Legacy/alternate domain |
+
+The default is the redirect WorkOS uses when a flow starts outside the console,
+such as the password-reset email link. It must be the production URL: with the
+local URL as the default, a password reset ended on `localhost:3000/callback`.
+Sign-in started from the console passes its own `redirect_uri`, so QA and local
+dev are not affected. The QA and production consoles share this one WorkOS
+environment (type sandbox, named "QA").
+
+To change the default, replace the whole list (the command takes every URI, not
+a single one) and dry-run first:
+
+```sh
+npx workos authkit redirect-uris set --uri <uri> [--uri <uri> ...] --default <uri> --dry-run
+```
 
 ## AuthKit settings (staging)
 
