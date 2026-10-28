@@ -128,6 +128,7 @@ export interface UserPlan {
   plan: string;
   dailyRowWrites: number | null;
   rowsWrittenToday: number | null;
+  billing?: { checkoutAvailable: boolean; portalAvailable: boolean };
 }
 
 /** Reads the signed-in user's plan and today's write usage. */

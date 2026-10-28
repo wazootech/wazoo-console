@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
+import { PlanCard } from "@/components/plan-card";
 import { PageHeader } from "@/components/page-header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -135,7 +136,7 @@ export default function SettingsPage() {
       <div className="space-y-6 max-w-2xl">
         <PageHeader
           title="Settings"
-          description="Account information and API status"
+          description="Account, plan and API status"
         />
         <Card>
           <CardHeader>
@@ -152,6 +153,7 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+        <PlanCard />
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">API Status</CardTitle>
