@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
@@ -10,7 +10,7 @@ import { TokenListItem } from "@/components/token-list-item";
 import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { getWorldTabs, saveLocalWorldToken } from "@/lib/utils";
 import {
   listWorldTokens,
@@ -38,7 +38,7 @@ export default function WorldTokensPage({
 
   const tabs = getWorldTabs(worldId);
 
-  async function fetchTokens() {
+  const fetchTokens = useCallback(async () => {
     if (!client) return;
     setLoading(true);
     setError(null);
@@ -49,11 +49,11 @@ export default function WorldTokensPage({
       setTokens(r.data?.tokens ?? []);
     }
     setLoading(false);
-  }
+  }, [client, worldId]);
 
   useEffect(() => {
     fetchTokens();
-  }, [client, worldId]);
+  }, [fetchTokens]);
 
   async function handleCreate() {
     if (!client) return;

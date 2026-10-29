@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
@@ -11,14 +11,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import {
   listPlatformTokens,
   createPlatformToken,
@@ -41,7 +40,7 @@ export default function TokensPage() {
   } | null>(null);
   const [showSecret, setShowSecret] = useState(false);
 
-  async function fetchTokens() {
+  const fetchTokens = useCallback(async () => {
     if (!client) return;
     setLoading(true);
     setError(null);
@@ -52,11 +51,11 @@ export default function TokensPage() {
       setTokens(r.data?.tokens ?? []);
     }
     setLoading(false);
-  }
+  }, [client]);
 
   useEffect(() => {
     fetchTokens();
-  }, [client]);
+  }, [fetchTokens]);
 
   async function handleRevoke(tokenName: string) {
     if (!client) return;

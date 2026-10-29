@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
@@ -41,7 +41,7 @@ export default function WorldDetailPage({
   const [showDelete, setShowDelete] = useState(false);
   const [worldToken, setWorldToken] = useState<string | null>(null);
 
-  async function fetchWorld() {
+  const fetchWorld = useCallback(async () => {
     if (!client) return;
     setLoading(true);
     setError(null);
@@ -52,11 +52,11 @@ export default function WorldDetailPage({
       setWorld(r.data ?? null);
     }
     setLoading(false);
-  }
+  }, [client, worldId]);
 
   useEffect(() => {
     fetchWorld();
-  }, [client, worldId]);
+  }, [fetchWorld]);
 
   const tabs = getWorldTabs(worldId);
 
