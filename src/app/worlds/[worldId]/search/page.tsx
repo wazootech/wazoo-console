@@ -1,66 +1,19 @@
 "use client";
 
-import { useState, use } from "react";
+import { use } from "react";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs, getWorldsApiUrl, thrownMessage } from "@/lib/utils";
-import {
-  Search,
-  Loader2,
-  Sparkles,
-  SlidersHorizontal,
-  AlertTriangle,
-  ChevronDown,
-  ChevronRight,
-  X,
-} from "lucide-react";
-
-// Contract shape from POST /worlds/{id}/search (worlds-api#30 D6): the single
-// content text field, score on the normalized 0–1 scale (null in fallback
-// mode), and the required scoreType family.
-interface SearchResult {
-  id?: string;
-  subject: string;
-  predicate: string;
-  graph?: string;
-  content: string;
-  score: number | null;
-  scoreType?: string;
-}
-
-// Subject-detail rows come from SPARQL bindings, not the search contract.
-interface DetailQuad {
-  subject: string;
-  predicate: string;
-  object: string;
-  graph: string;
-}
-
-const MODE_BADGES: Record<string, { label: string; className: string }> = {
-  semantic: {
-    label: "Semantic Mode (vector)",
-    className: "text-violet-400 bg-violet-950/20 border-violet-900/50",
-  },
-  keyword: {
-    label: "Keyword Mode (full-text)",
-    className: "text-sky-400 bg-sky-950/20 border-sky-900/50",
-  },
-  hybrid: {
-    label: "Hybrid Mode (vector + keyword)",
-    className: "text-emerald-400 bg-emerald-950/20 border-emerald-900/50",
-  },
-  fallback: {
-    label: "Fallback Mode (SQL LIKE)",
-    className: "text-amber-500 bg-amber-950/20 border-amber-900/50",
-  },
-};
+import { getWorldTabs } from "@/lib/utils";
+import { Loader2, Sparkles, AlertTriangle } from "lucide-react";
+import { MODE_BADGES } from "./search-types";
+import { useWorldSearch } from "./use-world-search";
+import { SearchForm } from "./search-form";
+import { SearchResultsTable } from "./search-results-table";
+import { SearchDetailPanel } from "./search-detail-panel";
 
 export default function SearchPage({
   params,
@@ -69,153 +22,8 @@ export default function SearchPage({
 }) {
   const { worldId } = use(params);
   const tabs = getWorldTabs(worldId);
-
-  const [token, setToken] = useState<string | null>(null);
-  const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState(10);
-  const [minScore, setMinScore] = useState(0.0);
-  const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [mode, setMode] = useState<string | null>(null);
-  const [typeFilter, setTypeFilter] = useState("");
-  const [labelFilter, setLabelFilter] = useState("");
-  const [propFilter, setPropFilter] = useState("");
-  const [detailSubject, setDetailSubject] = useState<string | null>(null);
-  const [detailQuads, setDetailQuads] = useState<DetailQuad[]>([]);
-  const [detailLoading, setDetailLoading] = useState(false);
-  const [detailError, setDetailError] = useState<string | null>(null);
-
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!query.trim()) return;
-    if (!token) {
-      setError("Please select or add a World Access Token first.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setResults([]);
-    setMode(null);
-
-    try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(worldId)}/search`;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          query: query.trim(),
-          limit,
-          minScore,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to search World Graph");
-      }
-
-      setResults(data.results || []);
-      // mode is required by the contract — surface the mode that actually ran
-      // (semantic / keyword / hybrid / fallback) instead of implying semantic.
-      setMode(data.mode);
-      setDetailSubject(null);
-      setDetailQuads([]);
-    } catch (err) {
-      setError(
-        thrownMessage(err) || "An unexpected error occurred during search",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // Derived type options from rdf:type triples found in the current results.
-  const typeOptions = Array.from(
-    new Set(
-      results
-        .filter((r) => r.predicate.includes("#type"))
-        .map((r) => r.content)
-        .filter((v): v is string => Boolean(v)),
-    ),
-  ).sort();
-
-  // Client-side filtering over the fetched results.
-  const filteredResults = results.filter((r) => {
-    if (typeFilter) {
-      const typedSubjects = new Set(
-        results
-          .filter(
-            (t) => t.predicate.includes("#type") && t.content === typeFilter,
-          )
-          .map((t) => t.subject),
-      );
-      if (!typedSubjects.has(r.subject)) return false;
-    }
-    if (
-      propFilter &&
-      !r.predicate.toLowerCase().includes(propFilter.toLowerCase())
-    ) {
-      return false;
-    }
-    if (
-      labelFilter &&
-      !r.content.toLowerCase().includes(labelFilter.toLowerCase())
-    ) {
-      return false;
-    }
-    return true;
-  });
-
-  async function openDetail(subject: string) {
-    if (detailSubject === subject) {
-      setDetailSubject(null);
-      setDetailQuads([]);
-      return;
-    }
-    setDetailSubject(subject);
-    setDetailLoading(true);
-    setDetailError(null);
-    setDetailQuads([]);
-    try {
-      const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(worldId)}/sparql`;
-      const escaped = subject.replace(/[\\"]/g, (m) =>
-        m === '"' ? '\\"' : "\\\\",
-      );
-      const query = `SELECT ?p ?o ?g WHERE { GRAPH ?g { <${escaped}> ?p ?o } }`;
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ query }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to load subject detail");
-      }
-      const bindings: Array<Record<string, { value?: string } | undefined>> =
-        data?.results?.bindings || [];
-      setDetailQuads(
-        bindings.map((b) => ({
-          subject,
-          predicate: b.p?.value || "",
-          object: b.o?.value || "",
-          graph: b.g?.value || "",
-        })),
-      );
-    } catch (err) {
-      setDetailError(thrownMessage(err) || "Failed to load subject detail");
-    } finally {
-      setDetailLoading(false);
-    }
-  }
+  const s = useWorldSearch(worldId);
+  const { mode, error, results, loading, filteredResults } = s;
 
   return (
     <AppShell>
@@ -226,137 +34,12 @@ export default function SearchPage({
         />
         <NavTabs tabs={tabs} />
 
-        <WorldTokenSelector worldId={worldId} onTokenChange={setToken} />
+        <WorldTokenSelector worldId={worldId} onTokenChange={s.setToken} />
 
         <div className="space-y-4">
           <Card className="border border-zinc-800 bg-zinc-950 text-white">
             <CardContent className="pt-6">
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
-                    <Input
-                      placeholder="e.g. Find references to agent status, memory history, or profile definitions..."
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      className="bg-zinc-900 border-zinc-800 text-white pl-9 h-11 text-sm focus:border-primary"
-                    />
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="border-zinc-800 hover:bg-zinc-900 h-11"
-                  >
-                    <SlidersHorizontal className="size-4" />
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={loading}
-                    className="h-11 px-6 font-semibold"
-                  >
-                    {loading ? (
-                      <Loader2 className="size-4 animate-spin" />
-                    ) : (
-                      "Search"
-                    )}
-                  </Button>
-                </div>
-
-                {showFilters && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
-                    <div className="space-y-1.5">
-                      <Label htmlFor="limit" className="text-zinc-400 text-xs">
-                        Limit
-                      </Label>
-                      <Input
-                        id="limit"
-                        type="number"
-                        min={1}
-                        max={100}
-                        value={limit}
-                        onChange={(e) =>
-                          setLimit(parseInt(e.target.value) || 10)
-                        }
-                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label
-                        htmlFor="min-score"
-                        className="text-zinc-400 text-xs"
-                      >
-                        Min Similarity Score
-                      </Label>
-                      <Input
-                        id="min-score"
-                        type="number"
-                        step={0.01}
-                        min={0}
-                        max={1}
-                        value={minScore}
-                        onChange={(e) =>
-                          setMinScore(parseFloat(e.target.value) || 0)
-                        }
-                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label
-                        htmlFor="type-filter"
-                        className="text-zinc-400 text-xs"
-                      >
-                        Type (rdf:type)
-                      </Label>
-                      <select
-                        id="type-filter"
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white text-xs px-2"
-                      >
-                        <option value="">All types</option>
-                        {typeOptions.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label
-                        htmlFor="prop-filter"
-                        className="text-zinc-400 text-xs"
-                      >
-                        Property (predicate contains)
-                      </Label>
-                      <Input
-                        id="prop-filter"
-                        type="text"
-                        placeholder="e.g. #label"
-                        value={propFilter}
-                        onChange={(e) => setPropFilter(e.target.value)}
-                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label
-                        htmlFor="label-filter"
-                        className="text-zinc-400 text-xs"
-                      >
-                        Label / object contains
-                      </Label>
-                      <Input
-                        id="label-filter"
-                        type="text"
-                        placeholder="e.g. agent"
-                        value={labelFilter}
-                        onChange={(e) => setLabelFilter(e.target.value)}
-                        className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
-                      />
-                    </div>
-                  </div>
-                )}
-              </form>
+              <SearchForm {...s} />
             </CardContent>
           </Card>
 
@@ -407,144 +90,21 @@ export default function SearchPage({
                     </div>
                   )}
                   {filteredResults.length > 0 && (
-                    <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
-                      <table className="w-full text-left text-xs text-zinc-300 border-collapse">
-                        <thead>
-                          <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
-                            <th className="p-3 w-8" />
-                            <th className="p-3 border-r border-zinc-800">
-                              Subject
-                            </th>
-                            <th className="p-3 border-r border-zinc-800">
-                              Predicate
-                            </th>
-                            <th className="p-3 border-r border-zinc-800">
-                              Content
-                            </th>
-                            <th className="p-3 border-r border-zinc-800">
-                              Score
-                            </th>
-                            <th className="p-3">Graph</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {filteredResults.map((r, idx) => (
-                            <tr
-                              key={r.id ?? idx}
-                              className={`border-b border-zinc-800 last:border-b-0 ${
-                                detailSubject === r.subject
-                                  ? "bg-primary/5"
-                                  : "hover:bg-zinc-900/10"
-                              }`}
-                            >
-                              <td className="p-3">
-                                <button
-                                  type="button"
-                                  onClick={() => openDetail(r.subject)}
-                                  aria-expanded={detailSubject === r.subject}
-                                  aria-label={`Inspect ${r.subject}`}
-                                  className="text-zinc-500 hover:text-primary transition-colors"
-                                >
-                                  {detailSubject === r.subject ? (
-                                    <ChevronDown className="size-4" />
-                                  ) : (
-                                    <ChevronRight className="size-4" />
-                                  )}
-                                </button>
-                              </td>
-                              <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
-                                {r.subject}
-                              </td>
-                              <td className="p-3 border-r border-zinc-800 font-mono break-all max-w-[120px]">
-                                {r.predicate}
-                              </td>
-                              <td className="p-3 border-r border-zinc-800 break-words text-zinc-200">
-                                {r.content || "—"}
-                              </td>
-                              <td className="p-3 border-r border-zinc-800 font-semibold text-primary">
-                                {r.score != null ? r.score.toFixed(4) : "—"}
-                              </td>
-                              <td className="p-3 font-mono break-all max-w-[100px]">
-                                {r.graph || "—"}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                    <SearchResultsTable
+                      results={filteredResults}
+                      detailSubject={s.detailSubject}
+                      onInspect={s.openDetail}
+                    />
                   )}
 
-                  {detailSubject && (
-                    <div className="border border-zinc-800 rounded-lg bg-zinc-900/40">
-                      <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-zinc-200">
-                            Subject detail
-                          </p>
-                          <p className="font-mono text-[11px] text-zinc-500 break-all">
-                            {detailSubject}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDetailSubject(null);
-                            setDetailQuads([]);
-                          }}
-                          aria-label="Close detail panel"
-                          className="text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
-                        >
-                          <X className="size-4" />
-                        </button>
-                      </div>
-                      <div className="p-4">
-                        {detailLoading && (
-                          <div className="flex items-center gap-2 text-zinc-400 text-xs">
-                            <Loader2 className="size-4 animate-spin" />
-                            Loading all quads for subject...
-                          </div>
-                        )}
-                        {detailError && <ErrorCard message={detailError} />}
-                        {!detailLoading &&
-                          !detailError &&
-                          detailQuads.length === 0 && (
-                            <p className="text-zinc-500 text-xs">
-                              No quads found for this subject.
-                            </p>
-                          )}
-                        {!detailLoading && detailQuads.length > 0 && (
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-left text-xs text-zinc-300 border-collapse">
-                              <thead>
-                                <tr className="text-zinc-400 font-medium border-b border-zinc-800">
-                                  <th className="py-2 pr-3">Predicate</th>
-                                  <th className="py-2 pr-3">Object</th>
-                                  <th className="py-2">Graph</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {detailQuads.map((q, i) => (
-                                  <tr
-                                    key={i}
-                                    className="border-b border-zinc-900 last:border-b-0"
-                                  >
-                                    <td className="py-2 pr-3 font-mono break-all max-w-[160px]">
-                                      {q.predicate}
-                                    </td>
-                                    <td className="py-2 pr-3 break-words text-zinc-200">
-                                      {q.object}
-                                    </td>
-                                    <td className="py-2 font-mono break-all max-w-[120px]">
-                                      {q.graph || "—"}
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                  {s.detailSubject && (
+                    <SearchDetailPanel
+                      subject={s.detailSubject}
+                      quads={s.detailQuads}
+                      loading={s.detailLoading}
+                      error={s.detailError}
+                      onClose={s.closeDetail}
+                    />
                   )}
                 </div>
               )}
