@@ -10,6 +10,7 @@
     "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
     "preview": "npx @opennextjs/cloudflare build && npx wrangler dev",
     "build:qa": "cross-env NEXT_PUBLIC_API_URL=https://api-qa.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console-qa.wazoo.dev/callback next build --webpack",
     "build:prod": "cross-env NEXT_PUBLIC_API_URL=https://api.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console.wazoo.dev/callback next build --webpack",
@@ -45,6 +46,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@eslint/js": "^9.39.5",
     "@opennextjs/cloudflare": "^1.20.1",
     "@playwright/test": "^1.62.0",
     "@types/node": "^26.1.1",
@@ -52,9 +54,12 @@
     "@types/react-dom": "^19.2.3",
     "@workos/emulate": "^0.4.1",
     "cross-env": "^10.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.10",
     "prettier": "^3.9.5",
     "tsx": "^4.23.1",
     "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
     "wrangler": "^4.112.0"
   }
 }

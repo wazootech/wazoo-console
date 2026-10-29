@@ -12,9 +12,23 @@ import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import { getWorldTabs, getWorldsApiUrl, thrownMessage } from "@/lib/utils";
 import Editor from "@monaco-editor/react";
 import { Play, Save, Trash2, Loader2, Sparkles } from "lucide-react";
+
+/** SPARQL JSON results, a mutation acknowledgement, or an API error. */
+type SparqlResponse = {
+  boolean?: boolean;
+  message?: string;
+  ok?: boolean;
+  success?: boolean;
+  status?: string;
+  head?: { vars?: string[] };
+  results?: {
+    bindings?: Array<Record<string, { value: unknown; type: string }>>;
+  };
+  error?: { message?: string; code?: string };
+};
 
 const PRESET_QUERIES = [
   {
@@ -80,7 +94,7 @@ export default function SparqlPage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invalidTokenError, setInvalidTokenError] = useState(false);
-  const [result, setResult] = useState<any | null>(null);
+  const [result, setResult] = useState<SparqlResponse | null>(null);
   const [timeTakenMs, setTimeTakenMs] = useState<number | null>(null);
 
   // Load custom queries from local storage
@@ -137,7 +151,7 @@ export default function SparqlPage({
       });
 
       const responseText = await res.text();
-      let data: any = null;
+      let data: SparqlResponse | null = null;
       try {
         data = responseText ? JSON.parse(responseText) : null;
       } catch {
@@ -159,9 +173,9 @@ export default function SparqlPage({
       }
 
       setResult(data);
-    } catch (e: any) {
+    } catch (e) {
       setInvalidTokenError(false);
-      setError(e.message || "An unexpected error occurred");
+      setError(thrownMessage(e) || "An unexpected error occurred");
     } finally {
       setLoading(false);
       setTimeTakenMs(Math.round(performance.now() - startTime));
@@ -207,7 +221,7 @@ export default function SparqlPage({
     if (result.head?.vars && result.results?.bindings) {
       const vars = result.head.vars as string[];
       const bindings = result.results.bindings as Array<
-        Record<string, { value: any; type: string }>
+        Record<string, { value: unknown; type: string }>
       >;
 
       if (bindings.length === 0) {

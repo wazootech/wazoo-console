@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
 
 interface DialogProps {
   open: boolean;

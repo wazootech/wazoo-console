@@ -18,7 +18,7 @@ import {
   type SavedWorldToken,
 } from "@/lib/utils";
 import Link from "next/link";
-import { KeyRound, Plus, Eye, EyeOff } from "lucide-react";
+import { KeyRound, Eye, EyeOff } from "lucide-react";
 
 interface WorldTokenSelectorProps {
   worldId: string;
@@ -46,7 +46,7 @@ export function WorldTokenSelector({
       setSelectedTokenValue("");
       onTokenChange(null);
     }
-  }, [worldId]);
+  }, [worldId, onTokenChange]);
 
   function handleSelectChange(val: string) {
     setSelectedTokenValue(val);
@@ -213,7 +213,7 @@ export function WorldTokenSelector({
 
         {tokens.length === 0 && !showManualForm && (
           <div className="p-3 border border-dashed border-amber-900/50 rounded bg-amber-950/10 text-amber-500 text-xs">
-            No access tokens found for this World in your browser's local
+            No access tokens found for this World in your browser&apos;s local
             storage. Go to the{" "}
             <Link
               href={`/worlds/${worldId}/tokens`}
@@ -221,7 +221,8 @@ export function WorldTokenSelector({
             >
               Tokens page
             </Link>{" "}
-            to generate one first, then select "+ Import existing token" above.
+            to generate one first, then select &quot;+ Import existing
+            token&quot; above.
           </div>
         )}
       </CardContent>

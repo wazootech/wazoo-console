@@ -8,7 +8,7 @@ import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import { getWorldTabs, getWorldsApiUrl, thrownMessage } from "@/lib/utils";
 import {
   Upload,
   FileText,
@@ -111,7 +111,7 @@ export default function ImportPage({
           }
           // Validate structure
           const valid = parsed.every(
-            (item: any) =>
+            (item: unknown): item is ParsedQuad =>
               typeof item === "object" &&
               item !== null &&
               "subject" in item &&
@@ -125,8 +125,8 @@ export default function ImportPage({
           }
           setParsedQuads(parsed);
           setParsedLines([]);
-        } catch (err: any) {
-          setError(`JSON Parse Error: ${err.message}`);
+        } catch (err) {
+          setError(`JSON Parse Error: ${thrownMessage(err)}`);
           setFile(null);
         }
       } else {
@@ -153,7 +153,7 @@ export default function ImportPage({
           throw new Error("JSON must contain an array of quad objects.");
         }
         const valid = parsed.every(
-          (item: any) =>
+          (item: unknown): item is ParsedQuad =>
             typeof item === "object" &&
             item !== null &&
             "subject" in item &&
@@ -167,8 +167,8 @@ export default function ImportPage({
         }
         setParsedQuads(parsed);
         setParsedLines([]);
-      } catch (err: any) {
-        setError(`JSON Parse Error: ${err.message}`);
+      } catch (err) {
+        setError(`JSON Parse Error: ${thrownMessage(err)}`);
         setParsedQuads([]);
         setParsedLines([]);
       }
@@ -236,8 +236,10 @@ export default function ImportPage({
       setPasteContent("");
       setParsedQuads([]);
       setParsedLines([]);
-    } catch (e: any) {
-      setError(e.message || "An unexpected error occurred during import");
+    } catch (e) {
+      setError(
+        thrownMessage(e) || "An unexpected error occurred during import",
+      );
     } finally {
       setLoading(false);
     }
