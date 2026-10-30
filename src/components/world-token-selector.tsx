@@ -2,23 +2,17 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   getLocalWorldTokens,
   saveLocalWorldToken,
   type SavedWorldToken,
 } from "@/lib/utils";
 import Link from "next/link";
-import { KeyRound, Eye, EyeOff } from "lucide-react";
+import { KeyRound } from "lucide-react";
+import { ManualTokenForm } from "./manual-token-form";
+import { TokenSelect } from "./token-select";
+import { NoTokensNotice } from "./no-tokens-notice";
 
 interface WorldTokenSelectorProps {
   worldId: string;
@@ -89,33 +83,11 @@ export function WorldTokenSelector({
               World Access Token
             </Label>
             <div className="flex items-center gap-2">
-              <Select
+              <TokenSelect
+                tokens={tokens}
                 value={selectedTokenValue}
-                onValueChange={handleSelectChange}
-              >
-                <SelectTrigger
-                  id="token-select"
-                  className="w-full bg-zinc-900 border-zinc-800 text-white"
-                >
-                  <SelectValue placeholder="Select a token or import one..." />
-                </SelectTrigger>
-                <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
-                  {tokens.map((t) => (
-                    <SelectItem key={t.token} value={t.token}>
-                      <span className="font-medium">{t.name}</span>
-                      <span className="ml-2 text-xs text-zinc-500 font-mono">
-                        ({t.token.slice(0, 10)}...)
-                      </span>
-                    </SelectItem>
-                  ))}
-                  <SelectItem
-                    value="manual"
-                    className="text-primary font-medium"
-                  >
-                    + Import existing token
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                onChange={handleSelectChange}
+              />
             </div>
           </div>
           <div className="shrink-0 flex items-center gap-2">
@@ -129,101 +101,28 @@ export function WorldTokenSelector({
         </div>
 
         {showManualForm && (
-          <form
+          <ManualTokenForm
+            manualName={manualName}
+            setManualName={setManualName}
+            manualToken={manualToken}
+            setManualToken={setManualToken}
+            showTokenSecret={showTokenSecret}
+            setShowTokenSecret={setShowTokenSecret}
             onSubmit={handleAddManualToken}
-            className="space-y-4 p-4 border border-zinc-800 rounded-lg bg-zinc-900/50"
-          >
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-white">
-                Import an existing token
-              </h3>
-              <p className="text-xs text-zinc-400">
-                Generate a token on the Tokens page first, then enter its secret
-                here. This only imports the existing token into this browser; it
-                does not create a token.
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="manual-name" className="text-zinc-400">
-                Local Token Label (optional)
-              </Label>
-              <Input
-                id="manual-name"
-                placeholder="e.g. My Dev Token"
-                value={manualName}
-                onChange={(e) => setManualName(e.target.value)}
-                className="bg-zinc-900 border-zinc-800 text-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="manual-token" className="text-zinc-400">
-                Existing Token Secret
-              </Label>
-              <div className="relative">
-                <Input
-                  id="manual-token"
-                  type={showTokenSecret ? "text" : "password"}
-                  placeholder="wzw_..."
-                  value={manualToken}
-                  onChange={(e) => setManualToken(e.target.value)}
-                  className="bg-zinc-900 border-zinc-800 text-white pr-10"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowTokenSecret(!showTokenSecret)}
-                  aria-label={
-                    showTokenSecret ? "Hide token secret" : "Show token secret"
-                  }
-                  aria-pressed={showTokenSecret}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
-                >
-                  {showTokenSecret ? (
-                    <EyeOff className="size-4" />
-                  ) : (
-                    <Eye className="size-4" />
-                  )}
-                </button>
-              </div>
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowManualForm(false);
-                  if (tokens.length > 0) {
-                    setSelectedTokenValue(tokens[0].token);
-                    onTokenChange(tokens[0].token);
-                  } else {
-                    setSelectedTokenValue("");
-                  }
-                }}
-                className="hover:bg-zinc-800"
-              >
-                Cancel
-              </Button>
-              <Button type="submit" size="sm">
-                Import & Select
-              </Button>
-            </div>
-          </form>
+            onCancel={() => {
+              setShowManualForm(false);
+              if (tokens.length > 0) {
+                setSelectedTokenValue(tokens[0].token);
+                onTokenChange(tokens[0].token);
+              } else {
+                setSelectedTokenValue("");
+              }
+            }}
+          />
         )}
 
         {tokens.length === 0 && !showManualForm && (
-          <div className="p-3 border border-dashed border-amber-900/50 rounded bg-amber-950/10 text-amber-500 text-xs">
-            No access tokens found for this World in your browser&apos;s local
-            storage. Go to the{" "}
-            <Link
-              href={`/worlds/${worldId}/tokens`}
-              className="underline font-semibold hover:text-amber-400"
-            >
-              Tokens page
-            </Link>{" "}
-            to generate one first, then select &quot;+ Import existing
-            token&quot; above.
-          </div>
+          <NoTokensNotice worldId={worldId} />
         )}
       </CardContent>
     </Card>
