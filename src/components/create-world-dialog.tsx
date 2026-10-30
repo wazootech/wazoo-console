@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { CreatedWorldView } from "./created-world-view";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
@@ -83,20 +84,10 @@ export function CreateWorldDialog({
           <DialogTitle>Create World</DialogTitle>
         </DialogHeader>
         {createdWorldId ? (
-          <div className="space-y-4">
-            <p role="status">World created successfully.</p>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">World ID</p>
-              <code className="block break-all rounded-md border bg-muted p-3 text-sm">
-                {createdWorldId}
-              </code>
-            </div>
-            <div className="flex justify-end">
-              <Button type="button" onClick={() => onOpenChange(false)}>
-                Done
-              </Button>
-            </div>
-          </div>
+          <CreatedWorldView
+            worldId={createdWorldId}
+            onDone={() => onOpenChange(false)}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
