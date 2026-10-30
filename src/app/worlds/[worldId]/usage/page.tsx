@@ -6,7 +6,6 @@ import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { getWorldTabs } from "@/lib/utils";
 import {
@@ -18,6 +17,7 @@ import {
   type QuotaSummary,
 } from "@/lib/quota-error";
 import { getWorldUsage, type UsageEvent } from "@wazoo/client";
+import { UsageCards } from "./usage-cards";
 
 export default function WorldUsagePage({
   params,
@@ -97,49 +97,7 @@ export default function WorldUsagePage({
           </div>
         )}
         {!loading && usage && (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Metrics</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="divide-y">
-                  {usage.total.map((m) => (
-                    <div key={m.metric} className="flex justify-between py-2">
-                      <span className="text-sm">{m.metric}</span>
-                      <span className="text-sm font-mono">
-                        {m.quantity.toLocaleString()}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-            {quotaSummary && quotaSummary.limits.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm">Limits</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="divide-y">
-                    {quotaSummary.limits.map((limit) => (
-                      <div
-                        key={limit.metric}
-                        className="flex justify-between py-2"
-                      >
-                        <span className="text-sm">{limit.metric}</span>
-                        <span className="text-sm font-mono">
-                          {limit.quantity.toLocaleString()} /{" "}
-                          {limit.limitQuantity.toLocaleString()} (
-                          {limit.usagePercent}%)
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
+          <UsageCards usage={usage} quotaSummary={quotaSummary} />
         )}
       </div>
     </AppShell>
