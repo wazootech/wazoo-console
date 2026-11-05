@@ -33,9 +33,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!token) return null;
 
   const navItems = [
-    { label: gt("Worlds"), href: "/worlds" },
-    { label: gt("Tokens"), href: "/tokens" },
-    { label: gt("Docs"), href: "https://docs.wazoo.dev", external: true },
+    {
+      label: gt("Worlds", {
+        $context: "Nav item: Wazoo worlds, knowledge graphs a user manages",
+      }),
+      href: "/worlds",
+    },
+    {
+      label: gt("Tokens", {
+        $context:
+          "Nav item: Wazoo API access tokens (wzt_ secrets), not game pieces or chips",
+      }),
+      href: "/tokens",
+    },
+    {
+      label: gt("Docs", { $context: "Nav item linking to documentation" }),
+      href: "https://docs.wazoo.dev",
+      external: true,
+    },
   ];
 
   return (
