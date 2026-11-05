@@ -7,6 +7,5 @@ out/
 /.codex-*.log
 .env*
 test-results/
-public/_gt/
 playwright-report/
 playwright/.cache/

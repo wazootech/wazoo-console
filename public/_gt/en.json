@@ -1,0 +1,53 @@
+{
+  "2253d131ab9b959f": "Worlds",
+  "8f01f72ab87d0628": "Tokens",
+  "f2e393e1419f8c99": "Docs",
+  "2c1c93a646bbea6e": "Language",
+  "b79f328847ada9f1": {
+    "t": "div",
+    "i": 1,
+    "d": {
+      "arl": "Cookie consent"
+    },
+    "c": {
+      "t": "div",
+      "i": 2,
+      "c": [
+        {
+          "t": "p",
+          "i": 3,
+          "c": "We use cookies that are strictly necessary for authentication and session management. No analytics or tracking cookies are loaded without your consent."
+        },
+        {
+          "t": "div",
+          "i": 4,
+          "c": [
+            {
+              "t": "Button",
+              "i": 5,
+              "c": "Reject all"
+            },
+            {
+              "t": "Button",
+              "i": 6,
+              "c": "Accept all"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "87fdcc57d0c2053a": "Could not start sign-in. Please try again.",
+  "d4334f49fb53ce4f": [
+    {
+      "t": "CardTitle",
+      "i": 1,
+      "c": "Welcome to Wazoo"
+    },
+    {
+      "t": "CardDescription",
+      "i": 2,
+      "c": "Wazoo is for people aged 13 and older. Under-13 accounts are not allowed without verifiable parental consent."
+    }
+  ]
+}

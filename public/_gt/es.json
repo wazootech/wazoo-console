@@ -1,0 +1,53 @@
+{
+  "2c1c93a646bbea6e": "Idioma",
+  "4db1d1a896fd4779": "Documentación",
+  "55c30bdda0f880f7": "Mundos",
+  "87fdcc57d0c2053a": "No se pudo iniciar el proceso de inicio de sesión. Inténtalo de nuevo.",
+  "b79f328847ada9f1": {
+    "c": {
+      "c": [
+        {
+          "c": "Usamos cookies estrictamente necesarias para la autenticación y la gestión de sesiones. No se cargan cookies de analítica ni de seguimiento sin tu consentimiento.",
+          "i": 3,
+          "t": "p"
+        },
+        {
+          "c": [
+            {
+              "c": "Rechazar todas",
+              "i": 5,
+              "t": "Button"
+            },
+            {
+              "c": "Aceptar todas",
+              "i": 6,
+              "t": "Button"
+            }
+          ],
+          "i": 4,
+          "t": "div"
+        }
+      ],
+      "i": 2,
+      "t": "div"
+    },
+    "d": {
+      "arl": "Cookie consent"
+    },
+    "i": 1,
+    "t": "div"
+  },
+  "d050cc022a91e763": "Tokens",
+  "d4334f49fb53ce4f": [
+    {
+      "c": "Te damos la bienvenida a Wazoo",
+      "i": 1,
+      "t": "CardTitle"
+    },
+    {
+      "c": "Wazoo es para personas de 13 años o más. No se permiten cuentas de menores de 13 años sin consentimiento parental verificable.",
+      "i": 2,
+      "t": "CardDescription"
+    }
+  ]
+}

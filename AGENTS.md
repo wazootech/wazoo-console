@@ -22,8 +22,8 @@ This repository contains the Wazoo console application.
   environment; E2E tests may write data.
 - Run `pnpm run health:local` to verify the health endpoint.
 - Do not touch deploy targets or environment configuration unless the user asks.
-- Translations (gt-next): `public/_gt/*.json` files are generated, not
-  hand-written, and are gitignored. After a fresh checkout, run
-  `npx gt generate` once so `next dev`/`tsc` compile (`src/loadTranslations.ts`
-  imports those files). Wrapping UI strings: use `<T>` for JSX and `useGT()`
+- Translations (gt-next): `public/_gt/*.json` hold the committed translations
+  (kept in sync with `gt-lock.json`). When UI strings change, run
+  `npx gt generate && GT_PROJECT_ID=… GT_API_KEY=… npx gt translate` and commit
+  the refreshed files. Wrapping UI strings: use `<T>` for JSX and `useGT()`
   for plain strings; add locales in `gt.config.json`.
