@@ -10,11 +10,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { T, useGT } from "gt-next";
 
 const privacyPolicyUrl = "https://docs.wazoo.dev/privacy-policy";
 const termsUrl = "https://docs.wazoo.dev/terms";
 
 export function SignInGate() {
+  const gt = useGT();
   const [confirmed, setConfirmed] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -46,13 +48,14 @@ export function SignInGate() {
       };
       if (!res.ok || !body.url) {
         setError(
-          body.error?.message ?? "Could not start sign-in. Please try again.",
+          body.error?.message ??
+            gt("Could not start sign-in. Please try again."),
         );
         return;
       }
       window.location.assign(body.url);
     } catch {
-      setError("Could not start sign-in. Please try again.");
+      setError(gt("Could not start sign-in. Please try again."));
     } finally {
       setSubmitting(false);
     }
@@ -66,11 +69,13 @@ export function SignInGate() {
     >
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Welcome to Wazoo</CardTitle>
-          <CardDescription>
-            Wazoo is for people aged 13 and older. Under-13 accounts are not
-            allowed without verifiable parental consent.
-          </CardDescription>
+          <T>
+            <CardTitle>Welcome to Wazoo</CardTitle>
+            <CardDescription>
+              Wazoo is for people aged 13 and older. Under-13 accounts are not
+              allowed without verifiable parental consent.
+            </CardDescription>
+          </T>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-sm text-muted-foreground">
