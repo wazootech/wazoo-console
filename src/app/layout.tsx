@@ -2,13 +2,12 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 
 import { GTProvider } from "gt-next";
-
+import { getLocale } from "gt-next/server";
 import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { AuthProvider } from "@/lib/auth";
 import { ConsentProvider } from "@/lib/consent";
 import { ConsentBanner } from "@/components/consent-banner";
 import "./globals.css";
-import { getLocale } from "gt-next/server";
 
 export const metadata: Metadata = {
   title: "Wazoo Console",
