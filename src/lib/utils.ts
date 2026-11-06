@@ -64,3 +64,17 @@ export function saveLocalWorldToken(
     console.error("Failed to save local world token", e);
   }
 }
+
+/** The `message` of a thrown value, or "" when it carries none. */
+export function thrownMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "message" in err &&
+    typeof err.message === "string"
+  ) {
+    return err.message;
+  }
+  return "";
+}

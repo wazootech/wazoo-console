@@ -1,0 +1,13 @@
+title = "wazoo-console gitleaks config"
+
+[extend]
+useDefault = true
+
+# General Translation (gt-next) dictionaries key every string by a 16-character
+# hex content hash, which the generic-api-key rule reads as a credential. Scope
+# the exemption to that one rule and to those files so everything else is still
+# scanned.
+[[allowlists]]
+description = "General Translation dictionary content hashes"
+targetRules = ["generic-api-key"]
+paths = ['''^public/_gt/.*\.json$''']

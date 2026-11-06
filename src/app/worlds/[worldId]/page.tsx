@@ -1,30 +1,23 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
+import { useCallback, useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { NavTabs } from "@/components/nav-tabs";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { WorldTokenSelector } from "@/components/world-token-selector";
 import { getWorldTabs } from "@/lib/utils";
+import { WorldInfoCards } from "./world-info-cards";
 import {
   getWorldIdentity,
   worldIdentityErrorMessage,
   type WorldIdentity,
 } from "@/lib/world-identity";
-
-const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
-  ACTIVE: "default",
-  SUSPENDED: "secondary",
-  DELETED: "destructive",
-};
 
 export default function WorldDetailPage({
   params,
@@ -41,7 +34,7 @@ export default function WorldDetailPage({
   const [showDelete, setShowDelete] = useState(false);
   const [worldToken, setWorldToken] = useState<string | null>(null);
 
-  async function fetchWorld() {
+  const fetchWorld = useCallback(async () => {
     if (!client) return;
     setLoading(true);
     setError(null);
@@ -52,11 +45,11 @@ export default function WorldDetailPage({
       setWorld(r.data ?? null);
     }
     setLoading(false);
-  }
+  }, [client, worldId]);
 
   useEffect(() => {
     fetchWorld();
-  }, [client, worldId]);
+  }, [fetchWorld]);
 
   const tabs = getWorldTabs(worldId);
 
@@ -127,58 +120,7 @@ export default function WorldDetailPage({
         </div>
         <WorldTokenSelector worldId={worldId} onTokenChange={setWorldToken} />
         <NavTabs tabs={tabs} />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">State</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant={stateVariant[world.state] ?? "secondary"}>
-                {world.state}
-              </Badge>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Region</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{world.region}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Backend</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{world.backend}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Created</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                {world.createTime
-                  ? new Date(world.createTime).toLocaleString()
-                  : "—"}
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Updated</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">
-                {world.updateTime
-                  ? new Date(world.updateTime).toLocaleString()
-                  : "—"}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <WorldInfoCards world={world} />
         <DeleteWorldDialog
           open={showDelete}
           onOpenChange={setShowDelete}

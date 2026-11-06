@@ -1,0 +1,57 @@
+name: code-health
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: File length (enforced; 120 src / 300 test, blank/comment/import lines excluded)
+        run: |
+          # Lines of code = non-blank, non-comment lines, excluding import and
+          # `export ... from` statements even when a formatter wraps them over
+          # several lines. A plain `export { a };` is counted as code.
+          count() {
+            awk '
+              function isfrom(s) { return s ~ /from[ \t]*["\x27]/ }
+              st == "imp" { if (isfrom($0)) st = ""; next }
+              st == "exp" { buf++; if ($0 ~ /^[ \t]*}/) { if (!isfrom($0)) n += buf; st = "" } next }
+              /^[ \t]*($|\/\/|\/\*|\*)/ { next }
+              /^[ \t]*import[ \t{*"\x27]/ {
+                if (!isfrom($0) && $0 !~ /^[ \t]*import[ \t]*["\x27]/ && $0 !~ /;[ \t]*$/) st = "imp"
+                next
+              }
+              /^[ \t]*export[ \t]+(type[ \t]+)?\*/ { if (!isfrom($0)) n++; next }
+              /^[ \t]*export[ \t]+(type[ \t]+)?{/ {
+                if (isfrom($0)) next
+                if ($0 !~ /}/) { st = "exp"; buf = 1; next }
+              }
+              { n++ }
+              END { print n + 0 }
+            ' "$1"
+          }
+          # Files allowed to exceed the limit, one path per line, each with a
+          # reason. This list may only shrink. It is empty: every file fits.
+          ALLOWLIST=""
+          fail=0
+          while read -r f; do
+            n=$(count "$f")
+            case "$f" in *.test.*|*.spec.*|*/tests/*|tests/*) max=300;; *) max=120;; esac
+            if [ "$n" -gt "$max" ]; then
+              case "$ALLOWLIST" in *"$f"*) continue;; esac
+              echo "::error file=$f::$n lines of code (limit $max)"
+              echo "- \`$f\`: $n (limit $max)" >> "$GITHUB_STEP_SUMMARY"
+              fail=1
+            fi
+          done < <(git ls-files '*.ts' '*.tsx' '*.js' '*.mjs' \
+            | grep -vE '(^|/)(node_modules|dist|generated|fixtures|\.next)/|\.d\.ts$|\.gen\.|openapi|snapshot|schema')
+          exit $fail
+      - name: TODO/FIXME without an issue link (warn-only)
+        run: |
+          git grep -nE '\b(TODO|FIXME)\b' -- '*.ts' '*.tsx' '*.js' '*.mjs' ':!*generated*' \
+            | grep -vE '#[0-9]+|/issues/[0-9]+' \
+            | while IFS=: read -r f l _; do echo "::warning file=$f,line=$l::TODO/FIXME without an issue link"; done || true
