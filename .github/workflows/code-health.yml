@@ -12,10 +12,32 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: File length (warn-only; 120 src / 300 test, blank/comment/import lines excluded)
         run: |
+          # Lines of code = non-blank, non-comment lines, excluding import and
+          # `export ... from` statements even when a formatter wraps them over
+          # several lines. A plain `export { a };` is counted as code.
+          count() {
+            awk '
+              function isfrom(s) { return s ~ /from[ \t]*["\x27]/ }
+              st == "imp" { if (isfrom($0)) st = ""; next }
+              st == "exp" { buf++; if ($0 ~ /^[ \t]*}/) { if (!isfrom($0)) n += buf; st = "" } next }
+              /^[ \t]*($|\/\/|\/\*|\*)/ { next }
+              /^[ \t]*import[ \t{*"\x27]/ {
+                if (!isfrom($0) && $0 !~ /^[ \t]*import[ \t]*["\x27]/ && $0 !~ /;[ \t]*$/) st = "imp"
+                next
+              }
+              /^[ \t]*export[ \t]+(type[ \t]+)?\*/ { if (!isfrom($0)) n++; next }
+              /^[ \t]*export[ \t]+(type[ \t]+)?{/ {
+                if (isfrom($0)) next
+                if ($0 !~ /}/) { st = "exp"; buf = 1; next }
+              }
+              { n++ }
+              END { print n + 0 }
+            ' "$1"
+          }
           git ls-files '*.ts' '*.tsx' '*.js' '*.mjs' \
             | grep -vE '(^|/)(node_modules|dist|generated|fixtures|\.next)/|\.d\.ts$|\.gen\.|openapi|snapshot|schema' \
             | while read -r f; do
-                n=$(grep -cvE '^\s*($|//|/\*|\*|import |export .* from )' "$f" || true)
+                n=$(count "$f")
                 case "$f" in *.test.*|*.spec.*|*/tests/*|tests/*) max=300;; *) max=120;; esac
                 if [ "$n" -gt "$max" ]; then echo "::warning file=$f::$n lines of code (limit $max)"; echo "- \`$f\`: $n (limit $max)" >> "$GITHUB_STEP_SUMMARY"; fi
               done
