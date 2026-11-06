@@ -45,6 +45,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               href="/worlds"
               className="group flex items-center gap-2 font-semibold shrink-0"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element -- static SVG logo; next/image would not optimize it */}
               <img src="/wazoo.svg" alt="" className="size-7 logo-spin" />
               <span className="flex items-center gap-2">
                 <span className="hidden sm:inline">Wazoo Console</span>

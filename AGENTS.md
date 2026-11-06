@@ -22,3 +22,13 @@ This repository contains the Wazoo console application.
   environment; E2E tests may write data.
 - Run `pnpm run health:local` to verify the health endpoint.
 - Do not touch deploy targets or environment configuration unless the user asks.
+
+## Code health
+
+Family-wide rules live in the [wazootech workspace constitution](https://github.com/wazootech/workspace/blob/main/AGENTS.md#code-health-standards); this repo's specifics:
+
+- Before pushing, run `pnpm run format:check`, `pnpm run lint`, and `pnpm run typecheck`, plus the narrowest relevant build; CI runs the same checks. Lint uses `--max-warnings 0` (typescript-eslint recommended plus `eslint-config-next/core-web-vitals`).
+- `@typescript-eslint/no-explicit-any` is an error. `react-hooks/set-state-in-effect` is off pending a Suspense refactor of the 13 fetch-on-mount effects; do not add new ones.
+- `unrs-resolver: false` in `pnpm-workspace.yaml` is deliberate (prebuilt binaries); do not turn it on.
+- Workflow actions are pinned to full commit SHAs with a version comment; Node comes from `.node-version`; installs are frozen. Deploy and publish jobs are approval-gated; pin them but change nothing else without asking.
+- `secret-scan.yml` runs gitleaks on every pull request and push to `main`. `code-health.yml` only warns. `CODEOWNERS` routes review to `@EthanThatOneKid`.

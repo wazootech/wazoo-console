@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
-import { getWorldsApiUrl, getWorldTabs } from "@/lib/utils";
+import { getWorldsApiUrl, getWorldTabs, thrownMessage } from "@/lib/utils";
 import {
   AlertCircle,
   ArrowRight,
@@ -22,6 +22,9 @@ import {
   FileCode,
   Loader2,
 } from "lucide-react";
+
+/** Error envelope the Worlds API returns on a failed request. */
+type ApiErrorBody = { error?: { message?: string; code?: string } };
 
 interface ExportFormat {
   id: string;
@@ -124,7 +127,7 @@ export default function ExportPage({
 
       if (!res.ok) {
         const responseText = await res.text();
-        let errData: any = null;
+        let errData: ApiErrorBody | null = null;
         try {
           errData = responseText ? JSON.parse(responseText) : null;
         } catch {
@@ -157,9 +160,11 @@ export default function ExportPage({
 
       setPreviewContent(text);
       return text;
-    } catch (err: any) {
+    } catch (err) {
       setInvalidTokenError(false);
-      setError(err.message || "An unexpected error occurred during export");
+      setError(
+        thrownMessage(err) || "An unexpected error occurred during export",
+      );
       setPreviewContent(null);
       return null;
     }

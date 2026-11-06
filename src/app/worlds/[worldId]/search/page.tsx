@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import { getWorldTabs, getWorldsApiUrl, thrownMessage } from "@/lib/utils";
 import {
   Search,
   Loader2,
@@ -126,8 +126,10 @@ export default function SearchPage({
       setMode(data.mode);
       setDetailSubject(null);
       setDetailQuads([]);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred during search");
+    } catch (err) {
+      setError(
+        thrownMessage(err) || "An unexpected error occurred during search",
+      );
     } finally {
       setLoading(false);
     }
@@ -198,7 +200,8 @@ export default function SearchPage({
       if (!res.ok) {
         throw new Error(data.error?.message || "Failed to load subject detail");
       }
-      const bindings: any[] = data?.results?.bindings || [];
+      const bindings: Array<Record<string, { value?: string } | undefined>> =
+        data?.results?.bindings || [];
       setDetailQuads(
         bindings.map((b) => ({
           subject,
@@ -207,8 +210,8 @@ export default function SearchPage({
           graph: b.g?.value || "",
         })),
       );
-    } catch (err: any) {
-      setDetailError(err.message || "Failed to load subject detail");
+    } catch (err) {
+      setDetailError(thrownMessage(err) || "Failed to load subject detail");
     } finally {
       setDetailLoading(false);
     }
