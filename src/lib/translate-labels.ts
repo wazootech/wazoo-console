@@ -1,10 +1,12 @@
+import type { GTTranslationOptions } from "gt-next";
+
 /**
  * Translate a world-tab label through gt with a literal call per known label,
  * so the gt-next static extractor can harvest each string at build time.
  * Unknown labels fall back to the raw label.
  */
 export function translateWorldTabLabel(
-  gt: (s: string) => string,
+  gt: (s: string, o?: GTTranslationOptions) => string,
   label: string,
 ): string {
   switch (label) {
@@ -16,8 +18,13 @@ export function translateWorldTabLabel(
       return gt("Import");
     case "Search":
       return gt("Search");
+    // Shares the nav label's context string so the hash matches the entry
+    // already in the translation files (bare "Tokens" renders as "Fichas").
     case "Tokens":
-      return gt("Tokens");
+      return gt("Tokens", {
+        $context:
+          "Nav item: Wazoo API access tokens (wzt_ secrets), not game pieces or chips",
+      });
     case "Usage":
       return gt("Usage");
     case "Export":
