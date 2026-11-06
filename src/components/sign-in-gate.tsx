@@ -10,9 +10,29 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { requestSignIn } from "@/lib/request-sign-in";
 
 const privacyPolicyUrl = "https://docs.wazoo.dev/privacy-policy";
 const termsUrl = "https://docs.wazoo.dev/terms";
+
+function PolicyLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary underline underline-offset-4 hover:opacity-80"
+    >
+      {children}
+    </a>
+  );
+}
 
 export function SignInGate() {
   const [confirmed, setConfirmed] = useState(false);
@@ -23,39 +43,13 @@ export function SignInGate() {
     if (!confirmed || submitting) return;
     setSubmitting(true);
     setError(null);
-    try {
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ ageConfirmed: true }),
-      });
-      const location = res.headers.get("location");
-      if (
-        res.redirected ||
-        (location && res.status >= 300 && res.status < 400)
-      ) {
-        window.location.assign(location ?? res.url);
-        return;
-      }
-      const body = (await res.json().catch(() => ({}))) as {
-        url?: string;
-        error?: { message?: string };
-      };
-      if (!res.ok || !body.url) {
-        setError(
-          body.error?.message ?? "Could not start sign-in. Please try again.",
-        );
-        return;
-      }
-      window.location.assign(body.url);
-    } catch {
-      setError("Could not start sign-in. Please try again.");
-    } finally {
-      setSubmitting(false);
+    const result = await requestSignIn();
+    if ("error" in result) {
+      setError(result.error);
+    } else {
+      window.location.assign(result.redirectTo);
     }
+    setSubmitting(false);
   }
 
   return (
@@ -77,24 +71,8 @@ export function SignInGate() {
             We collect the minimum needed to run your account: your email
             address and display name. Usage data is tracked to meter and manage
             the platform. See our{" "}
-            <a
-              href={privacyPolicyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline underline-offset-4 hover:opacity-80"
-            >
-              privacy policy
-            </a>{" "}
-            and{" "}
-            <a
-              href={termsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline underline-offset-4 hover:opacity-80"
-            >
-              terms of service
-            </a>
-            .
+            <PolicyLink href={privacyPolicyUrl}>privacy policy</PolicyLink> and{" "}
+            <PolicyLink href={termsUrl}>terms of service</PolicyLink>.
           </p>
           <label className="flex items-start gap-3 text-sm">
             <input
@@ -105,24 +83,8 @@ export function SignInGate() {
             />
             <span>
               I confirm I am at least 13 years old and have read the Wazoo{" "}
-              <a
-                href={privacyPolicyUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary underline underline-offset-4 hover:opacity-80"
-              >
-                privacy policy
-              </a>{" "}
-              and{" "}
-              <a
-                href={termsUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary underline underline-offset-4 hover:opacity-80"
-              >
-                terms of service
-              </a>
-              .
+              <PolicyLink href={privacyPolicyUrl}>privacy policy</PolicyLink>{" "}
+              and <PolicyLink href={termsUrl}>terms of service</PolicyLink>.
             </span>
           </label>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -136,14 +98,9 @@ export function SignInGate() {
           </Button>
           <p className="text-center text-xs text-muted-foreground">
             We do not sell or share your personal information.{" "}
-            <a
-              href={privacyPolicyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline underline-offset-4 hover:opacity-80"
-            >
+            <PolicyLink href={privacyPolicyUrl}>
               Do Not Sell or Share My Personal Information
-            </a>
+            </PolicyLink>
           </p>
         </CardContent>
       </Card>
