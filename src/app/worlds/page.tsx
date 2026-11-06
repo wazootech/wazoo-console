@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
@@ -33,7 +33,7 @@ export default function WorldsPage() {
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  async function fetchWorlds() {
+  const fetchWorlds = useCallback(async () => {
     if (!client) return;
     setLoading(true);
     setError(null);
@@ -48,11 +48,11 @@ export default function WorldsPage() {
       setWorlds(r.data ?? []);
     }
     setLoading(false);
-  }
+  }, [client, logout]);
 
   useEffect(() => {
     fetchWorlds();
-  }, [client]);
+  }, [fetchWorlds]);
 
   return (
     <AppShell>

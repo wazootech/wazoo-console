@@ -11,9 +11,11 @@ import {
 import { createClient, type Client, type User } from "@wazoo/client";
 
 function getApiBaseUrl(): string {
-  if (typeof window !== "undefined" && (window as any).__WZ_API_URL) {
-    return (window as any).__WZ_API_URL;
-  }
+  const injected =
+    typeof window !== "undefined"
+      ? (window as Window & { __WZ_API_URL?: string }).__WZ_API_URL
+      : undefined;
+  if (injected) return injected;
   return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
 }
 

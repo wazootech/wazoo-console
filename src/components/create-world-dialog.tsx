@@ -12,13 +12,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { CreatedWorldView } from "./created-world-view";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
-import { useGT } from "gt-next";
 import { isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
   createWorldByDisplayName,
   worldIdentityErrorMessage,
 } from "@/lib/world-identity";
+import { useGT } from "gt-next";
 
 export function CreateWorldDialog({
   open,
@@ -29,8 +30,8 @@ export function CreateWorldDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
-  const { client, logout } = useAuth();
   const gt = useGT();
+  const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [createdWorldId, setCreatedWorldId] = useState<string | null>(null);
@@ -85,20 +86,10 @@ export function CreateWorldDialog({
           <DialogTitle>{gt("Create World")}</DialogTitle>
         </DialogHeader>
         {createdWorldId ? (
-          <div className="space-y-4">
-            <p role="status">{gt("World created successfully.")}</p>
-            <div className="space-y-2">
-              <p className="text-sm font-medium">{gt("World ID")}</p>
-              <code className="block break-all rounded-md border bg-muted p-3 text-sm">
-                {createdWorldId}
-              </code>
-            </div>
-            <div className="flex justify-end">
-              <Button type="button" onClick={() => onOpenChange(false)}>
-                {gt("Done")}
-              </Button>
-            </div>
-          </div>
+          <CreatedWorldView
+            worldId={createdWorldId}
+            onDone={() => onOpenChange(false)}
+          />
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">

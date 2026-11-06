@@ -47,7 +47,9 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
   const persist = useCallback((value: "accepted" | "rejected") => {
     try {
       window.localStorage.setItem(consentStorageKey, value);
-    } catch {}
+    } catch {
+      // Storage can be unavailable (private mode, quota); consent still applies for this session.
+    }
     setStatus(value);
   }, []);
 
