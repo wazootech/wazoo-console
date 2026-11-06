@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getWorldsApiUrl } from "@/lib/utils";
 import { RefreshCw, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useGT } from "gt-next";
 
 interface ReindexWorldButtonProps {
   worldId?: string | null;
@@ -17,6 +18,7 @@ export function ReindexWorldButton({
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const gt = useGT();
 
   async function handleReindex() {
     setLoading(true);
@@ -25,7 +27,9 @@ export function ReindexWorldButton({
 
     if (!worldId) {
       setErrorMsg(
-        "World provisioning is incomplete: no canonical data-plane ID is available.",
+        gt(
+          "World provisioning is incomplete: no canonical data-plane ID is available.",
+        ),
       );
       setStatus("error");
       setLoading(false);
@@ -79,16 +83,18 @@ export function ReindexWorldButton({
         ) : (
           <RefreshCw className="size-4" />
         )}
-        Reindex World
+        {gt("Reindex World")}
       </Button>
       {!worldId && (
         <span className="text-xs text-amber-500">
-          World provisioning is incomplete; refresh or contact an administrator.
+          {gt(
+            "World provisioning is incomplete; refresh or contact an administrator.",
+          )}
         </span>
       )}
       {status === "success" && (
         <span className="text-xs text-emerald-400 flex items-center gap-1">
-          <CheckCircle className="size-3.5" /> Reindexed
+          <CheckCircle className="size-3.5" /> {gt("Reindexed")}
         </span>
       )}
       {status === "error" && errorMsg && (

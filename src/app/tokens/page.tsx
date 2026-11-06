@@ -27,9 +27,11 @@ import {
 } from "@wazoo/client";
 
 import { ScopeSelector } from "@/components/scope-selector";
+import { useGT } from "gt-next";
 
 export default function TokensPage() {
   const { client } = useAuth();
+  const gt = useGT();
   const [tokens, setTokens] = useState<PlatformToken[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -72,11 +74,13 @@ export default function TokensPage() {
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="API Tokens"
-          description="Manage platform API tokens for authentication"
+          title={gt("API Tokens", {
+            $context: "Page title: Wazoo platform API access tokens",
+          })}
+          description={gt("Manage platform API tokens for authentication")}
           actions={
             <Button onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" /> Create Token
+              <Plus className="size-4" /> {gt("Create Token")}
             </Button>
           }
         />
@@ -102,7 +106,7 @@ export default function TokensPage() {
                 key={t.uid}
                 name={t.name}
                 uid={t.uid}
-                typeBadge="Platform Token"
+                typeBadge={gt("Platform Token")}
                 scopes={
                   t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined
                 }
@@ -114,7 +118,7 @@ export default function TokensPage() {
         {!loading && tokens.length === 0 && !error && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No API tokens yet.
+              {gt("No API tokens yet.")}
             </CardContent>
           </Card>
         )}
@@ -141,6 +145,7 @@ function CreateTokenDialog({
   onCreated: (uid: string, name: string, token: string) => void;
 }) {
   const { client, user } = useAuth();
+  const gt = useGT();
   const [name, setName] = useState("");
   const [scope, setScope] = useState("");
   const [isScopeValid, setIsScopeValid] = useState(true);
@@ -172,7 +177,7 @@ function CreateTokenDialog({
       onOpenChange(false);
       onCreated(d.uid, d.name, d.token);
     } else {
-      setError("No token in response");
+      setError(gt("No token in response"));
     }
     setLoading(false);
   }
@@ -181,11 +186,11 @@ function CreateTokenDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create API Token</DialogTitle>
+          <DialogTitle>{gt("Create API Token")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tokenName">Name</Label>
+            <Label htmlFor="tokenName">{gt("Name")}</Label>
             <Input
               id="tokenName"
               placeholder="my-token"
@@ -214,13 +219,13 @@ function CreateTokenDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {gt("Cancel")}
             </Button>
             <Button type="submit" disabled={loading || !isScopeValid}>
               {loading ? (
                 <Loader2 className="size-4 animate-spin text-muted-foreground mr-1" />
               ) : null}
-              Create
+              {gt("Create")}
             </Button>
           </div>
         </form>

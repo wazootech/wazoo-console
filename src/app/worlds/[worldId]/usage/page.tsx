@@ -8,7 +8,8 @@ import { NavTabs } from "@/components/nav-tabs";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   errMsg,
   isUnauthorizedError,
@@ -25,6 +26,7 @@ export default function WorldUsagePage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const gt = useGT();
   const { client, logout } = useAuth();
   const [usage, setUsage] = useState<{
     total: Array<{ metric: string; quantity: number }>;
@@ -35,7 +37,10 @@ export default function WorldUsagePage({
   const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
   const [quotaSummary, setQuotaSummary] = useState<QuotaSummary | null>(null);
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   useEffect(() => {
     if (!client) return;
@@ -63,18 +68,18 @@ export default function WorldUsagePage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Usage"
-          description="Review usage metrics for this world"
+          title={gt("Usage")}
+          description={gt("Review usage metrics for this world")}
         />
         <NavTabs tabs={tabs} />
         {error && (
           <QuotaErrorBanner
             message={error}
             usagePercent={errorQuota?.usagePercent}
-            usageLabel="Usage"
+            usageLabel={gt("Usage")}
             hint={
               errorQuota
-                ? "Reduce usage or raise the plan limit to continue."
+                ? gt("Reduce usage or raise the plan limit to continue.")
                 : undefined
             }
           />
@@ -83,12 +88,12 @@ export default function WorldUsagePage({
           <QuotaErrorBanner
             message={
               quotaSummary.state === "THROTTLED"
-                ? "This world has exceeded one or more usage limits."
-                : "This world is approaching one or more usage limits."
+                ? gt("This world has exceeded one or more usage limits.")
+                : gt("This world is approaching one or more usage limits.")
             }
             usagePercent={quotaSummary.usagePercent}
             usageLabel="Usage"
-            hint="Reduce usage or raise the plan limit to continue."
+            hint={gt("Reduce usage or raise the plan limit to continue.")}
           />
         )}
         {loading && (
@@ -100,7 +105,7 @@ export default function WorldUsagePage({
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Metrics</CardTitle>
+                <CardTitle className="text-sm">{gt("Metrics")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="divide-y">
@@ -118,7 +123,7 @@ export default function WorldUsagePage({
             {quotaSummary && quotaSummary.limits.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Limits</CardTitle>
+                  <CardTitle className="text-sm">{gt("Limits")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="divide-y">

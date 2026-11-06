@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import {
+  getWorldTabs,
+  getWorldsApiUrl,
+  translateWorldTabLabel,
+} from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   Search,
   Loader2,
@@ -68,7 +73,11 @@ export default function SearchPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const [token, setToken] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -91,7 +100,7 @@ export default function SearchPage({
     e.preventDefault();
     if (!query.trim()) return;
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
 
@@ -117,7 +126,9 @@ export default function SearchPage({
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to search World Graph");
+        throw new Error(
+          data.error?.message || gt("Failed to search World Graph"),
+        );
       }
 
       setResults(data.results || []);
@@ -127,7 +138,7 @@ export default function SearchPage({
       setDetailSubject(null);
       setDetailQuads([]);
     } catch (err: any) {
-      setError(err.message || "An unexpected error occurred during search");
+      setError(err.message || gt("An unexpected error occurred during search"));
     } finally {
       setLoading(false);
     }
@@ -196,7 +207,9 @@ export default function SearchPage({
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to load subject detail");
+        throw new Error(
+          data.error?.message || gt("Failed to load subject detail"),
+        );
       }
       const bindings: any[] = data?.results?.bindings || [];
       setDetailQuads(
@@ -208,7 +221,7 @@ export default function SearchPage({
         })),
       );
     } catch (err: any) {
-      setDetailError(err.message || "Failed to load subject detail");
+      setDetailError(err.message || gt("Failed to load subject detail"));
     } finally {
       setDetailLoading(false);
     }
@@ -218,8 +231,10 @@ export default function SearchPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="World Graph Search"
-          description="Full-text search across the world's graph data, with automatic fallback when the search index is unavailable. The badge on each result set shows which mode actually ran."
+          title={gt("World Graph Search")}
+          description={gt(
+            "Full-text search across the world's graph data, with automatic fallback when the search index is unavailable. The badge on each result set shows which mode actually ran.",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -233,7 +248,9 @@ export default function SearchPage({
                   <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-zinc-500" />
                     <Input
-                      placeholder="e.g. Find references to agent status, memory history, or profile definitions..."
+                      placeholder={gt(
+                        "e.g. Find references to agent status, memory history, or profile definitions...",
+                      )}
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       className="bg-zinc-900 border-zinc-800 text-white pl-9 h-11 text-sm focus:border-primary"
@@ -255,7 +272,7 @@ export default function SearchPage({
                     {loading ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      "Search"
+                      gt("Search")
                     )}
                   </Button>
                 </div>
@@ -303,7 +320,7 @@ export default function SearchPage({
                         htmlFor="type-filter"
                         className="text-zinc-400 text-xs"
                       >
-                        Type (rdf:type)
+                        {gt("Type (rdf:type)")}
                       </Label>
                       <select
                         id="type-filter"
@@ -311,7 +328,7 @@ export default function SearchPage({
                         onChange={(e) => setTypeFilter(e.target.value)}
                         className="h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white text-xs px-2"
                       >
-                        <option value="">All types</option>
+                        <option value="">{gt("All types")}</option>
                         {typeOptions.map((t) => (
                           <option key={t} value={t}>
                             {t}
@@ -324,12 +341,12 @@ export default function SearchPage({
                         htmlFor="prop-filter"
                         className="text-zinc-400 text-xs"
                       >
-                        Property (predicate contains)
+                        {gt("Property (predicate contains)")}
                       </Label>
                       <Input
                         id="prop-filter"
                         type="text"
-                        placeholder="e.g. #label"
+                        placeholder={gt("e.g. #label")}
                         value={propFilter}
                         onChange={(e) => setPropFilter(e.target.value)}
                         className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
@@ -340,12 +357,12 @@ export default function SearchPage({
                         htmlFor="label-filter"
                         className="text-zinc-400 text-xs"
                       >
-                        Label / object contains
+                        {gt("Label / object contains")}
                       </Label>
                       <Input
                         id="label-filter"
                         type="text"
-                        placeholder="e.g. agent"
+                        placeholder={gt("e.g. agent")}
                         value={labelFilter}
                         onChange={(e) => setLabelFilter(e.target.value)}
                         className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
@@ -383,7 +400,7 @@ export default function SearchPage({
 
               {!error && results.length === 0 && !loading && (
                 <div className="py-12 text-center text-zinc-500 text-xs">
-                  Enter a search query to search the world graph.
+                  {gt("Enter a search query to search the world graph.")}
                 </div>
               )}
 
@@ -391,7 +408,7 @@ export default function SearchPage({
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
                   <Loader2 className="size-6 animate-spin text-primary" />
                   <p className="text-zinc-400 text-xs">
-                    Searching the world graph...
+                    {gt("Searching the world graph...")}
                   </p>
                 </div>
               )}
@@ -400,7 +417,7 @@ export default function SearchPage({
                 <div className="space-y-3">
                   {filteredResults.length === 0 && (
                     <div className="py-8 text-center text-zinc-500 text-xs border border-dashed border-zinc-800 rounded">
-                      No results match the active filters.
+                      {gt("No results match the active filters.")}
                     </div>
                   )}
                   {filteredResults.length > 0 && (
@@ -410,18 +427,18 @@ export default function SearchPage({
                           <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
                             <th className="p-3 w-8" />
                             <th className="p-3 border-r border-zinc-800">
-                              Subject
+                              {gt("Subject")}
                             </th>
                             <th className="p-3 border-r border-zinc-800">
-                              Predicate
+                              {gt("Predicate")}
                             </th>
                             <th className="p-3 border-r border-zinc-800">
-                              Content
+                              {gt("Content")}
                             </th>
                             <th className="p-3 border-r border-zinc-800">
-                              Score
+                              {gt("Score")}
                             </th>
-                            <th className="p-3">Graph</th>
+                            <th className="p-3">{gt("Graph")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -439,7 +456,9 @@ export default function SearchPage({
                                   type="button"
                                   onClick={() => openDetail(r.subject)}
                                   aria-expanded={detailSubject === r.subject}
-                                  aria-label={`Inspect ${r.subject}`}
+                                  aria-label={gt("Inspect {subject}", {
+                                    subject: r.subject,
+                                  })}
                                   className="text-zinc-500 hover:text-primary transition-colors"
                                 >
                                   {detailSubject === r.subject ? (
@@ -476,7 +495,7 @@ export default function SearchPage({
                       <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
                         <div className="min-w-0">
                           <p className="text-xs font-semibold text-zinc-200">
-                            Subject detail
+                            {gt("Subject detail")}
                           </p>
                           <p className="font-mono text-[11px] text-zinc-500 break-all">
                             {detailSubject}
@@ -488,7 +507,7 @@ export default function SearchPage({
                             setDetailSubject(null);
                             setDetailQuads([]);
                           }}
-                          aria-label="Close detail panel"
+                          aria-label={gt("Close detail panel")}
                           className="text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
                         >
                           <X className="size-4" />
@@ -506,7 +525,7 @@ export default function SearchPage({
                           !detailError &&
                           detailQuads.length === 0 && (
                             <p className="text-zinc-500 text-xs">
-                              No quads found for this subject.
+                              {gt("No quads found for this subject.")}
                             </p>
                           )}
                         {!detailLoading && detailQuads.length > 0 && (
@@ -514,9 +533,11 @@ export default function SearchPage({
                             <table className="w-full text-left text-xs text-zinc-300 border-collapse">
                               <thead>
                                 <tr className="text-zinc-400 font-medium border-b border-zinc-800">
-                                  <th className="py-2 pr-3">Predicate</th>
-                                  <th className="py-2 pr-3">Object</th>
-                                  <th className="py-2">Graph</th>
+                                  <th className="py-2 pr-3">
+                                    {gt("Predicate")}
+                                  </th>
+                                  <th className="py-2 pr-3">{gt("Object")}</th>
+                                  <th className="py-2">{gt("Graph")}</th>
                                 </tr>
                               </thead>
                               <tbody>

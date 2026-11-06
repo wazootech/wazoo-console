@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { deleteWorld } from "@wazoo/client";
+import { useGT } from "gt-next";
 
 interface Props {
   open: boolean;
@@ -28,6 +29,7 @@ export function DeleteWorldDialog({
   onDeleted,
 }: Props) {
   const { client } = useAuth();
+  const gt = useGT();
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,10 +52,13 @@ export function DeleteWorldDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete World</DialogTitle>
+          <DialogTitle>{gt("Delete World")}</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. Type <strong>{worldId}</strong> to
-            confirm.
+            {gt("This action cannot be undone.")}{" "}
+            {gt("Type {worldId} to confirm.", {
+              worldId,
+              $context: "Confirmation prompt before deleting a world",
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -74,7 +79,7 @@ export function DeleteWorldDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {gt("Cancel")}
             </Button>
             <Button
               variant="destructive"
@@ -82,7 +87,7 @@ export function DeleteWorldDialog({
               disabled={confirm !== worldId || loading}
             >
               {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-              Delete
+              {gt("Delete")}
             </Button>
           </div>
         </div>

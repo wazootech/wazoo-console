@@ -12,7 +12,13 @@ import { Label } from "@/components/ui/label";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import {
+  getWorldTabs,
+  getWorldsApiUrl,
+  translateWorldTabLabel,
+  translatePresetQueryName,
+} from "@/lib/utils";
+import { useGT } from "gt-next";
 import Editor from "@monaco-editor/react";
 import { Play, Save, Trash2, Loader2, Sparkles } from "lucide-react";
 
@@ -69,7 +75,11 @@ export default function SparqlPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const [token, setToken] = useState<string | null>(null);
   const [query, setQuery] = useState(PRESET_QUERIES[0].query);
@@ -115,7 +125,7 @@ export default function SparqlPage({
 
   async function executeQuery() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     setLoading(true);
@@ -147,7 +157,7 @@ export default function SparqlPage({
       const message =
         data?.error?.message ||
         responseText.trim() ||
-        "Failed to execute query";
+        gt("Failed to execute query");
       if (!res.ok) {
         if (
           isUnrecognizedWorldTokenError(res.status, message, data?.error?.code)
@@ -161,7 +171,7 @@ export default function SparqlPage({
       setResult(data);
     } catch (e: any) {
       setInvalidTokenError(false);
-      setError(e.message || "An unexpected error occurred");
+      setError(e.message || gt("An unexpected error occurred"));
     } finally {
       setLoading(false);
       setTimeTakenMs(Math.round(performance.now() - startTime));
@@ -270,8 +280,10 @@ export default function SparqlPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="SPARQL Query Editor"
-          description="Directly query and manipulate the Graph store of your World"
+          title={gt("SPARQL Query Editor")}
+          description={gt(
+            "Directly query and manipulate the Graph store of your World",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -283,7 +295,8 @@ export default function SparqlPage({
             <Card className="border-zinc-800 bg-zinc-950 text-white">
               <CardHeader className="pb-3 border-b border-zinc-900">
                 <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-primary" /> Preset Queries
+                  <Sparkles className="size-4 text-primary" />{" "}
+                  {gt("Preset Queries")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-3 space-y-1">
@@ -295,7 +308,7 @@ export default function SparqlPage({
                     className="w-full justify-start text-left text-zinc-400 hover:text-white hover:bg-zinc-900 text-xs truncate"
                     onClick={() => setQuery(q.query)}
                   >
-                    {q.name}
+                    {translatePresetQueryName(gt, q.name)}
                   </Button>
                 ))}
               </CardContent>
@@ -304,12 +317,14 @@ export default function SparqlPage({
             <Card className="border-zinc-800 bg-zinc-950 text-white">
               <CardHeader className="pb-3 border-b border-zinc-900">
                 <CardTitle className="text-sm font-semibold">
-                  Saved Queries
+                  {gt("Saved Queries")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-3 space-y-3">
                 {customQueries.length === 0 ? (
-                  <p className="text-zinc-500 text-xs">No saved queries yet.</p>
+                  <p className="text-zinc-500 text-xs">
+                    {gt("No saved queries yet.")}
+                  </p>
                 ) : (
                   <div className="space-y-1">
                     {customQueries.map((q, idx) => (
@@ -330,7 +345,9 @@ export default function SparqlPage({
                           size="icon"
                           className="size-6 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => deleteQuery(idx)}
-                          aria-label={`Delete saved query ${q.name}`}
+                          aria-label={gt("Delete saved query {name}", {
+                            name: q.name,
+                          })}
                         >
                           <Trash2 className="size-3" />
                         </Button>
@@ -344,12 +361,12 @@ export default function SparqlPage({
                     htmlFor="save-query-name"
                     className="text-xs text-zinc-400"
                   >
-                    Save Current Query
+                    {gt("Save Current Query")}
                   </Label>
                   <div className="flex gap-2">
                     <Input
                       id="save-query-name"
-                      placeholder="Query name"
+                      placeholder={gt("Query name")}
                       value={newQueryName}
                       onChange={(e) => setNewQueryName(e.target.value)}
                       className="h-8 text-xs bg-zinc-900 border-zinc-800 text-white"
@@ -373,7 +390,7 @@ export default function SparqlPage({
             <Card className="border border-zinc-800 bg-zinc-950 overflow-hidden">
               <div className="flex justify-between items-center p-3 bg-zinc-900 border-b border-zinc-800">
                 <span className="text-xs font-semibold text-zinc-400">
-                  Query Editor
+                  {gt("Query Editor")}
                 </span>
                 <Button
                   onClick={executeQuery}
@@ -386,7 +403,7 @@ export default function SparqlPage({
                   ) : (
                     <Play className="size-3.5 fill-current" />
                   )}
-                  Execute Query
+                  {gt("Execute Query")}
                 </Button>
               </div>
               <CardContent className="p-0">
@@ -410,11 +427,11 @@ export default function SparqlPage({
             <Card className="border border-zinc-800 bg-zinc-950">
               <CardHeader className="pb-3 border-b border-zinc-900 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-semibold text-white">
-                  Results
+                  {gt("Results")}
                 </CardTitle>
                 {timeTakenMs !== null && (
                   <span className="text-xs text-zinc-500">
-                    Query executed in {timeTakenMs}ms
+                    {gt("Query executed in {ms}ms", { ms: timeTakenMs })}
                   </span>
                 )}
               </CardHeader>
@@ -426,14 +443,14 @@ export default function SparqlPage({
                 )}
                 {!invalidTokenError && !error && !result && !loading && (
                   <p className="text-zinc-500 text-xs py-4 text-center">
-                    Execute a query to see results here.
+                    {gt("Execute a query to see results here.")}
                   </p>
                 )}
                 {loading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-2">
                     <Loader2 className="size-6 animate-spin text-primary" />
                     <p className="text-zinc-400 text-xs">
-                      Running query against World Graph...
+                      {gt("Running query against World Graph...")}
                     </p>
                   </div>
                 )}

@@ -8,7 +8,12 @@ import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs, getWorldsApiUrl } from "@/lib/utils";
+import {
+  getWorldTabs,
+  getWorldsApiUrl,
+  translateWorldTabLabel,
+} from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   Upload,
   FileText,
@@ -31,7 +36,11 @@ export default function ImportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const [token, setToken] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -89,7 +98,9 @@ export default function ImportPage({
 
     if (!isJson && !isCsv && !isTxt) {
       setError(
-        "Unsupported file format. Please upload a .json, .csv, or .txt file.",
+        gt(
+          "Unsupported file format. Please upload a .json, .csv, or .txt file.",
+        ),
       );
       setFile(null);
       return;
@@ -120,7 +131,9 @@ export default function ImportPage({
           );
           if (!valid) {
             throw new Error(
-              "Each object in the array must contain 'subject', 'predicate', and 'object' fields.",
+              gt(
+                "Each object in the array must contain 'subject', 'predicate', and 'object' fields.",
+              ),
             );
           }
           setParsedQuads(parsed);
@@ -184,7 +197,7 @@ export default function ImportPage({
 
   async function handleImport() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     // State set in this function is not visible until the next render, so
@@ -193,13 +206,13 @@ export default function ImportPage({
     let payloadType = contentType;
     if (mode === "paste") {
       if (!pasteContent.trim()) {
-        setError("Paste some content to import.");
+        setError(gt("Paste some content to import."));
         return;
       }
       payload = pasteContent;
       payloadType = pasteType === "json" ? "application/json" : "text/plain";
     } else if (!fileContent) {
-      setError("No file content loaded to import.");
+      setError(gt("No file content loaded to import."));
       return;
     }
 
@@ -237,7 +250,7 @@ export default function ImportPage({
       setParsedQuads([]);
       setParsedLines([]);
     } catch (e: any) {
-      setError(e.message || "An unexpected error occurred during import");
+      setError(e.message || gt("An unexpected error occurred during import"));
     } finally {
       setLoading(false);
     }
@@ -247,8 +260,10 @@ export default function ImportPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Import Data"
-          description="Load graph quads or plain text chunks into your World"
+          title={gt("Import Data")}
+          description={gt(
+            "Load graph quads or plain text chunks into your World",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -260,7 +275,7 @@ export default function ImportPage({
             <Card className="border border-zinc-800 bg-zinc-950 text-white">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">
-                  Import Data
+                  {gt("Import Data")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -275,7 +290,7 @@ export default function ImportPage({
                     }`}
                   >
                     <Upload className="size-3.5" />
-                    Upload file
+                    {gt("Upload file")}
                   </button>
                   <button
                     type="button"
@@ -287,7 +302,7 @@ export default function ImportPage({
                     }`}
                   >
                     <ClipboardPaste className="size-3.5" />
-                    Paste text
+                    {gt("Paste text")}
                   </button>
                 </div>
 
@@ -314,10 +329,10 @@ export default function ImportPage({
                       />
                       <Upload className="size-8 text-zinc-500 mb-3" />
                       <p className="text-sm text-zinc-300 font-medium">
-                        Drag and drop file here
+                        {gt("Drag and drop file here")}
                       </p>
                       <p className="text-xs text-zinc-500 mt-1">
-                        Supports JSON (quads), CSV, TXT (chunks)
+                        {gt("Supports JSON (quads), CSV, TXT (chunks)")}
                       </p>
                     </div>
 
@@ -347,7 +362,7 @@ export default function ImportPage({
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
-                        JSON quads
+                        {gt("JSON quads")}
                       </button>
                       <button
                         type="button"
@@ -358,7 +373,7 @@ export default function ImportPage({
                             : "text-zinc-400 hover:text-zinc-200"
                         }`}
                       >
-                        Plain text
+                        {gt("Plain text")}
                       </button>
                     </div>
                     <textarea
@@ -367,7 +382,9 @@ export default function ImportPage({
                       placeholder={
                         pasteType === "json"
                           ? '[{"subject": "https://example.org/alice", "predicate": "https://schema.org/givenName", "object": "Alice"}]'
-                          : "One text chunk per line. Each line becomes a chunk indexed for full-text search."
+                          : gt(
+                              "One text chunk per line. Each line becomes a chunk indexed for full-text search.",
+                            )
                       }
                       rows={8}
                       className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
@@ -380,7 +397,7 @@ export default function ImportPage({
                         onClick={processPaste}
                         className="border-zinc-800 hover:bg-zinc-900"
                       >
-                        Preview
+                        {gt("Preview")}
                       </Button>
                     )}
                   </div>
@@ -397,10 +414,10 @@ export default function ImportPage({
                   {loading ? (
                     <>
                       <Loader2 className="size-4 animate-spin mr-1.5" />
-                      Importing...
+                      {gt("Importing...")}
                     </>
                   ) : (
-                    "Execute Import"
+                    gt("Execute Import")
                   )}
                 </Button>
               </CardContent>
@@ -412,10 +429,10 @@ export default function ImportPage({
                   <CheckCircle className="size-5 shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-white">
-                      Import Successful
+                      {gt("Import Successful")}
                     </p>
                     <p className="text-xs text-green-300">
-                      Successfully imported:
+                      {gt("Successfully imported:")}
                       {success.quads > 0 && ` ${success.quads} quads`}
                       {success.chunks > 0 && ` ${success.chunks} text chunks`}
                     </p>
@@ -430,7 +447,7 @@ export default function ImportPage({
             <Card className="border border-zinc-800 bg-zinc-950 text-white min-h-[350px]">
               <CardHeader className="border-b border-zinc-900">
                 <CardTitle className="text-sm font-semibold">
-                  Import Preview
+                  {gt("Import Preview")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4">
@@ -439,23 +456,27 @@ export default function ImportPage({
                 {!error && parsedQuads.length > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs text-zinc-500">
-                      <span>Parsed {parsedQuads.length} quads</span>
-                      <span>Showing first 5 quads</span>
+                      <span>
+                        {gt("Parsed {count} quads", {
+                          count: parsedQuads.length,
+                        })}
+                      </span>
+                      <span>{gt("Showing first 5 quads")}</span>
                     </div>
                     <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
                       <table className="w-full text-left text-xs text-zinc-300 border-collapse">
                         <thead>
                           <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
                             <th className="p-2 border-r border-zinc-800">
-                              Subject
+                              {gt("Subject")}
                             </th>
                             <th className="p-2 border-r border-zinc-800">
-                              Predicate
+                              {gt("Predicate")}
                             </th>
                             <th className="p-2 border-r border-zinc-800">
-                              Object
+                              {gt("Object")}
                             </th>
-                            <th className="p-2">Graph</th>
+                            <th className="p-2">{gt("Graph")}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -487,8 +508,12 @@ export default function ImportPage({
                 {!error && parsedLines.length > 0 && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between text-xs text-zinc-500">
-                      <span>Parsed {parsedLines.length} lines</span>
-                      <span>Showing first 5 chunks</span>
+                      <span>
+                        {gt("Parsed {count} lines", {
+                          count: parsedLines.length,
+                        })}
+                      </span>
+                      <span>{gt("Showing first 5 chunks")}</span>
                     </div>
                     <div className="border border-zinc-800 rounded bg-zinc-900/30 divide-y divide-zinc-800">
                       {parsedLines.slice(0, 5).map((l, idx) => (
@@ -510,7 +535,9 @@ export default function ImportPage({
                   <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
                     <AlertCircle className="size-6 mb-2 text-zinc-600" />
                     <p className="text-xs">
-                      Upload a file or paste text on the left to see a preview.
+                      {gt(
+                        "Upload a file or paste text on the left to see a preview.",
+                      )}
                     </p>
                   </div>
                 )}

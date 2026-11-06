@@ -9,6 +9,7 @@ import {
 } from "@wazoo/client";
 import { Loader2, Sparkles } from "lucide-react";
 import { useAuth } from "@/lib/auth";
+import { useGT } from "gt-next";
 import { errMsg, isUnauthorizedError } from "@/lib/quota-error";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ function readCheckoutReturn(): CheckoutReturn {
 }
 
 export function PlanCard() {
+  const gt = useGT();
   const { client, logout } = useAuth();
   const [plan, setPlan] = useState<UserPlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export function PlanCard() {
       setError(
         r.error
           ? errMsg(r.error)
-          : "Could not open the payment page. Please try again.",
+          : gt("Could not open the payment page. Please try again."),
       );
       setBusy(null);
       return;
@@ -129,28 +131,31 @@ export function PlanCard() {
     <Card aria-labelledby="plan-card-title">
       <CardHeader>
         <CardTitle id="plan-card-title" className="text-sm">
-          Plan
+          {gt("Plan")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" /> Loading your plan...
+            <Loader2 className="size-4 animate-spin" />{" "}
+            {gt("Loading your plan...")}
           </div>
         ) : (
           <>
             {checkoutReturn === "success" && (
               <p role="status" className="text-sm text-green-500">
                 {isPro
-                  ? "You're on Pro. Thank you!"
+                  ? gt("You're on Pro. Thank you!")
                   : confirming
-                    ? "Payment received. Updating your plan..."
-                    : "Payment received. Your plan can take a minute to update; refresh this page to check."}
+                    ? gt("Payment received. Updating your plan...")
+                    : gt(
+                        "Payment received. Your plan can take a minute to update; refresh this page to check.",
+                      )}
               </p>
             )}
             {checkoutReturn === "cancelled" && !isPro && (
               <p role="status" className="text-sm text-muted-foreground">
-                Checkout was cancelled. You have not been charged.
+                {gt("Checkout was cancelled. You have not been charged.")}
               </p>
             )}
             {error && (
@@ -163,29 +168,32 @@ export function PlanCard() {
               <>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">
-                    Current plan
+                    {gt("Current plan")}
                   </span>
                   <Badge variant={isPro ? "default" : "secondary"}>
-                    {isPro ? "Pro" : "Free"}
+                    {isPro ? gt("Pro") : gt("Free")}
                   </Badge>
                 </div>
 
                 <div className="space-y-1.5">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">
-                      Daily write usage
+                      {gt("Daily write usage")}
                     </span>
                     <span>
                       {limit !== null && used !== null
-                        ? `${used.toLocaleString()} of ${limit.toLocaleString()} rows`
-                        : "Unavailable right now"}
+                        ? gt("{used} of {limit} rows", {
+                            used: used.toLocaleString(),
+                            limit: limit.toLocaleString(),
+                          })
+                        : gt("Unavailable right now")}
                     </span>
                   </div>
                   {limit !== null && used !== null && (
                     <>
                       <div
                         role="progressbar"
-                        aria-label="Daily write usage"
+                        aria-label={gt("Daily write usage")}
                         aria-valuemin={0}
                         aria-valuemax={100}
                         aria-valuenow={percent}
@@ -197,11 +205,17 @@ export function PlanCard() {
                         />
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Each stored triple uses about {ROWS_PER_TRIPLE} rows, so
-                        this plan holds about{" "}
-                        {Math.floor(limit / ROWS_PER_TRIPLE).toLocaleString()}{" "}
-                        new triples a day (more with inference on). Reading is
-                        never limited. The count resets at 00:00 UTC.
+                        {gt(
+                          "Each stored triple uses about {rows} rows, so this plan holds about {triples} new triples a day (more with inference on). Reading is never limited. The count resets at 00:00 UTC.",
+                          {
+                            rows: ROWS_PER_TRIPLE,
+                            triples: Math.floor(
+                              limit / ROWS_PER_TRIPLE,
+                            ).toLocaleString(),
+                            $context:
+                              "Plan usage explanation for the daily write limit",
+                          },
+                        )}
                       </p>
                     </>
                   )}
@@ -218,7 +232,7 @@ export function PlanCard() {
                       ) : (
                         <Sparkles className="size-4 mr-1.5" />
                       )}
-                      Upgrade to Pro
+                      {gt("Upgrade to Pro")}
                     </Button>
                   )}
                   {plan.billing.portalAvailable && (
@@ -230,7 +244,7 @@ export function PlanCard() {
                       {busy === "portal" && (
                         <Loader2 className="size-4 animate-spin mr-1.5" />
                       )}
-                      Manage billing
+                      {gt("Manage billing")}
                     </Button>
                   )}
                 </div>
@@ -238,8 +252,9 @@ export function PlanCard() {
                   !plan.billing.portalAvailable &&
                   !isPro && (
                     <p className="text-xs text-muted-foreground">
-                      Paid plans are not available yet. Free is included while
-                      Wazoo is in private beta.
+                      {gt(
+                        "Paid plans are not available yet. Free is included while Wazoo is in private beta.",
+                      )}
                     </p>
                   )}
               </>

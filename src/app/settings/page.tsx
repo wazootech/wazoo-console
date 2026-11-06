@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { getHealth } from "@wazoo/client";
+import { useGT } from "gt-next";
 
 interface DeletionInitiated {
   deletion: { uid: string; expiresAt: string };
@@ -33,6 +34,7 @@ interface DeletionInitiated {
 }
 
 export default function SettingsPage() {
+  const gt = useGT();
   const { user, client, logout } = useAuth();
   const [apiOk, setApiOk] = useState<boolean | null>(null);
 
@@ -135,20 +137,24 @@ export default function SettingsPage() {
     <AppShell>
       <div className="space-y-6 max-w-2xl">
         <PageHeader
-          title="Settings"
-          description="Account, plan and API status"
+          title={gt("Settings")}
+          description={gt("Account, plan and API status")}
         />
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Account</CardTitle>
+            <CardTitle className="text-sm">{gt("Account")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm text-muted-foreground">
+                {gt("Email")}
+              </span>
               <span className="text-sm">{user?.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">User ID</span>
+              <span className="text-sm text-muted-foreground">
+                {gt("User ID")}
+              </span>
               <span className="text-sm font-mono">{user?.uid}</span>
             </div>
           </CardContent>
@@ -156,21 +162,21 @@ export default function SettingsPage() {
         <PlanCard />
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">API Status</CardTitle>
+            <CardTitle className="text-sm">{gt("API Status")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               {apiOk === null ? (
-                <Badge variant="secondary">Checking...</Badge>
+                <Badge variant="secondary">{gt("Checking...")}</Badge>
               ) : apiOk ? (
                 <Badge className="gap-1">
                   <CheckCircle className="size-3" />
-                  Connected
+                  {gt("Connected")}
                 </Badge>
               ) : (
                 <Badge variant="destructive" className="gap-1">
                   <XCircle className="size-3" />
-                  Error
+                  {gt("Error")}
                 </Badge>
               )}
               <span className="text-xs text-muted-foreground">
@@ -181,13 +187,14 @@ export default function SettingsPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Your data</CardTitle>
+            <CardTitle className="text-sm">{gt("Your data")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
               <p className="text-sm text-muted-foreground mb-3">
-                Export a copy of the data Wazoo holds on your account, or
-                permanently delete the account and its data.
+                {gt(
+                  "Export a copy of the data Wazoo holds on your account, or permanently delete the account and its data.",
+                )}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button
@@ -200,7 +207,7 @@ export default function SettingsPage() {
                   ) : (
                     <Download className="size-4" />
                   )}
-                  Export my data
+                  {gt("Export my data")}
                 </Button>
                 <Button
                   variant="destructive"
@@ -211,7 +218,7 @@ export default function SettingsPage() {
                   disabled={!client}
                 >
                   <Trash2 className="size-4" />
-                  Delete account
+                  {gt("Delete account")}
                 </Button>
               </div>
               {exportError ? (
@@ -224,17 +231,18 @@ export default function SettingsPage() {
         </Card>
         <Button variant="outline" onClick={() => logout()}>
           <LogOut className="size-4" />
-          Sign out
+          {gt("Sign out")}
         </Button>
       </div>
 
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete your account?</DialogTitle>
+            <DialogTitle>{gt("Delete your account?")}</DialogTitle>
             <DialogDescription>
-              This permanently deletes your account, worlds, tokens, and usage
-              data. Exported data can no longer be recovered.
+              {gt(
+                "This permanently deletes your account, worlds, tokens, and usage data. Exported data can no longer be recovered.",
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -249,7 +257,7 @@ export default function SettingsPage() {
                 onClick={() => setDeleteOpen(false)}
                 disabled={deleting}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -261,7 +269,7 @@ export default function SettingsPage() {
                 ) : (
                   <AlertTriangle className="size-4" />
                 )}
-                Continue
+                {gt("Continue")}
               </Button>
             </div>
           </div>
@@ -276,7 +284,7 @@ export default function SettingsPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm deletion</DialogTitle>
+            <DialogTitle>{gt("Confirm deletion")}</DialogTitle>
             <DialogDescription>{pending?.message}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -286,8 +294,9 @@ export default function SettingsPage() {
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              This step must be completed within 15 minutes. Once confirmed, you
-              will be signed out.
+              {gt(
+                "This step must be completed within 15 minutes. Once confirmed, you will be signed out.",
+              )}
             </p>
             <div className="flex justify-end gap-2">
               <Button
@@ -303,7 +312,7 @@ export default function SettingsPage() {
                 disabled={deleting}
               >
                 {deleting ? <Loader2 className="size-4 animate-spin" /> : null}
-                Permanently delete account
+                {gt("Permanently delete account")}
               </Button>
             </div>
           </div>

@@ -3,6 +3,7 @@
 import { useAuth } from "@/lib/auth";
 import { LogOut, User, Settings, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useGT } from "gt-next";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -14,6 +15,7 @@ import {
 
 export function UserMenu() {
   const { user, logout } = useAuth();
+  const gt = useGT();
   const router = useRouter();
 
   if (!user) return null;
@@ -24,7 +26,7 @@ export function UserMenu() {
         <button
           type="button"
           className="inline-flex items-center gap-2 rounded-md border border-border/60 bg-background/50 px-2.5 py-1.5 text-sm text-muted-foreground hover:border-border hover:bg-accent hover:text-accent-foreground transition-all outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          aria-label="User menu"
+          aria-label={gt("User menu")}
         >
           <User className="size-4" />
           <span className="hidden sm:inline max-w-[120px] truncate">
@@ -37,7 +39,7 @@ export function UserMenu() {
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={() => router.push("/settings")}>
           <Settings className="size-4" />
-          Settings
+          {gt("Settings")}
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <a
@@ -46,12 +48,12 @@ export function UserMenu() {
             rel="noopener noreferrer"
           >
             <ShieldCheck className="size-4" />
-            Do Not Sell or Share My Personal Information
+            {gt("Do Not Sell or Share My Personal Information")}
           </a>
         </DropdownMenuItem>
         <DropdownMenuItem variant="destructive" onSelect={() => logout()}>
           <LogOut className="size-4" />
-          Sign out
+          {gt("Sign out")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

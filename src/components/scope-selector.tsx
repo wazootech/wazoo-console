@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { useGT } from "gt-next";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export function ScopeSelector({
   disabled = false,
   onValidationChange,
 }: ScopeSelectorProps) {
+  const gt = useGT();
   const activeScopes = parseScopes(value);
   const activeSet = new Set(activeScopes);
   const validation: ScopeValidationResult = validateScopes(value);
@@ -65,7 +67,7 @@ export function ScopeSelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label htmlFor="scope">Scopes</Label>
+        <Label htmlFor="scope">{gt("Scopes")}</Label>
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -75,7 +77,7 @@ export function ScopeSelector({
             onClick={handleSelectDefaults}
             disabled={disabled}
           >
-            Select defaults
+            {gt("Select defaults")}
           </Button>
           <span className="text-muted-foreground/40">•</span>
           <Button
@@ -86,14 +88,14 @@ export function ScopeSelector({
             onClick={handleClear}
             disabled={disabled}
           >
-            Clear
+            {gt("Clear")}
           </Button>
         </div>
       </div>
 
       <Input
         id="scope"
-        placeholder="e.g. users.read worlds.read"
+        placeholder={gt("e.g. users.read worlds.read")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -107,7 +109,7 @@ export function ScopeSelector({
       {/* Selectable Chip Grid */}
       <div className="space-y-1.5">
         <p className="text-xs font-medium text-muted-foreground">
-          Available Scopes:
+          {gt("Available Scopes:")}
         </p>
         <div className="flex flex-wrap gap-1.5">
           {VALID_PLATFORM_SCOPES.map((scope) => {
@@ -137,8 +139,10 @@ export function ScopeSelector({
       {/* Default scope indicator */}
       {value.trim() === "" ? (
         <p className="text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">Note:</span> Leaving
-          this empty will automatically grant all default scopes:{" "}
+          <span className="font-medium text-foreground">{gt("Note:")}</span>{" "}
+          {gt(
+            "Leaving this empty will automatically grant all default scopes:",
+          )}{" "}
           <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">
             {DEFAULT_PLATFORM_SCOPES.join(" ")}
           </code>
@@ -150,9 +154,15 @@ export function ScopeSelector({
         <div className="flex items-start gap-2 rounded-md border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-600 dark:text-amber-400">
           <ShieldAlert className="size-4 shrink-0 mt-0.5" />
           <div>
-            <strong>Reserved Scope:</strong> The{" "}
-            <code className="font-mono">admin</code> scope cannot be requested
-            via user API tokens and must be manually seeded.
+            <strong>{gt("Reserved Scope:")}</strong>{" "}
+            {gt(
+              "The {scope} scope cannot be requested via user API tokens and must be manually seeded.",
+              {
+                scope: "admin",
+                $context:
+                  "Scopes selector: the admin scope is reserved for platform administrators",
+              },
+            )}
           </div>
         </div>
       ) : null}

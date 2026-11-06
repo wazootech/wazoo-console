@@ -13,7 +13,8 @@ import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { WorldTokenSelector } from "@/components/world-token-selector";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   getWorldIdentity,
   worldIdentityErrorMessage,
@@ -33,6 +34,7 @@ export default function WorldDetailPage({
 }) {
   const { worldId } = use(params);
   const { client } = useAuth();
+  const gt = useGT();
   const router = useRouter();
   const [world, setWorld] = useState<WorldIdentity | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,10 @@ export default function WorldDetailPage({
     fetchWorld();
   }, [client, worldId]);
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   function copyWorldId() {
     if (!world) return;
@@ -84,7 +89,7 @@ export default function WorldDetailPage({
   if (!world)
     return (
       <AppShell>
-        <p className="text-muted-foreground">World not found.</p>
+        <p className="text-muted-foreground">{gt("World not found.")}</p>
       </AppShell>
     );
 
@@ -98,7 +103,7 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${worldId}`}
+                aria-label={gt("Copy world ID {worldId}", { worldId })}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
@@ -110,7 +115,7 @@ export default function WorldDetailPage({
                 )}
               </Button>
               <span className="sr-only" aria-live="polite">
-                {copied ? "Copied to clipboard" : ""}
+                {copied ? gt("Copied to clipboard") : ""}
               </span>
             </div>
           </div>
@@ -121,7 +126,7 @@ export default function WorldDetailPage({
               size="sm"
               onClick={() => setShowDelete(true)}
             >
-              Delete
+              {gt("Delete")}
             </Button>
           </div>
         </div>
@@ -130,7 +135,7 @@ export default function WorldDetailPage({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">State</CardTitle>
+              <CardTitle className="text-sm">{gt("State")}</CardTitle>
             </CardHeader>
             <CardContent>
               <Badge variant={stateVariant[world.state] ?? "secondary"}>
@@ -140,7 +145,7 @@ export default function WorldDetailPage({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Region</CardTitle>
+              <CardTitle className="text-sm">{gt("Region")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm">{world.region}</p>
@@ -148,7 +153,7 @@ export default function WorldDetailPage({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Backend</CardTitle>
+              <CardTitle className="text-sm">{gt("Backend")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm">{world.backend}</p>
@@ -156,7 +161,7 @@ export default function WorldDetailPage({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Created</CardTitle>
+              <CardTitle className="text-sm">{gt("Created")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm">
@@ -168,7 +173,7 @@ export default function WorldDetailPage({
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm">Updated</CardTitle>
+              <CardTitle className="text-sm">{gt("Updated")}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm">

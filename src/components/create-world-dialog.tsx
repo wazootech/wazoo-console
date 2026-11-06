@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
+import { useGT } from "gt-next";
 import { isUnauthorizedError, quotaErrorInfo } from "@/lib/quota-error";
 import {
   createWorldByDisplayName,
@@ -29,6 +30,7 @@ export function CreateWorldDialog({
   onCreated: () => void;
 }) {
   const { client, logout } = useAuth();
+  const gt = useGT();
   const displayNameRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
   const [createdWorldId, setCreatedWorldId] = useState<string | null>(null);
@@ -70,7 +72,7 @@ export function CreateWorldDialog({
       onCreated();
     } else {
       setError(
-        "The Worlds API did not return the created world's canonical ID.",
+        gt("The Worlds API did not return the created world's canonical ID."),
       );
     }
     setLoading(false);
@@ -80,38 +82,40 @@ export function CreateWorldDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create World</DialogTitle>
+          <DialogTitle>{gt("Create World")}</DialogTitle>
         </DialogHeader>
         {createdWorldId ? (
           <div className="space-y-4">
-            <p role="status">World created successfully.</p>
+            <p role="status">{gt("World created successfully.")}</p>
             <div className="space-y-2">
-              <p className="text-sm font-medium">World ID</p>
+              <p className="text-sm font-medium">{gt("World ID")}</p>
               <code className="block break-all rounded-md border bg-muted p-3 text-sm">
                 {createdWorldId}
               </code>
             </div>
             <div className="flex justify-end">
               <Button type="button" onClick={() => onOpenChange(false)}>
-                Done
+                {gt("Done")}
               </Button>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="displayName">Display name</Label>
+              <Label htmlFor="displayName">{gt("Display name")}</Label>
               <Input
                 ref={displayNameRef}
                 id="displayName"
-                placeholder="My World"
+                placeholder={gt("My World")}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 disabled={loading}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                A human-readable name for this world. You can change it later.
+                {gt(
+                  "A human-readable name for this world. You can change it later.",
+                )}
               </p>
             </div>
             {error && (
@@ -120,7 +124,9 @@ export function CreateWorldDialog({
                 usagePercent={limitInfo?.usagePercent}
                 hint={
                   limitInfo
-                    ? "Delete unused worlds or raise the database limit to create more."
+                    ? gt(
+                        "Delete unused worlds or raise the database limit to create more.",
+                      )
                     : undefined
                 }
               />
@@ -136,7 +142,7 @@ export function CreateWorldDialog({
               </Button>
               <Button type="submit" disabled={!canSubmit}>
                 {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                Create
+                {gt("Create")}
               </Button>
             </div>
           </form>

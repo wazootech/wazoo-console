@@ -1,6 +1,7 @@
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useGT } from "gt-next";
 
 export function TokenSecretCard({
   token,
@@ -15,14 +16,16 @@ export function TokenSecretCard({
   onToggle: () => void;
   onDismiss: () => void;
 }) {
+  const gt = useGT();
   return (
     <Card className="border-primary">
       <CardHeader>
-        <CardTitle className="text-sm">New Token Created</CardTitle>
+        <CardTitle className="text-sm">{gt("New Token Created")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
         <p className="text-xs text-muted-foreground">
-          Copy this token now. <strong>It will not be shown again.</strong>
+          {gt("Copy this token now.")}{" "}
+          <strong>{gt("It will not be shown again.")}</strong>
         </p>
         <div className="flex items-center gap-2">
           <code className="flex-1 rounded-md bg-secondary px-3 py-2 text-sm font-mono break-all">
@@ -31,7 +34,7 @@ export function TokenSecretCard({
           <Button
             variant="ghost"
             size="icon"
-            aria-label={showSecret ? "Hide token" : "Show token"}
+            aria-label={showSecret ? gt("Hide token") : gt("Show token")}
             aria-pressed={showSecret}
             onClick={onToggle}
           >
@@ -43,7 +46,7 @@ export function TokenSecretCard({
           </Button>
         </div>
         <Button variant="outline" size="sm" onClick={onDismiss}>
-          Dismiss
+          {gt("Dismiss")}
         </Button>
       </CardContent>
     </Card>

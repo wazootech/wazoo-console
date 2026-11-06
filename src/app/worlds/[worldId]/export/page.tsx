@@ -11,7 +11,13 @@ import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
-import { getWorldsApiUrl, getWorldTabs } from "@/lib/utils";
+import {
+  getWorldsApiUrl,
+  getWorldTabs,
+  translateWorldTabLabel,
+  translateExportFormatDescription,
+} from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   AlertCircle,
   ArrowRight,
@@ -86,7 +92,11 @@ export default function ExportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const [token, setToken] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(
@@ -102,7 +112,7 @@ export default function ExportPage({
 
   async function fetchExportData(format: ExportFormat) {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return null;
     }
 
@@ -159,7 +169,7 @@ export default function ExportPage({
       return text;
     } catch (err: any) {
       setInvalidTokenError(false);
-      setError(err.message || "An unexpected error occurred during export");
+      setError(err.message || gt("An unexpected error occurred during export"));
       setPreviewContent(null);
       return null;
     }
@@ -179,7 +189,7 @@ export default function ExportPage({
 
   async function handleLoadPreview() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     setLoading(true);
@@ -189,7 +199,7 @@ export default function ExportPage({
 
   async function handleDownload() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
 
@@ -228,8 +238,10 @@ export default function ExportPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Export World"
-          description="Export graph triples, quads, and text data into standard RDF formats"
+          title={gt("Export World")}
+          description={gt(
+            "Export graph triples, quads, and text data into standard RDF formats",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -246,9 +258,11 @@ export default function ExportPage({
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-white flex items-center gap-2">
               <FileCode className="size-4 text-primary" />
-              Select Export Format
+              {gt("Select Export Format")}
             </h2>
-            <span className="text-xs text-zinc-500">5 formats available</span>
+            <span className="text-xs text-zinc-500">
+              {gt("5 formats available")}
+            </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -281,7 +295,7 @@ export default function ExportPage({
                       </span>
                     </div>
                     <p className="text-xs text-zinc-400 leading-relaxed">
-                      {fmt.description}
+                      {translateExportFormatDescription(gt, fmt)}
                     </p>
                   </div>
 
@@ -313,12 +327,12 @@ export default function ExportPage({
                   {copied ? (
                     <>
                       <Check className="size-3.5 text-green-400" />
-                      Copied
+                      {gt("Copied")}
                     </>
                   ) : (
                     <>
                       <Copy className="size-3.5" />
-                      Copy Preview
+                      {gt("Copy Preview")}
                     </>
                   )}
                 </Button>
@@ -336,7 +350,7 @@ export default function ExportPage({
                 ) : (
                   <FileCode className="size-3.5" />
                 )}
-                {previewContent ? "Refresh Preview" : "Preview Sample"}
+                {previewContent ? gt("Refresh Preview") : gt("Preview Sample")}
               </Button>
 
               <Button
@@ -350,7 +364,7 @@ export default function ExportPage({
                 ) : (
                   <Download className="size-3.5" />
                 )}
-                Download {selectedFormat.ext}
+                {gt("Download {ext}", { ext: selectedFormat.ext })}
               </Button>
             </div>
           </CardHeader>
@@ -361,11 +375,12 @@ export default function ExportPage({
                 <AlertCircle className="size-8 text-amber-500/80" />
                 <div className="space-y-1 max-w-sm">
                   <p className="text-sm font-semibold text-white">
-                    World is Empty
+                    {gt("World is Empty")}
                   </p>
                   <p className="text-xs text-zinc-400">
-                    This world contains no quads or text data to export yet. Try
-                    importing RDF graph files or plain text first.
+                    {gt(
+                      "This world contains no quads or text data to export yet. Try importing RDF graph files or plain text first.",
+                    )}
                   </p>
                 </div>
                 <Link href={`/worlds/${worldId}/import`}>
@@ -374,7 +389,7 @@ export default function ExportPage({
                     size="sm"
                     className="mt-2 text-xs gap-1.5 border-zinc-800"
                   >
-                    Go to Import Page
+                    {gt("Go to Import Page")}
                     <ArrowRight className="size-3.5" />
                   </Button>
                 </Link>
@@ -384,7 +399,11 @@ export default function ExportPage({
             {!isEmpty && previewContent && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs text-zinc-500">
-                  <span>Export Content Preview ({selectedFormat.mime})</span>
+                  <span>
+                    {gt("Export Content Preview ({mime})", {
+                      mime: selectedFormat.mime,
+                    })}
+                  </span>
                   <span>{previewContent.split("\n").length} lines</span>
                 </div>
                 <pre className="p-4 rounded-lg bg-zinc-900/60 border border-zinc-800 font-mono text-xs text-zinc-300 overflow-x-auto max-h-[400px] leading-relaxed whitespace-pre-wrap">
@@ -397,12 +416,18 @@ export default function ExportPage({
               <div className="flex flex-col items-center justify-center py-16 text-zinc-500 text-center space-y-2">
                 <FileCode className="size-8 text-zinc-600 mb-1" />
                 <p className="text-xs text-zinc-400 font-medium">
-                  Ready to export in {selectedFormat.name} format
+                  {gt("Ready to export in {format} format", {
+                    format: selectedFormat.name,
+                  })}
                 </p>
                 <p className="text-[11px] text-zinc-500 max-w-md">
-                  Click <strong>Download {selectedFormat.ext}</strong> to save
-                  the exported data file, or click{" "}
-                  <strong>Preview Sample</strong> to inspect content inline.
+                  {gt("Click")}{" "}
+                  <strong>
+                    {gt("Download {ext}", { ext: selectedFormat.ext })}
+                  </strong>{" "}
+                  {gt("to save the exported data file, or click")}{" "}
+                  <strong>{gt("Preview Sample")}</strong>{" "}
+                  {gt("to inspect content inline.")}
                 </p>
               </div>
             )}
@@ -410,7 +435,9 @@ export default function ExportPage({
             {loading && (
               <div className="flex flex-col items-center justify-center py-16 text-zinc-400 space-y-2">
                 <Loader2 className="size-6 animate-spin text-primary" />
-                <p className="text-xs">Fetching export data from server...</p>
+                <p className="text-xs">
+                  {gt("Fetching export data from server...")}
+                </p>
               </div>
             )}
           </CardContent>

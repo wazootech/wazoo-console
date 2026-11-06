@@ -18,7 +18,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Loader2, XCircle } from "lucide-react";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   errMsg,
   isUnauthorizedError,
@@ -35,6 +36,7 @@ export default function WorldBillingPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
+  const gt = useGT();
   const { client, logout } = useAuth();
   const [billing, setBilling] = useState<Billing | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,7 +49,10 @@ export default function WorldBillingPage({
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelled, setCancelled] = useState(false);
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   useEffect(() => {
     if (!client) return;
@@ -104,8 +109,8 @@ export default function WorldBillingPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Billing"
-          description="Review billing state for this world"
+          title={gt("Billing")}
+          description={gt("Review billing state for this world")}
         />
         <NavTabs tabs={tabs} />
         {error && (
@@ -114,7 +119,7 @@ export default function WorldBillingPage({
             usagePercent={errorQuota?.usagePercent}
             hint={
               errorQuota
-                ? "Upgrade your plan or free up capacity to continue."
+                ? gt("Upgrade your plan or free up capacity to continue.")
                 : undefined
             }
           />
@@ -123,11 +128,11 @@ export default function WorldBillingPage({
           <QuotaErrorBanner
             message={
               quotaSummary.state === "THROTTLED"
-                ? "This world has exceeded its plan limits."
-                : "This world is approaching its plan limits."
+                ? gt("This world has exceeded its plan limits.")
+                : gt("This world is approaching its plan limits.")
             }
             usagePercent={quotaSummary.usagePercent}
-            hint="Upgrade your plan or free up capacity to continue."
+            hint={gt("Upgrade your plan or free up capacity to continue.")}
           />
         )}
         {loading && (
@@ -139,20 +144,22 @@ export default function WorldBillingPage({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">State</CardTitle>
+                <CardTitle className="text-sm">{gt("State")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2">
                   <Badge variant="secondary">{billing.state}</Badge>
                   {billing.paymentRequired && (
-                    <Badge variant="destructive">Payment required</Badge>
+                    <Badge variant="destructive">
+                      {gt("Payment required")}
+                    </Badge>
                   )}
                 </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Provider</CardTitle>
+                <CardTitle className="text-sm">{gt("Provider")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-sm">{billing.provider}</p>
@@ -160,19 +167,21 @@ export default function WorldBillingPage({
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Customer</CardTitle>
+                <CardTitle className="text-sm">{gt("Customer")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <Badge
                   variant={billing.customerConfigured ? "default" : "secondary"}
                 >
-                  {billing.customerConfigured ? "Configured" : "Not configured"}
+                  {billing.customerConfigured
+                    ? gt("Configured")
+                    : gt("Not configured")}
                 </Badge>
               </CardContent>
             </Card>
             <Card>
               <CardHeader>
-                <CardTitle className="text-sm">Subscription</CardTitle>
+                <CardTitle className="text-sm">{gt("Subscription")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
@@ -182,8 +191,8 @@ export default function WorldBillingPage({
                     }
                   >
                     {billing.subscriptionConfigured
-                      ? "Configured"
-                      : "Not configured"}
+                      ? gt("Configured")
+                      : gt("Not configured")}
                   </Badge>
                   {billing.subscriptionConfigured && !cancelled ? (
                     <div>
@@ -197,18 +206,18 @@ export default function WorldBillingPage({
                         }}
                       >
                         <XCircle className="size-4" />
-                        Cancel subscription
+                        {gt("Cancel subscription")}
                       </Button>
                       <p className="text-xs text-muted-foreground mt-2">
-                        Cancelling ends the subscription immediately. Your world
-                        and its data stay intact; access to paid features ends
-                        at the next billing cycle.
+                        {gt(
+                          "Cancelling ends the subscription immediately. Your world and its data stay intact; access to paid features ends at the next billing cycle.",
+                        )}
                       </p>
                     </div>
                   ) : null}
                   {cancelled ? (
                     <p className="text-sm text-muted-foreground">
-                      Subscription cancelled.
+                      {gt("Subscription cancelled.")}
                     </p>
                   ) : null}
                 </div>
@@ -217,7 +226,7 @@ export default function WorldBillingPage({
             {quotaSummary && quotaSummary.limits.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">Plan limits</CardTitle>
+                  <CardTitle className="text-sm">{gt("Plan limits")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="divide-y">
@@ -245,10 +254,16 @@ export default function WorldBillingPage({
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cancel subscription</DialogTitle>
+            <DialogTitle>{gt("Cancel subscription")}</DialogTitle>
             <DialogDescription>
-              This ends your subscription. Your world and its data stay intact.
-              Type <strong>{worldId}</strong> to confirm.
+              {gt(
+                "This ends your subscription. Your world and its data stay intact.",
+              )}{" "}
+              {gt("Type {worldId} to confirm.", {
+                worldId,
+                $context:
+                  "Confirmation prompt before cancelling a subscription",
+              })}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -265,7 +280,7 @@ export default function WorldBillingPage({
                 onClick={() => setCancelOpen(false)}
                 disabled={cancelling}
               >
-                Keep subscription
+                {gt("Keep subscription")}
               </Button>
               <Button
                 variant="destructive"
@@ -275,7 +290,7 @@ export default function WorldBillingPage({
                 {cancelling ? (
                   <Loader2 className="size-4 animate-spin" />
                 ) : null}
-                Cancel subscription
+                {gt("Cancel subscription")}
               </Button>
             </div>
           </div>
