@@ -54,7 +54,8 @@ export default function SearchPage({
           <Card className="border border-zinc-800 bg-zinc-950 text-white min-h-[250px]">
             <CardHeader className="border-b border-zinc-900 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Sparkles className="size-4 text-primary" /> Query Results
+                <Sparkles className="size-4 text-primary" />{" "}
+                {gt("Query Results")}
               </CardTitle>
               {mode && MODE_BADGES[mode] && (
                 <div

@@ -43,7 +43,7 @@ export function SearchDetailPanel({
         {loading && (
           <div className="flex items-center gap-2 text-zinc-400 text-xs">
             <Loader2 className="size-4 animate-spin" />
-            Loading all quads for subject...
+            {gt("Loading all quads for subject...")}
           </div>
         )}
         {error && <ErrorCard message={error} />}
