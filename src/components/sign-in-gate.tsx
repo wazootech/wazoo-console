@@ -73,26 +73,28 @@ export function SignInGate() {
           </T>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            We collect the minimum needed to run your account: your email
-            address and display name. Usage data is tracked to meter and manage
-            the platform. See our{" "}
-            <PolicyLink href={privacyPolicyUrl}>privacy policy</PolicyLink> and{" "}
-            <PolicyLink href={termsUrl}>terms of service</PolicyLink>.
-          </p>
-          <label className="flex items-start gap-3 text-sm">
-            <input
-              type="checkbox"
-              checked={confirmed}
-              onChange={(e) => setConfirmed(e.target.checked)}
-              className="mt-0.5 size-4 rounded border-input"
-            />
-            <span>
-              I confirm I am at least 13 years old and have read the Wazoo{" "}
+          <T>
+            <p className="text-sm text-muted-foreground">
+              We collect the minimum needed to run your account: your email
+              address and display name. Usage data is tracked to meter and
+              manage the platform. See our{" "}
               <PolicyLink href={privacyPolicyUrl}>privacy policy</PolicyLink>{" "}
               and <PolicyLink href={termsUrl}>terms of service</PolicyLink>.
-            </span>
-          </label>
+            </p>
+            <label className="flex items-start gap-3 text-sm">
+              <input
+                type="checkbox"
+                checked={confirmed}
+                onChange={(e) => setConfirmed(e.target.checked)}
+                className="mt-0.5 size-4 rounded border-input"
+              />
+              <span>
+                I confirm I am at least 13 years old and have read the Wazoo{" "}
+                <PolicyLink href={privacyPolicyUrl}>privacy policy</PolicyLink>{" "}
+                and <PolicyLink href={termsUrl}>terms of service</PolicyLink>.
+              </span>
+            </label>
+          </T>
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
           <Button
             className="w-full"
@@ -100,14 +102,16 @@ export function SignInGate() {
             onClick={handleContinue}
           >
             {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-            Continue to sign in
+            {gt("Continue to sign in")}
           </Button>
-          <p className="text-center text-xs text-muted-foreground">
-            We do not sell or share your personal information.{" "}
-            <PolicyLink href={privacyPolicyUrl}>
-              Do Not Sell or Share My Personal Information
-            </PolicyLink>
-          </p>
+          <T>
+            <p className="text-center text-xs text-muted-foreground">
+              We do not sell or share your personal information.{" "}
+              <PolicyLink href={privacyPolicyUrl}>
+                Do Not Sell or Share My Personal Information
+              </PolicyLink>
+            </p>
+          </T>
         </CardContent>
       </Card>
     </main>

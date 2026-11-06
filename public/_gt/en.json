@@ -94,6 +94,7 @@
   "a737d65356ee212b": "e.g. users.read worlds.read",
   "e8036404119fdbf4": "Available Scopes:",
   "87fdcc57d0c2053a": "Could not start sign-in. Please try again.",
+  "11b1506321f9a4e6": "Continue to sign in",
   "d4334f49fb53ce4f": [
     {
       "t": "CardTitle",
@@ -106,6 +107,73 @@
       "c": "Wazoo is for people aged 13 and older. Under-13 accounts are not allowed without verifiable parental consent."
     }
   ],
+  "714bd8fbfb4b54f3": [
+    {
+      "t": "p",
+      "i": 1,
+      "c": [
+        "We collect the minimum needed to run your account: your email address and display name. Usage data is tracked to meter and manage the platform. See our",
+        " ",
+        {
+          "t": "PolicyLink",
+          "i": 2,
+          "c": "privacy policy"
+        },
+        " ",
+        "and ",
+        {
+          "t": "PolicyLink",
+          "i": 3,
+          "c": "terms of service"
+        },
+        "."
+      ]
+    },
+    {
+      "t": "label",
+      "i": 4,
+      "c": [
+        {
+          "t": "input",
+          "i": 5
+        },
+        {
+          "t": "span",
+          "i": 6,
+          "c": [
+            "I confirm I am at least 13 years old and have read the Wazoo",
+            " ",
+            {
+              "t": "PolicyLink",
+              "i": 7,
+              "c": "privacy policy"
+            },
+            " ",
+            "and ",
+            {
+              "t": "PolicyLink",
+              "i": 8,
+              "c": "terms of service"
+            },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "9f9497c4f2ab8e3c": {
+    "t": "p",
+    "i": 1,
+    "c": [
+      "We do not sell or share your personal information.",
+      " ",
+      {
+        "t": "PolicyLink",
+        "i": 2,
+        "c": "Do Not Sell or Share My Personal Information"
+      }
+    ]
+  },
   "14c58aa8457f7249": "Copy Token UID",
   "eeb042d35500287e": "Revoke token {name}",
   "a29643205fb5e704": "New Token Created",

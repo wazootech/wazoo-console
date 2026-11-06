@@ -94,6 +94,7 @@
   "a737d65356ee212b": "p. ej., users.read worlds.read",
   "e8036404119fdbf4": "Ámbitos disponibles:",
   "87fdcc57d0c2053a": "No se pudo comenzar el proceso de inicio de sesión. Inténtalo de nuevo.",
+  "11b1506321f9a4e6": "Continuar para iniciar sesión",
   "d4334f49fb53ce4f": [
     {
       "c": "Te damos la bienvenida a Wazoo",
@@ -106,6 +107,72 @@
       "t": "CardDescription"
     }
   ],
+  "714bd8fbfb4b54f3": [
+    {
+      "t": "p",
+      "i": 1,
+      "c": [
+        "Recopilamos lo mínimo necesario para gestionar tu cuenta: tu dirección de correo electrónico y tu nombre para mostrar. Registramos datos de uso para medir y gestionar el uso de la plataforma. Consulta nuestra",
+        " ",
+        {
+          "t": "PolicyLink",
+          "i": 2,
+          "c": "política de privacidad"
+        },
+        " ",
+        "y ",
+        {
+          "t": "PolicyLink",
+          "i": 3,
+          "c": "condiciones de servicio"
+        },
+        "."
+      ]
+    },
+    {
+      "t": "label",
+      "i": 4,
+      "c": [
+        {
+          "t": "input",
+          "i": 5
+        },
+        {
+          "t": "span",
+          "i": 6,
+          "c": [
+            "Confirmo que tengo al menos 13 años y que he leído la política de privacidad de Wazoo y las condiciones de servicio.",
+            " ",
+            {
+              "t": "PolicyLink",
+              "i": 7,
+              "c": "política de privacidad"
+            },
+            " ",
+            "y ",
+            {
+              "t": "PolicyLink",
+              "i": 8,
+              "c": "condiciones de servicio"
+            },
+            "."
+          ]
+        }
+      ]
+    }
+  ],
+  "9f9497c4f2ab8e3c": {
+    "c": [
+      "No vendemos ni compartimos tu información personal. ",
+      {
+        "c": "No vender ni compartir mi información personal",
+        "i": 2,
+        "t": "PolicyLink"
+      }
+    ],
+    "i": 1,
+    "t": "p"
+  },
   "14c58aa8457f7249": "Copiar UID del token",
   "eeb042d35500287e": "Revocar token {name}",
   "a29643205fb5e704": "Nuevo token creado",
