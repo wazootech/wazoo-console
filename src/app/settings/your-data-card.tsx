@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, Trash2, Loader2 } from "lucide-react";
+import { useGT } from "gt-next";
 
 interface YourDataCardProps {
   hasClient: boolean;
@@ -17,16 +18,18 @@ export function YourDataCard({
   onExport,
   onDelete,
 }: YourDataCardProps) {
+  const gt = useGT();
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-sm">Your data</CardTitle>
+        <CardTitle className="text-sm">{gt("Your data")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <p className="text-sm text-muted-foreground mb-3">
-            Export a copy of the data Wazoo holds on your account, or
-            permanently delete the account and its data.
+            {gt(
+              "Export a copy of the data Wazoo holds on your account, or permanently delete the account and its data.",
+            )}
           </p>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -39,7 +42,7 @@ export function YourDataCard({
               ) : (
                 <Download className="size-4" />
               )}
-              Export my data
+              {gt("Export my data")}
             </Button>
             <Button
               variant="destructive"
@@ -47,7 +50,7 @@ export function YourDataCard({
               disabled={!hasClient}
             >
               <Trash2 className="size-4" />
-              Delete account
+              {gt("Delete account")}
             </Button>
           </div>
           {exportError ? (

@@ -15,6 +15,7 @@ import { Loader2 } from "lucide-react";
 import { createPlatformToken } from "@wazoo/client";
 import { ScopeSelector } from "@/components/scope-selector";
 import { errMsg } from "./err-msg";
+import { useGT } from "gt-next";
 
 export function CreateTokenDialog({
   open,
@@ -25,6 +26,7 @@ export function CreateTokenDialog({
   onOpenChange: (o: boolean) => void;
   onCreated: (uid: string, name: string, token: string) => void;
 }) {
+  const gt = useGT();
   const { client, user } = useAuth();
   const [name, setName] = useState("");
   const [scope, setScope] = useState("");
@@ -57,7 +59,7 @@ export function CreateTokenDialog({
       onOpenChange(false);
       onCreated(d.uid, d.name, d.token);
     } else {
-      setError("No token in response");
+      setError(gt("No token in response"));
     }
     setLoading(false);
   }
@@ -66,11 +68,11 @@ export function CreateTokenDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create API Token</DialogTitle>
+          <DialogTitle>{gt("Create API Token")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="tokenName">Name</Label>
+            <Label htmlFor="tokenName">{gt("Name")}</Label>
             <Input
               id="tokenName"
               placeholder="my-token"
@@ -99,13 +101,13 @@ export function CreateTokenDialog({
               onClick={() => onOpenChange(false)}
               disabled={loading}
             >
-              Cancel
+              {gt("Cancel")}
             </Button>
             <Button type="submit" disabled={loading || !isScopeValid}>
               {loading ? (
                 <Loader2 className="size-4 animate-spin text-muted-foreground mr-1" />
               ) : null}
-              Create
+              {gt("Create")}
             </Button>
           </div>
         </form>

@@ -2,6 +2,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ErrorCard } from "@/components/error-card";
 import { AlertCircle } from "lucide-react";
 import type { ParsedQuad } from "./import-parse";
+import { useGT } from "gt-next";
 
 interface ImportPreviewProps {
   error: string | null;
@@ -16,10 +17,13 @@ export function ImportPreview({
   parsedLines,
   isEmpty,
 }: ImportPreviewProps) {
+  const gt = useGT();
   return (
     <Card className="border border-zinc-800 bg-zinc-950 text-white min-h-[350px]">
       <CardHeader className="border-b border-zinc-900">
-        <CardTitle className="text-sm font-semibold">Import Preview</CardTitle>
+        <CardTitle className="text-sm font-semibold">
+          {gt("Import Preview")}
+        </CardTitle>
       </CardHeader>
       <CardContent className="pt-4">
         {error && <ErrorCard message={error} />}
@@ -27,17 +31,27 @@ export function ImportPreview({
         {!error && parsedQuads.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Parsed {parsedQuads.length} quads</span>
-              <span>Showing first 5 quads</span>
+              <span>
+                {gt("Parsed {count} quads", {
+                  count: parsedQuads.length,
+                })}
+              </span>
+              <span>{gt("Showing first 5 quads")}</span>
             </div>
             <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
               <table className="w-full text-left text-xs text-zinc-300 border-collapse">
                 <thead>
                   <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
-                    <th className="p-2 border-r border-zinc-800">Subject</th>
-                    <th className="p-2 border-r border-zinc-800">Predicate</th>
-                    <th className="p-2 border-r border-zinc-800">Object</th>
-                    <th className="p-2">Graph</th>
+                    <th className="p-2 border-r border-zinc-800">
+                      {gt("Subject")}
+                    </th>
+                    <th className="p-2 border-r border-zinc-800">
+                      {gt("Predicate")}
+                    </th>
+                    <th className="p-2 border-r border-zinc-800">
+                      {gt("Object")}
+                    </th>
+                    <th className="p-2">{gt("Graph")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -69,8 +83,12 @@ export function ImportPreview({
         {!error && parsedLines.length > 0 && (
           <div className="space-y-3">
             <div className="flex items-center justify-between text-xs text-zinc-500">
-              <span>Parsed {parsedLines.length} lines</span>
-              <span>Showing first 5 chunks</span>
+              <span>
+                {gt("Parsed {count} lines", {
+                  count: parsedLines.length,
+                })}
+              </span>
+              <span>{gt("Showing first 5 chunks")}</span>
             </div>
             <div className="border border-zinc-800 rounded bg-zinc-900/30 divide-y divide-zinc-800">
               {parsedLines.slice(0, 5).map((l, idx) => (
@@ -92,7 +110,7 @@ export function ImportPreview({
           <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
             <AlertCircle className="size-6 mb-2 text-zinc-600" />
             <p className="text-xs">
-              Upload a file or paste text on the left to see a preview.
+              {gt("Upload a file or paste text on the left to see a preview.")}
             </p>
           </div>
         )}

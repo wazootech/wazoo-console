@@ -1,5 +1,7 @@
 import { FileCode } from "lucide-react";
 import { EXPORT_FORMATS, type ExportFormat } from "./export-formats";
+import { useGT } from "gt-next";
+import { translateExportFormatDescription } from "@/lib/utils";
 
 interface ExportFormatGridProps {
   selectedFormat: ExportFormat;
@@ -11,14 +13,17 @@ export function ExportFormatGrid({
   selectedFormat,
   onSelect,
 }: ExportFormatGridProps) {
+  const gt = useGT();
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2">
           <FileCode className="size-4 text-primary" />
-          Select Export Format
+          {gt("Select Export Format")}
         </h2>
-        <span className="text-xs text-zinc-500">5 formats available</span>
+        <span className="text-xs text-zinc-500">
+          {gt("5 formats available")}
+        </span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -51,7 +56,7 @@ export function ExportFormatGrid({
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 leading-relaxed">
-                  {fmt.description}
+                  {translateExportFormatDescription(gt, fmt)}
                 </p>
               </div>
 

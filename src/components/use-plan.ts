@@ -9,6 +9,7 @@ import {
 } from "@wazoo/client";
 import { useAuth } from "@/lib/auth";
 import { errMsg, isUnauthorizedError } from "@/lib/quota-error";
+import { useGT } from "gt-next";
 
 /** After paying, the plan changes when Stripe's webhook lands; poll for it. */
 const POLL_EVERY_MS = 2000;
@@ -23,6 +24,7 @@ function readCheckoutReturn(): CheckoutReturn {
 }
 
 export function usePlan() {
+  const gt = useGT();
   const { client, logout } = useAuth();
   const [plan, setPlan] = useState<UserPlan | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,7 +104,7 @@ export function usePlan() {
       setError(
         r.error
           ? errMsg(r.error)
-          : "Could not open the payment page. Please try again.",
+          : gt("Could not open the payment page. Please try again."),
       );
       setBusy(null);
       return;

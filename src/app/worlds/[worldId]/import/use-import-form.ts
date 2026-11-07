@@ -4,14 +4,18 @@ import { useState } from "react";
 import { thrownMessage } from "@/lib/utils";
 import { postImport } from "./import-api";
 import {
+  importErrorMessage,
   isSupportedFile,
   pickImportPayload,
   parseImportText,
-  UNSUPPORTED_FILE_MESSAGE,
+  unsupportedFileMessage,
+  type ImportCounts,
   type ParsedQuad,
 } from "./import-parse";
+import { useGT } from "gt-next";
 
 export function useImportForm(worldId: string) {
+  const gt = useGT();
   const [token, setToken] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [fileContent, setFileContent] = useState<string>("");
@@ -20,10 +24,7 @@ export function useImportForm(worldId: string) {
   const [parsedLines, setParsedLines] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<{
-    quads: number;
-    chunks: number;
-  } | null>(null);
+  const [success, setSuccess] = useState<ImportCounts | null>(null);
   const [mode, setMode] = useState<"file" | "paste">("file");
   const [pasteContent, setPasteContent] = useState("");
   const [pasteType, setPasteType] = useState<"json" | "text">("json");
@@ -36,7 +37,7 @@ export function useImportForm(worldId: string) {
     const isJson = selectedFile.name.endsWith(".json");
 
     if (!isSupportedFile(selectedFile.name)) {
-      setError(UNSUPPORTED_FILE_MESSAGE);
+      setError(unsupportedFileMessage(gt));
       setFile(null);
       return;
     }
@@ -54,6 +55,7 @@ export function useImportForm(worldId: string) {
           content,
           isJson,
           "JSON file must contain an array of quad objects.",
+          gt,
         );
         setParsedQuads(parsed.quads);
         setParsedLines(parsed.lines);
@@ -74,6 +76,7 @@ export function useImportForm(worldId: string) {
         pasteContent,
         pasteType === "json",
         "JSON must contain an array of quad objects.",
+        gt,
       );
       setParsedQuads(parsed.quads);
       setParsedLines(parsed.lines);
@@ -86,7 +89,7 @@ export function useImportForm(worldId: string) {
 
   async function handleImport() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     // State set in this function is not visible until the next render, so
@@ -95,6 +98,7 @@ export function useImportForm(worldId: string) {
       mode,
       { fileContent, contentType },
       { pasteContent, pasteType },
+      gt,
     );
     if ("error" in picked) {
       setError(picked.error);
@@ -115,9 +119,7 @@ export function useImportForm(worldId: string) {
       setParsedQuads([]);
       setParsedLines([]);
     } catch (e) {
-      setError(
-        thrownMessage(e) || "An unexpected error occurred during import",
-      );
+      setError(importErrorMessage(e, gt));
     } finally {
       setLoading(false);
     }

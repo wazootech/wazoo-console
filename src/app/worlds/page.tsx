@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus, Loader2, Globe } from "lucide-react";
 import Link from "next/link";
+import { useGT } from "gt-next";
 import { CreateWorldDialog } from "@/components/create-world-dialog";
 import { isUnauthorizedError } from "@/lib/quota-error";
 import {
@@ -25,6 +26,7 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 };
 
 export default function WorldsPage() {
+  const gt = useGT();
   const { client, logout } = useAuth();
   const [worlds, setWorlds] = useState<WorldIdentity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,11 +58,13 @@ export default function WorldsPage() {
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Worlds"
-          description="Manage your knowledge worlds"
+          title={gt("Worlds", {
+            $context: "Page title: Wazoo worlds, knowledge graphs",
+          })}
+          description={gt("Manage your knowledge worlds")}
           actions={
             <Button onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" /> Create World
+              <Plus className="size-4" /> {gt("Create World")}
             </Button>
           }
         />
@@ -74,7 +78,7 @@ export default function WorldsPage() {
             message={error}
             action={
               <Button variant="outline" size="sm" onClick={fetchWorlds}>
-                Retry
+                {gt("Retry")}
               </Button>
             }
           />
@@ -83,9 +87,9 @@ export default function WorldsPage() {
           <Card>
             <CardContent className="flex flex-col items-center gap-3 py-12">
               <Globe className="size-10 text-muted-foreground" />
-              <p className="text-muted-foreground">No Worlds yet.</p>
+              <p className="text-muted-foreground">{gt("No Worlds yet.")}</p>
               <Button onClick={() => setShowCreate(true)}>
-                <Plus className="size-4" /> Create your first World
+                <Plus className="size-4" /> {gt("Create your first World")}
               </Button>
             </CardContent>
           </Card>

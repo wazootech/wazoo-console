@@ -13,6 +13,7 @@ import { KeyRound } from "lucide-react";
 import { ManualTokenForm } from "./manual-token-form";
 import { TokenSelect } from "./token-select";
 import { NoTokensNotice } from "./no-tokens-notice";
+import { useGT } from "gt-next";
 
 interface WorldTokenSelectorProps {
   worldId: string;
@@ -23,6 +24,7 @@ export function WorldTokenSelector({
   worldId,
   onTokenChange,
 }: WorldTokenSelectorProps) {
+  const gt = useGT();
   const [tokens, setTokens] = useState<SavedWorldToken[]>([]);
   const [selectedTokenValue, setSelectedTokenValue] = useState<string>("");
   const [manualToken, setManualToken] = useState("");
@@ -80,7 +82,7 @@ export function WorldTokenSelector({
               className="text-zinc-400 flex items-center gap-1.5"
             >
               <KeyRound className="size-4 text-primary" />
-              World Access Token
+              {gt("World Access Token")}
             </Label>
             <div className="flex items-center gap-2">
               <TokenSelect
@@ -95,7 +97,7 @@ export function WorldTokenSelector({
               href={`/worlds/${worldId}/tokens`}
               className="inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-zinc-800 bg-transparent shadow-sm hover:bg-zinc-900 text-white h-8 px-3"
             >
-              Manage Tokens
+              {gt("Manage Tokens")}
             </Link>
           </div>
         </div>

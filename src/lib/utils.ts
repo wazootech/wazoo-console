@@ -65,6 +65,12 @@ export function saveLocalWorldToken(
   }
 }
 
+export {
+  translateExportFormatDescription,
+  translatePresetQueryName,
+  translateWorldTabLabel,
+} from "./translate-labels";
+
 /** The `message` of a thrown value, or "" when it carries none. */
 export function thrownMessage(err: unknown): string {
   if (err instanceof Error) return err.message;

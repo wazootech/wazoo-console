@@ -2,6 +2,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import type { UserPlan } from "@wazoo/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useGT } from "gt-next";
 
 /** A stored triple costs about 9 database rows (the table plus its 8 indexes). */
 const ROWS_PER_TRIPLE = 9;
@@ -14,6 +15,7 @@ interface PlanDetailsProps {
 }
 
 export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
+  const gt = useGT();
   const limit = plan.dailyRowWrites ?? null;
   const used = plan.rowsWrittenToday ?? null;
   const percent =
@@ -25,26 +27,33 @@ export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
   return (
     <>
       <div className="flex items-center justify-between">
-        <span className="text-sm text-muted-foreground">Current plan</span>
+        <span className="text-sm text-muted-foreground">
+          {gt("Current plan")}
+        </span>
         <Badge variant={isPro ? "default" : "secondary"}>
-          {isPro ? "Pro" : "Free"}
+          {isPro ? gt("Pro") : gt("Free")}
         </Badge>
       </div>
 
       <div className="space-y-1.5">
         <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Daily write usage</span>
+          <span className="text-muted-foreground">
+            {gt("Daily write usage")}
+          </span>
           <span>
             {limit !== null && used !== null
-              ? `${used.toLocaleString()} of ${limit.toLocaleString()} rows`
-              : "Unavailable right now"}
+              ? gt("{used} of {limit} rows", {
+                  used: used.toLocaleString(),
+                  limit: limit.toLocaleString(),
+                })
+              : gt("Unavailable right now")}
           </span>
         </div>
         {limit !== null && used !== null && (
           <>
             <div
               role="progressbar"
-              aria-label="Daily write usage"
+              aria-label={gt("Daily write usage")}
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={percent}
@@ -56,10 +65,14 @@ export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
               />
             </div>
             <p className="text-xs text-muted-foreground">
-              Each stored triple uses about {ROWS_PER_TRIPLE} rows, so this plan
-              holds about {Math.floor(limit / ROWS_PER_TRIPLE).toLocaleString()}{" "}
-              new triples a day (more with inference on). Reading is never
-              limited. The count resets at 00:00 UTC.
+              {gt(
+                "Each stored triple uses about {rows} rows, so this plan holds about {triples} new triples a day (more with inference on). Reading is never limited. The count resets at 00:00 UTC.",
+                {
+                  rows: ROWS_PER_TRIPLE,
+                  triples: Math.floor(limit / ROWS_PER_TRIPLE).toLocaleString(),
+                  $context: "Plan usage explanation for the daily write limit",
+                },
+              )}
             </p>
           </>
         )}
@@ -73,7 +86,7 @@ export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
             ) : (
               <Sparkles className="size-4 mr-1.5" />
             )}
-            Upgrade to Pro
+            {gt("Upgrade to Pro")}
           </Button>
         )}
         {plan.billing.portalAvailable && (
@@ -85,7 +98,7 @@ export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
             {busy === "portal" && (
               <Loader2 className="size-4 animate-spin mr-1.5" />
             )}
-            Manage billing
+            {gt("Manage billing")}
           </Button>
         )}
       </div>
@@ -93,8 +106,9 @@ export function PlanDetails({ plan, busy, goTo }: PlanDetailsProps) {
         !plan.billing.portalAvailable &&
         !isPro && (
           <p className="text-xs text-muted-foreground">
-            Paid plans are not available yet. Free is included while Wazoo is in
-            private beta.
+            {gt(
+              "Paid plans are not available yet. Free is included while Wazoo is in private beta.",
+            )}
           </p>
         )}
     </>

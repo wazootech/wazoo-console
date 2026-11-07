@@ -7,10 +7,11 @@ import { NavTabs } from "@/components/nav-tabs";
 import { WorldTokenSelector } from "@/components/world-token-selector";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import { useWorldExport } from "./use-world-export";
 import { ExportFormatGrid } from "./export-format-grid";
 import { ExportActionsCard } from "./export-actions-card";
+import { useGT } from "gt-next";
 
 export default function ExportPage({
   params,
@@ -18,15 +19,21 @@ export default function ExportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
   const x = useWorldExport(worldId);
 
   return (
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Export World"
-          description="Export graph triples, quads, and text data into standard RDF formats"
+          title={gt("Export World")}
+          description={gt(
+            "Export graph triples, quads, and text data into standard RDF formats",
+          )}
         />
         <NavTabs tabs={tabs} />
 

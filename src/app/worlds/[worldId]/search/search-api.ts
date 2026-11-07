@@ -5,6 +5,7 @@ export async function postSearch(
   worldId: string,
   token: string,
   body: { query: string; limit: number; minScore: number },
+  gt: (s: string) => string,
 ): Promise<{ results?: SearchResult[]; mode: string }> {
   const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(worldId)}/search`;
   const res = await fetch(endpoint, {
@@ -18,7 +19,7 @@ export async function postSearch(
 
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.error?.message || "Failed to search World Graph");
+    throw new Error(data.error?.message || gt("Failed to search World Graph"));
   }
   return data;
 }
@@ -27,6 +28,7 @@ export async function fetchSubjectQuads(
   worldId: string,
   token: string | null,
   subject: string,
+  gt: (s: string) => string,
 ): Promise<DetailQuad[]> {
   const endpoint = `${getWorldsApiUrl()}/worlds/${encodeURIComponent(worldId)}/sparql`;
   const escaped = subject.replace(/[\\"]/g, (m) =>
@@ -43,7 +45,7 @@ export async function fetchSubjectQuads(
   });
   const data = await res.json();
   if (!res.ok) {
-    throw new Error(data.error?.message || "Failed to load subject detail");
+    throw new Error(data.error?.message || gt("Failed to load subject detail"));
   }
   const bindings: Array<Record<string, { value?: string } | undefined>> =
     data?.results?.bindings || [];

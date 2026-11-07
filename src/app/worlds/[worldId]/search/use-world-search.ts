@@ -9,8 +9,10 @@ import {
   type DetailQuad,
   type SearchResult,
 } from "./search-types";
+import { useGT } from "gt-next";
 
 export function useWorldSearch(worldId: string) {
+  const gt = useGT();
   const [token, setToken] = useState<string | null>(null);
   const [query, setQuery] = useState("");
   const [limit, setLimit] = useState(10);
@@ -32,7 +34,7 @@ export function useWorldSearch(worldId: string) {
     e.preventDefault();
     if (!query.trim()) return;
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
 
@@ -42,11 +44,16 @@ export function useWorldSearch(worldId: string) {
     setMode(null);
 
     try {
-      const data = await postSearch(worldId, token, {
-        query: query.trim(),
-        limit,
-        minScore,
-      });
+      const data = await postSearch(
+        worldId,
+        token,
+        {
+          query: query.trim(),
+          limit,
+          minScore,
+        },
+        gt,
+      );
       setResults(data.results || []);
       // mode is required by the contract — surface the mode that actually ran
       // (semantic / keyword / hybrid / fallback) instead of implying semantic.
@@ -55,7 +62,7 @@ export function useWorldSearch(worldId: string) {
       setDetailQuads([]);
     } catch (err) {
       setError(
-        thrownMessage(err) || "An unexpected error occurred during search",
+        thrownMessage(err) || gt("An unexpected error occurred during search"),
       );
     } finally {
       setLoading(false);
@@ -77,7 +84,7 @@ export function useWorldSearch(worldId: string) {
     setDetailError(null);
     setDetailQuads([]);
     try {
-      setDetailQuads(await fetchSubjectQuads(worldId, token, subject));
+      setDetailQuads(await fetchSubjectQuads(worldId, token, subject, gt));
     } catch (err) {
       setDetailError(thrownMessage(err) || "Failed to load subject detail");
     } finally {

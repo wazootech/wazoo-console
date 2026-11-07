@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { QuotaSummary } from "@/lib/quota-error";
 import type { UsageEvent } from "@wazoo/client";
+import { useGT } from "gt-next";
 
 interface UsageCardsProps {
   usage: {
@@ -11,11 +12,12 @@ interface UsageCardsProps {
 }
 
 export function UsageCards({ usage, quotaSummary }: UsageCardsProps) {
+  const gt = useGT();
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Metrics</CardTitle>
+          <CardTitle className="text-sm">{gt("Metrics")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="divide-y">
@@ -33,7 +35,7 @@ export function UsageCards({ usage, quotaSummary }: UsageCardsProps) {
       {quotaSummary && quotaSummary.limits.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Limits</CardTitle>
+            <CardTitle className="text-sm">{gt("Limits")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="divide-y">

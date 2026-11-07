@@ -1,6 +1,10 @@
-/** Starts sign-in; resolves to where to send the browser, or an error. */
+/**
+ * Starts sign-in; resolves to where to send the browser, or an error. `error`
+ * is null when the server gave no message, so the caller can show a translated
+ * default.
+ */
 export async function requestSignIn(): Promise<
-  { redirectTo: string } | { error: string }
+  { redirectTo: string } | { error: string | null }
 > {
   try {
     const res = await fetch("/api/auth/sign-in", {
@@ -20,13 +24,10 @@ export async function requestSignIn(): Promise<
       error?: { message?: string };
     };
     if (!res.ok || !body.url) {
-      return {
-        error:
-          body.error?.message ?? "Could not start sign-in. Please try again.",
-      };
+      return { error: body.error?.message ?? null };
     }
     return { redirectTo: body.url };
   } catch {
-    return { error: "Could not start sign-in. Please try again." };
+    return { error: null };
   }
 }

@@ -17,8 +17,10 @@ import {
 } from "@wazoo/client";
 import { CreateTokenDialog } from "./create-token-dialog";
 import { errMsg } from "./err-msg";
+import { useGT } from "gt-next";
 
 export default function TokensPage() {
+  const gt = useGT();
   const { client } = useAuth();
   const [tokens, setTokens] = useState<PlatformToken[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,11 +64,13 @@ export default function TokensPage() {
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="API Tokens"
-          description="Manage platform API tokens for authentication"
+          title={gt("API Tokens", {
+            $context: "Page title: Wazoo platform API access tokens",
+          })}
+          description={gt("Manage platform API tokens for authentication")}
           actions={
             <Button onClick={() => setShowCreate(true)}>
-              <Plus className="size-4" /> Create Token
+              <Plus className="size-4" /> {gt("Create Token")}
             </Button>
           }
         />
@@ -92,7 +96,7 @@ export default function TokensPage() {
                 key={t.uid}
                 name={t.name}
                 uid={t.uid}
-                typeBadge="Platform Token"
+                typeBadge={gt("Platform Token")}
                 scopes={
                   t.scope ? t.scope.split(/\s+/).filter(Boolean) : undefined
                 }
@@ -104,7 +108,7 @@ export default function TokensPage() {
         {!loading && tokens.length === 0 && !error && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No API tokens yet.
+              {gt("No API tokens yet.")}
             </CardContent>
           </Card>
         )}

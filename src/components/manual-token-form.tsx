@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
+import { useGT } from "gt-next";
 
 interface ManualTokenFormProps {
   manualName: string;
@@ -24,6 +25,7 @@ export function ManualTokenForm({
   onSubmit,
   onCancel,
 }: ManualTokenFormProps) {
+  const gt = useGT();
   return (
     <form
       onSubmit={onSubmit}
@@ -31,21 +33,21 @@ export function ManualTokenForm({
     >
       <div className="space-y-1">
         <h3 className="text-sm font-semibold text-white">
-          Import an existing token
+          {gt("Import an existing token")}
         </h3>
         <p className="text-xs text-zinc-400">
-          Generate a token on the Tokens page first, then enter its secret here.
-          This only imports the existing token into this browser; it does not
-          create a token.
+          {gt(
+            "Generate a token on the Tokens page first, then enter its secret here. This only imports the existing token into this browser; it does not create a token.",
+          )}
         </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="manual-name" className="text-zinc-400">
-          Local Token Label (optional)
+          {gt("Local Token Label (optional)")}
         </Label>
         <Input
           id="manual-name"
-          placeholder="e.g. My Dev Token"
+          placeholder={gt("e.g. My Dev Token")}
           value={manualName}
           onChange={(e) => setManualName(e.target.value)}
           className="bg-zinc-900 border-zinc-800 text-white"
@@ -53,13 +55,13 @@ export function ManualTokenForm({
       </div>
       <div className="space-y-2">
         <Label htmlFor="manual-token" className="text-zinc-400">
-          Existing Token Secret
+          {gt("Existing Token Secret")}
         </Label>
         <div className="relative">
           <Input
             id="manual-token"
             type={showTokenSecret ? "text" : "password"}
-            placeholder="wzw_..."
+            placeholder={gt("wzw_...")}
             value={manualToken}
             onChange={(e) => setManualToken(e.target.value)}
             className="bg-zinc-900 border-zinc-800 text-white pr-10"
@@ -69,7 +71,9 @@ export function ManualTokenForm({
             type="button"
             onClick={() => setShowTokenSecret(!showTokenSecret)}
             aria-label={
-              showTokenSecret ? "Hide token secret" : "Show token secret"
+              showTokenSecret
+                ? gt("Hide token secret")
+                : gt("Show token secret")
             }
             aria-pressed={showTokenSecret}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
@@ -90,10 +94,10 @@ export function ManualTokenForm({
           onClick={onCancel}
           className="hover:bg-zinc-800"
         >
-          Cancel
+          {gt("Cancel")}
         </Button>
         <Button type="submit" size="sm">
-          Import & Select
+          {gt("Import & Select")}
         </Button>
       </div>
     </form>

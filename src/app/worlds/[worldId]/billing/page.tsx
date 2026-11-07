@@ -6,7 +6,8 @@ import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
 import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { Loader2 } from "lucide-react";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
+import { useGT } from "gt-next";
 import { useWorldBilling } from "./use-world-billing";
 import { BillingCards } from "./billing-cards";
 import { BillingCancelDialog } from "./billing-cancel-dialog";
@@ -16,18 +17,22 @@ export default function WorldBillingPage({
 }: {
   params: Promise<{ worldId: string }>;
 }) {
+  const gt = useGT();
   const { worldId } = use(params);
   const b = useWorldBilling(worldId);
   const { billing, loading, error, errorQuota, quotaSummary } = b;
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   return (
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Billing"
-          description="Review billing state for this world"
+          title={gt("Billing")}
+          description={gt("Review billing state for this world")}
         />
         <NavTabs tabs={tabs} />
         {error && (
@@ -36,7 +41,7 @@ export default function WorldBillingPage({
             usagePercent={errorQuota?.usagePercent}
             hint={
               errorQuota
-                ? "Upgrade your plan or free up capacity to continue."
+                ? gt("Upgrade your plan or free up capacity to continue.")
                 : undefined
             }
           />
@@ -45,11 +50,11 @@ export default function WorldBillingPage({
           <QuotaErrorBanner
             message={
               quotaSummary.state === "THROTTLED"
-                ? "This world has exceeded its plan limits."
-                : "This world is approaching its plan limits."
+                ? gt("This world has exceeded its plan limits.")
+                : gt("This world is approaching its plan limits.")
             }
             usagePercent={quotaSummary.usagePercent}
-            hint="Upgrade your plan or free up capacity to continue."
+            hint={gt("Upgrade your plan or free up capacity to continue.")}
           />
         )}
         {loading && (

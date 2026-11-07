@@ -9,6 +9,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { useGT } from "gt-next";
 
 interface BillingCancelDialogProps {
   worldId: string;
@@ -31,14 +32,20 @@ export function BillingCancelDialog({
   cancelError,
   onCancel,
 }: BillingCancelDialogProps) {
+  const gt = useGT();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Cancel subscription</DialogTitle>
+          <DialogTitle>{gt("Cancel subscription")}</DialogTitle>
           <DialogDescription>
-            This ends your subscription. Your world and its data stay intact.
-            Type <strong>{worldId}</strong> to confirm.
+            {gt(
+              "This ends your subscription. Your world and its data stay intact.",
+            )}{" "}
+            {gt("Type {worldId} to confirm.", {
+              worldId,
+              $context: "Confirmation prompt before cancelling a subscription",
+            })}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4">
@@ -55,7 +62,7 @@ export function BillingCancelDialog({
               onClick={() => onOpenChange(false)}
               disabled={cancelling}
             >
-              Keep subscription
+              {gt("Keep subscription")}
             </Button>
             <Button
               variant="destructive"
@@ -63,7 +70,7 @@ export function BillingCancelDialog({
               disabled={confirm !== worldId || cancelling}
             >
               {cancelling ? <Loader2 className="size-4 animate-spin" /> : null}
-              Cancel subscription
+              {gt("Cancel subscription")}
             </Button>
           </div>
         </div>

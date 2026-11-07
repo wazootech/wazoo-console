@@ -1,6 +1,7 @@
 import { Loader2, X } from "lucide-react";
 import { ErrorCard } from "@/components/error-card";
 import type { DetailQuad } from "./search-types";
+import { useGT } from "gt-next";
 
 interface SearchDetailPanelProps {
   subject: string;
@@ -17,11 +18,14 @@ export function SearchDetailPanel({
   error,
   onClose,
 }: SearchDetailPanelProps) {
+  const gt = useGT();
   return (
     <div className="border border-zinc-800 rounded-lg bg-zinc-900/40">
       <div className="flex items-center justify-between gap-3 border-b border-zinc-800 px-4 py-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold text-zinc-200">Subject detail</p>
+          <p className="text-xs font-semibold text-zinc-200">
+            {gt("Subject detail")}
+          </p>
           <p className="font-mono text-[11px] text-zinc-500 break-all">
             {subject}
           </p>
@@ -29,7 +33,7 @@ export function SearchDetailPanel({
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close detail panel"
+          aria-label={gt("Close detail panel")}
           className="text-zinc-500 hover:text-zinc-200 transition-colors shrink-0"
         >
           <X className="size-4" />
@@ -39,13 +43,13 @@ export function SearchDetailPanel({
         {loading && (
           <div className="flex items-center gap-2 text-zinc-400 text-xs">
             <Loader2 className="size-4 animate-spin" />
-            Loading all quads for subject...
+            {gt("Loading all quads for subject...")}
           </div>
         )}
         {error && <ErrorCard message={error} />}
         {!loading && !error && quads.length === 0 && (
           <p className="text-zinc-500 text-xs">
-            No quads found for this subject.
+            {gt("No quads found for this subject.")}
           </p>
         )}
         {!loading && quads.length > 0 && (
@@ -53,9 +57,9 @@ export function SearchDetailPanel({
             <table className="w-full text-left text-xs text-zinc-300 border-collapse">
               <thead>
                 <tr className="text-zinc-400 font-medium border-b border-zinc-800">
-                  <th className="py-2 pr-3">Predicate</th>
-                  <th className="py-2 pr-3">Object</th>
-                  <th className="py-2">Graph</th>
+                  <th className="py-2 pr-3">{gt("Predicate")}</th>
+                  <th className="py-2 pr-3">{gt("Object")}</th>
+                  <th className="py-2">{gt("Graph")}</th>
                 </tr>
               </thead>
               <tbody>

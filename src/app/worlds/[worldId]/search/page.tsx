@@ -7,13 +7,14 @@ import { NavTabs } from "@/components/nav-tabs";
 import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ErrorCard } from "@/components/error-card";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import { Loader2, Sparkles, AlertTriangle } from "lucide-react";
 import { MODE_BADGES } from "./search-types";
 import { useWorldSearch } from "./use-world-search";
 import { SearchForm } from "./search-form";
 import { SearchResultsTable } from "./search-results-table";
 import { SearchDetailPanel } from "./search-detail-panel";
+import { useGT } from "gt-next";
 
 export default function SearchPage({
   params,
@@ -21,7 +22,11 @@ export default function SearchPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
   const s = useWorldSearch(worldId);
   const { mode, error, results, loading, filteredResults } = s;
 
@@ -29,8 +34,10 @@ export default function SearchPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="World Graph Search"
-          description="Full-text search across the world's graph data, with automatic fallback when the search index is unavailable. The badge on each result set shows which mode actually ran."
+          title={gt("World Graph Search")}
+          description={gt(
+            "Full-text search across the world's graph data, with automatic fallback when the search index is unavailable. The badge on each result set shows which mode actually ran.",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -47,7 +54,8 @@ export default function SearchPage({
           <Card className="border border-zinc-800 bg-zinc-950 text-white min-h-[250px]">
             <CardHeader className="border-b border-zinc-900 flex flex-row items-center justify-between">
               <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-                <Sparkles className="size-4 text-primary" /> Query Results
+                <Sparkles className="size-4 text-primary" />{" "}
+                {gt("Query Results")}
               </CardTitle>
               {mode && MODE_BADGES[mode] && (
                 <div
@@ -69,7 +77,7 @@ export default function SearchPage({
 
               {!error && results.length === 0 && !loading && (
                 <div className="py-12 text-center text-zinc-500 text-xs">
-                  Enter a search query to search the world graph.
+                  {gt("Enter a search query to search the world graph.")}
                 </div>
               )}
 
@@ -77,7 +85,7 @@ export default function SearchPage({
                 <div className="flex flex-col items-center justify-center py-16 gap-2">
                   <Loader2 className="size-6 animate-spin text-primary" />
                   <p className="text-zinc-400 text-xs">
-                    Searching the world graph...
+                    {gt("Searching the world graph...")}
                   </p>
                 </div>
               )}
@@ -86,7 +94,7 @@ export default function SearchPage({
                 <div className="space-y-3">
                   {filteredResults.length === 0 && (
                     <div className="py-8 text-center text-zinc-500 text-xs border border-dashed border-zinc-800 rounded">
-                      No results match the active filters.
+                      {gt("No results match the active filters.")}
                     </div>
                   )}
                   {filteredResults.length > 0 && (

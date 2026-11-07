@@ -1,3 +1,7 @@
+import { thrownMessage } from "@/lib/utils";
+
+export type ImportCounts = { quads: number; chunks: number };
+
 export interface ParsedQuad {
   subject: string;
   predicate: string;
@@ -10,6 +14,7 @@ export interface ParsedQuad {
 export function parseQuadJson(
   content: string,
   notArrayMessage: string,
+  gt: (s: string) => string,
 ): ParsedQuad[] {
   const parsed = JSON.parse(content);
   if (!Array.isArray(parsed)) {
@@ -26,7 +31,9 @@ export function parseQuadJson(
   );
   if (!valid) {
     throw new Error(
-      "Each object in the array must contain 'subject', 'predicate', and 'object' fields.",
+      gt(
+        "Each object in the array must contain 'subject', 'predicate', and 'object' fields.",
+      ),
     );
   }
   return parsed;
@@ -45,14 +52,12 @@ export function parseImportText(
   content: string,
   isJson: boolean,
   notArrayMessage: string,
+  gt: (s: string) => string,
 ): { quads: ParsedQuad[]; lines: string[] } {
   return isJson
-    ? { quads: parseQuadJson(content, notArrayMessage), lines: [] }
+    ? { quads: parseQuadJson(content, notArrayMessage, gt), lines: [] }
     : { quads: [], lines: splitLines(content) };
 }
-
-export const UNSUPPORTED_FILE_MESSAGE =
-  "Unsupported file format. Please upload a .json, .csv, or .txt file.";
 
 export function isSupportedFile(name: string): boolean {
   return [".json", ".csv", ".txt"].some((ext) => name.endsWith(ext));
@@ -62,10 +67,11 @@ export function pickImportPayload(
   mode: "file" | "paste",
   file: { fileContent: string; contentType: string },
   paste: { pasteContent: string; pasteType: "json" | "text" },
+  gt: (s: string) => string,
 ): { payload: string; payloadType: string } | { error: string } {
   if (mode === "paste") {
     if (!paste.pasteContent.trim()) {
-      return { error: "Paste some content to import." };
+      return { error: gt("Paste some content to import.") };
     }
     return {
       payload: paste.pasteContent,
@@ -74,7 +80,21 @@ export function pickImportPayload(
     };
   }
   if (!file.fileContent) {
-    return { error: "No file content loaded to import." };
+    return { error: gt("No file content loaded to import.") };
   }
   return { payload: file.fileContent, payloadType: file.contentType };
+}
+
+// Literal gt calls live here so the gt-next extractor can harvest them.
+export function unsupportedFileMessage(gt: (s: string) => string): string {
+  return gt(
+    "Unsupported file format. Please upload a .json, .csv, or .txt file.",
+  );
+}
+
+export function importErrorMessage(
+  err: unknown,
+  gt: (s: string) => string,
+): string {
+  return thrownMessage(err) || gt("An unexpected error occurred during import");
 }

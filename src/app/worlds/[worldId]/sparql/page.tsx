@@ -9,7 +9,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ErrorCard } from "@/components/error-card";
 import { WorldTokenErrorCard } from "@/components/world-token-error-card";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import Editor from "@monaco-editor/react";
 import { Play, Loader2 } from "lucide-react";
 import { PRESET_QUERIES } from "./sparql-presets";
@@ -17,6 +17,7 @@ import { useSavedQueries } from "./use-saved-queries";
 import { useSparqlExecution } from "./use-sparql-execution";
 import { SparqlResults } from "./sparql-results";
 import { SparqlSidebar } from "./sparql-sidebar";
+import { useGT } from "gt-next";
 
 export default function SparqlPage({
   params,
@@ -24,7 +25,11 @@ export default function SparqlPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const [token, setToken] = useState<string | null>(null);
   const [query, setQuery] = useState(PRESET_QUERIES[0].query);
@@ -36,8 +41,10 @@ export default function SparqlPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="SPARQL Query Editor"
-          description="Directly query and manipulate the Graph store of your World"
+          title={gt("SPARQL Query Editor")}
+          description={gt(
+            "Directly query and manipulate the Graph store of your World",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -51,7 +58,7 @@ export default function SparqlPage({
             <Card className="border border-zinc-800 bg-zinc-950 overflow-hidden">
               <div className="flex justify-between items-center p-3 bg-zinc-900 border-b border-zinc-800">
                 <span className="text-xs font-semibold text-zinc-400">
-                  Query Editor
+                  {gt("Query Editor")}
                 </span>
                 <Button
                   onClick={run.executeQuery}
@@ -64,7 +71,7 @@ export default function SparqlPage({
                   ) : (
                     <Play className="size-3.5 fill-current" />
                   )}
-                  Execute Query
+                  {gt("Execute Query")}
                 </Button>
               </div>
               <CardContent className="p-0">
@@ -88,11 +95,11 @@ export default function SparqlPage({
             <Card className="border border-zinc-800 bg-zinc-950">
               <CardHeader className="pb-3 border-b border-zinc-900 flex flex-row items-center justify-between">
                 <CardTitle className="text-sm font-semibold text-white">
-                  Results
+                  {gt("Results")}
                 </CardTitle>
                 {timeTakenMs !== null && (
                   <span className="text-xs text-zinc-500">
-                    Query executed in {timeTakenMs}ms
+                    {gt("Query executed in {ms}ms", { ms: timeTakenMs })}
                   </span>
                 )}
               </CardHeader>
@@ -104,14 +111,14 @@ export default function SparqlPage({
                 )}
                 {!invalidTokenError && !error && !result && !loading && (
                   <p className="text-zinc-500 text-xs py-4 text-center">
-                    Execute a query to see results here.
+                    {gt("Execute a query to see results here.")}
                   </p>
                 )}
                 {loading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-2">
                     <Loader2 className="size-6 animate-spin text-primary" />
                     <p className="text-zinc-400 text-xs">
-                      Running query against World Graph...
+                      {gt("Running query against World Graph...")}
                     </p>
                   </div>
                 )}

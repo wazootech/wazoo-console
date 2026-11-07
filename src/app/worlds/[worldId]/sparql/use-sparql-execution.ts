@@ -4,12 +4,14 @@ import { useState } from "react";
 import { isUnrecognizedWorldTokenError } from "@/lib/world-token-errors";
 import { getWorldsApiUrl, thrownMessage } from "@/lib/utils";
 import type { SparqlResponse } from "./sparql-presets";
+import { useGT } from "gt-next";
 
 export function useSparqlExecution(
   worldId: string,
   token: string | null,
   query: string,
 ) {
+  const gt = useGT();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invalidTokenError, setInvalidTokenError] = useState(false);
@@ -18,7 +20,7 @@ export function useSparqlExecution(
 
   async function executeQuery() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     setLoading(true);
@@ -50,7 +52,7 @@ export function useSparqlExecution(
       const message =
         data?.error?.message ||
         responseText.trim() ||
-        "Failed to execute query";
+        gt("Failed to execute query");
       if (!res.ok) {
         if (
           isUnrecognizedWorldTokenError(res.status, message, data?.error?.code)
@@ -64,7 +66,7 @@ export function useSparqlExecution(
       setResult(data);
     } catch (e) {
       setInvalidTokenError(false);
-      setError(thrownMessage(e) || "An unexpected error occurred");
+      setError(thrownMessage(e) || gt("An unexpected error occurred"));
     } finally {
       setLoading(false);
       setTimeTakenMs(Math.round(performance.now() - startTime));

@@ -1,5 +1,6 @@
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { SearchResult } from "./search-types";
+import { useGT } from "gt-next";
 
 interface SearchResultsTableProps {
   results: SearchResult[];
@@ -12,17 +13,18 @@ export function SearchResultsTable({
   detailSubject,
   onInspect,
 }: SearchResultsTableProps) {
+  const gt = useGT();
   return (
     <div className="overflow-x-auto border border-zinc-800 rounded bg-zinc-900/30">
       <table className="w-full text-left text-xs text-zinc-300 border-collapse">
         <thead>
           <tr className="border-b border-zinc-800 bg-zinc-900/70 text-zinc-400 font-medium">
             <th className="p-3 w-8" />
-            <th className="p-3 border-r border-zinc-800">Subject</th>
-            <th className="p-3 border-r border-zinc-800">Predicate</th>
-            <th className="p-3 border-r border-zinc-800">Content</th>
-            <th className="p-3 border-r border-zinc-800">Score</th>
-            <th className="p-3">Graph</th>
+            <th className="p-3 border-r border-zinc-800">{gt("Subject")}</th>
+            <th className="p-3 border-r border-zinc-800">{gt("Predicate")}</th>
+            <th className="p-3 border-r border-zinc-800">{gt("Content")}</th>
+            <th className="p-3 border-r border-zinc-800">{gt("Score")}</th>
+            <th className="p-3">{gt("Graph")}</th>
           </tr>
         </thead>
         <tbody>
@@ -40,7 +42,9 @@ export function SearchResultsTable({
                   type="button"
                   onClick={() => onInspect(r.subject)}
                   aria-expanded={detailSubject === r.subject}
-                  aria-label={`Inspect ${r.subject}`}
+                  aria-label={gt("Inspect {subject}", {
+                    subject: r.subject,
+                  })}
                   className="text-zinc-500 hover:text-primary transition-colors"
                 >
                   {detailSubject === r.subject ? (

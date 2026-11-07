@@ -12,8 +12,10 @@ import { getHealth } from "@wazoo/client";
 import { useAccountData } from "./use-account-data";
 import { DeleteAccountDialogs } from "./delete-account-dialogs";
 import { YourDataCard } from "./your-data-card";
+import { useGT } from "gt-next";
 
 export default function SettingsPage() {
+  const gt = useGT();
   const acct = useAccountData();
   const { user, client, logout } = acct;
   const [apiOk, setApiOk] = useState<boolean | null>(null);
@@ -27,20 +29,24 @@ export default function SettingsPage() {
     <AppShell>
       <div className="space-y-6 max-w-2xl">
         <PageHeader
-          title="Settings"
-          description="Account, plan and API status"
+          title={gt("Settings")}
+          description={gt("Account, plan and API status")}
         />
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Account</CardTitle>
+            <CardTitle className="text-sm">{gt("Account")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Email</span>
+              <span className="text-sm text-muted-foreground">
+                {gt("Email")}
+              </span>
               <span className="text-sm">{user?.email}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">User ID</span>
+              <span className="text-sm text-muted-foreground">
+                {gt("User ID")}
+              </span>
               <span className="text-sm font-mono">{user?.uid}</span>
             </div>
           </CardContent>
@@ -48,21 +54,21 @@ export default function SettingsPage() {
         <PlanCard />
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">API Status</CardTitle>
+            <CardTitle className="text-sm">{gt("API Status")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center gap-2">
               {apiOk === null ? (
-                <Badge variant="secondary">Checking...</Badge>
+                <Badge variant="secondary">{gt("Checking...")}</Badge>
               ) : apiOk ? (
                 <Badge className="gap-1">
                   <CheckCircle className="size-3" />
-                  Connected
+                  {gt("Connected")}
                 </Badge>
               ) : (
                 <Badge variant="destructive" className="gap-1">
                   <XCircle className="size-3" />
-                  Error
+                  {gt("Error")}
                 </Badge>
               )}
               <span className="text-xs text-muted-foreground">
@@ -83,7 +89,7 @@ export default function SettingsPage() {
         />
         <Button variant="outline" onClick={() => logout()}>
           <LogOut className="size-4" />
-          Sign out
+          {gt("Sign out")}
         </Button>
       </div>
 

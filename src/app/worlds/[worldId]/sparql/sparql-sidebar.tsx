@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Save, Trash2, Sparkles } from "lucide-react";
 import { PRESET_QUERIES } from "./sparql-presets";
+import { useGT } from "gt-next";
+import { translatePresetQueryName } from "@/lib/utils";
 
 interface SparqlSidebarProps {
   customQueries: Array<{ name: string; query: string }>;
@@ -23,12 +25,13 @@ export function SparqlSidebar({
   saveQuery,
   deleteQuery,
 }: SparqlSidebarProps) {
+  const gt = useGT();
   return (
     <div className="space-y-4 lg:col-span-1">
       <Card className="border-zinc-800 bg-zinc-950 text-white">
         <CardHeader className="pb-3 border-b border-zinc-900">
           <CardTitle className="text-sm font-semibold flex items-center gap-1.5">
-            <Sparkles className="size-4 text-primary" /> Preset Queries
+            <Sparkles className="size-4 text-primary" /> {gt("Preset Queries")}
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-3 space-y-1">
@@ -40,7 +43,7 @@ export function SparqlSidebar({
               className="w-full justify-start text-left text-zinc-400 hover:text-white hover:bg-zinc-900 text-xs truncate"
               onClick={() => setQuery(q.query)}
             >
-              {q.name}
+              {translatePresetQueryName(gt, q.name)}
             </Button>
           ))}
         </CardContent>
@@ -48,11 +51,15 @@ export function SparqlSidebar({
 
       <Card className="border-zinc-800 bg-zinc-950 text-white">
         <CardHeader className="pb-3 border-b border-zinc-900">
-          <CardTitle className="text-sm font-semibold">Saved Queries</CardTitle>
+          <CardTitle className="text-sm font-semibold">
+            {gt("Saved Queries")}
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-3 space-y-3">
           {customQueries.length === 0 ? (
-            <p className="text-zinc-500 text-xs">No saved queries yet.</p>
+            <p className="text-zinc-500 text-xs">
+              {gt("No saved queries yet.")}
+            </p>
           ) : (
             <div className="space-y-1">
               {customQueries.map((q, idx) => (
@@ -73,7 +80,9 @@ export function SparqlSidebar({
                     size="icon"
                     className="size-6 text-zinc-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => deleteQuery(idx)}
-                    aria-label={`Delete saved query ${q.name}`}
+                    aria-label={gt("Delete saved query {name}", {
+                      name: q.name,
+                    })}
                   >
                     <Trash2 className="size-3" />
                   </Button>
@@ -84,12 +93,12 @@ export function SparqlSidebar({
 
           <div className="pt-3 border-t border-zinc-900 space-y-2">
             <Label htmlFor="save-query-name" className="text-xs text-zinc-400">
-              Save Current Query
+              {gt("Save Current Query")}
             </Label>
             <div className="flex gap-2">
               <Input
                 id="save-query-name"
-                placeholder="Query name"
+                placeholder={gt("Query name")}
                 value={newQueryName}
                 onChange={(e) => setNewQueryName(e.target.value)}
                 className="h-8 text-xs bg-zinc-900 border-zinc-800 text-white"

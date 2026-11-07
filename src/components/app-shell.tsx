@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { UserMenu } from "@/components/user-menu";
+import { LocaleSelector, useGT } from "gt-next";
 import { useAuth } from "@/lib/auth";
 import { Loader2, ExternalLink } from "lucide-react";
 import { useEffect } from "react";
@@ -11,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { token, loading } = useAuth();
+  const gt = useGT();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -31,9 +33,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!token) return null;
 
   const navItems = [
-    { label: "Worlds", href: "/worlds" },
-    { label: "Tokens", href: "/tokens" },
-    { label: "Docs", href: "https://docs.wazoo.dev", external: true },
+    {
+      label: gt("Worlds", {
+        $context: "Nav item: Wazoo worlds, knowledge graphs a user manages",
+      }),
+      href: "/worlds",
+    },
+    {
+      label: gt("Tokens", {
+        $context:
+          "Nav item: Wazoo API access tokens (wzt_ secrets), not game pieces or chips",
+      }),
+      href: "/tokens",
+    },
+    {
+      label: gt("Docs", { $context: "Nav item linking to documentation" }),
+      href: "https://docs.wazoo.dev",
+      external: true,
+    },
   ];
 
   return (
@@ -94,7 +111,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </nav>
           </div>
-          <UserMenu />
+          <div className="flex items-center gap-2">
+            <LocaleSelector
+              aria-label={gt("Language")}
+              className="text-sm rounded-md border border-border/60 bg-background/50 px-2 py-1.5 text-muted-foreground hover:border-border hover:text-foreground transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+            <UserMenu />
+          </div>
         </div>
       </header>
       <main id="main-content" tabIndex={-1} className="flex-1 outline-none">

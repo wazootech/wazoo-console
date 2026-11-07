@@ -11,7 +11,12 @@ import { NavTabs } from "@/components/nav-tabs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus } from "lucide-react";
-import { getWorldTabs, saveLocalWorldToken } from "@/lib/utils";
+import {
+  getWorldTabs,
+  saveLocalWorldToken,
+  translateWorldTabLabel,
+} from "@/lib/utils";
+import { useGT } from "gt-next";
 import {
   listWorldTokens,
   createWorldToken,
@@ -24,6 +29,7 @@ export default function WorldTokensPage({
 }: {
   params: Promise<{ worldId: string }>;
 }) {
+  const gt = useGT();
   const { worldId } = use(params);
   const { client } = useAuth();
   const [tokens, setTokens] = useState<WorldToken[]>([]);
@@ -36,7 +42,10 @@ export default function WorldTokensPage({
   } | null>(null);
   const [showSecret, setShowSecret] = useState(false);
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   const fetchTokens = useCallback(async () => {
     if (!client) return;
@@ -86,11 +95,11 @@ export default function WorldTokensPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="World Tokens"
-          description="Manage access tokens for this world"
+          title={gt("World Tokens")}
+          description={gt("Manage access tokens for this world")}
           actions={
             <Button onClick={handleCreate}>
-              <Plus className="size-4" /> Create Token
+              <Plus className="size-4" /> {gt("Create Token")}
             </Button>
           }
         />
@@ -116,7 +125,7 @@ export default function WorldTokensPage({
                 key={t.uid}
                 name={t.name}
                 uid={t.uid}
-                typeBadge="World Token"
+                typeBadge={gt("World Token")}
                 onRevoke={() => handleRevoke(t.uid)}
               />
             ))}
@@ -125,7 +134,7 @@ export default function WorldTokensPage({
         {!loading && tokens.length === 0 && !error && (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
-              No world tokens yet.
+              {gt("No world tokens yet.")}
             </CardContent>
           </Card>
         )}

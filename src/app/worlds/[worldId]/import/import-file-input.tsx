@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Upload, FileText } from "lucide-react";
+import { useGT } from "gt-next";
 
 interface ImportFileInputProps {
   file: File | null;
@@ -14,6 +15,7 @@ export function ImportFileInput({
   contentType,
   processFile,
 }: ImportFileInputProps) {
+  const gt = useGT();
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -67,10 +69,10 @@ export function ImportFileInput({
         />
         <Upload className="size-8 text-zinc-500 mb-3" />
         <p className="text-sm text-zinc-300 font-medium">
-          Drag and drop file here
+          {gt("Drag and drop file here")}
         </p>
         <p className="text-xs text-zinc-500 mt-1">
-          Supports JSON (quads), CSV, TXT (chunks)
+          {gt("Supports JSON (quads), CSV, TXT (chunks)")}
         </p>
       </div>
 

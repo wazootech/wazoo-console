@@ -1,6 +1,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { WorldIdentity } from "@/lib/world-identity";
+import { useGT } from "gt-next";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
   ACTIVE: "default",
@@ -9,11 +10,12 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 };
 
 export function WorldInfoCards({ world }: { world: WorldIdentity }) {
+  const gt = useGT();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">State</CardTitle>
+          <CardTitle className="text-sm">{gt("State")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Badge variant={stateVariant[world.state] ?? "secondary"}>
@@ -23,7 +25,7 @@ export function WorldInfoCards({ world }: { world: WorldIdentity }) {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Region</CardTitle>
+          <CardTitle className="text-sm">{gt("Region")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{world.region}</p>
@@ -31,7 +33,7 @@ export function WorldInfoCards({ world }: { world: WorldIdentity }) {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Backend</CardTitle>
+          <CardTitle className="text-sm">{gt("Backend")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{world.backend}</p>
@@ -39,7 +41,7 @@ export function WorldInfoCards({ world }: { world: WorldIdentity }) {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Created</CardTitle>
+          <CardTitle className="text-sm">{gt("Created")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">
@@ -51,7 +53,7 @@ export function WorldInfoCards({ world }: { world: WorldIdentity }) {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Updated</CardTitle>
+          <CardTitle className="text-sm">{gt("Updated")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">

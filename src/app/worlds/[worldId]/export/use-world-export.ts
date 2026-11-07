@@ -4,6 +4,7 @@ import { useState } from "react";
 import { thrownMessage } from "@/lib/utils";
 import { fetchExportText, InvalidWorldTokenError } from "./export-api";
 import { EXPORT_FORMATS, type ExportFormat } from "./export-formats";
+import { useGT } from "gt-next";
 
 function downloadBlob(data: string, format: ExportFormat, worldId: string) {
   const blob = new Blob([data], { type: format.mime });
@@ -21,6 +22,7 @@ function downloadBlob(data: string, format: ExportFormat, worldId: string) {
 }
 
 export function useWorldExport(worldId: string) {
+  const gt = useGT();
   const [token, setToken] = useState<string | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<ExportFormat>(
     EXPORT_FORMATS[0],
@@ -35,7 +37,7 @@ export function useWorldExport(worldId: string) {
 
   async function fetchExportData(format: ExportFormat) {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return null;
     }
 
@@ -61,7 +63,7 @@ export function useWorldExport(worldId: string) {
       }
       setInvalidTokenError(false);
       setError(
-        thrownMessage(err) || "An unexpected error occurred during export",
+        thrownMessage(err) || gt("An unexpected error occurred during export"),
       );
       setPreviewContent(null);
       return null;
@@ -82,7 +84,7 @@ export function useWorldExport(worldId: string) {
 
   async function handleLoadPreview() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
     setLoading(true);
@@ -92,7 +94,7 @@ export function useWorldExport(worldId: string) {
 
   async function handleDownload() {
     if (!token) {
-      setError("Please select or add a World Access Token first.");
+      setError(gt("Please select or add a World Access Token first."));
       return;
     }
 

@@ -19,6 +19,7 @@ import {
   createWorldByDisplayName,
   worldIdentityErrorMessage,
 } from "@/lib/world-identity";
+import { useGT } from "gt-next";
 
 export function CreateWorldDialog({
   open,
@@ -29,6 +30,7 @@ export function CreateWorldDialog({
   onOpenChange: (open: boolean) => void;
   onCreated: () => void;
 }) {
+  const gt = useGT();
   const { client, logout } = useAuth();
   const displayNameRef = useRef<HTMLInputElement>(null);
   const [displayName, setDisplayName] = useState("");
@@ -71,7 +73,7 @@ export function CreateWorldDialog({
       onCreated();
     } else {
       setError(
-        "The Worlds API did not return the created world's canonical ID.",
+        gt("The Worlds API did not return the created world's canonical ID."),
       );
     }
     setLoading(false);
@@ -81,7 +83,7 @@ export function CreateWorldDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Create World</DialogTitle>
+          <DialogTitle>{gt("Create World")}</DialogTitle>
         </DialogHeader>
         {createdWorldId ? (
           <CreatedWorldView
@@ -91,18 +93,20 @@ export function CreateWorldDialog({
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="displayName">Display name</Label>
+              <Label htmlFor="displayName">{gt("Display name")}</Label>
               <Input
                 ref={displayNameRef}
                 id="displayName"
-                placeholder="My World"
+                placeholder={gt("My World")}
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 disabled={loading}
                 required
               />
               <p className="text-xs text-muted-foreground">
-                A human-readable name for this world. You can change it later.
+                {gt(
+                  "A human-readable name for this world. You can change it later.",
+                )}
               </p>
             </div>
             {error && (
@@ -111,7 +115,9 @@ export function CreateWorldDialog({
                 usagePercent={limitInfo?.usagePercent}
                 hint={
                   limitInfo
-                    ? "Delete unused worlds or raise the database limit to create more."
+                    ? gt(
+                        "Delete unused worlds or raise the database limit to create more.",
+                      )
                     : undefined
                 }
               />
@@ -123,11 +129,11 @@ export function CreateWorldDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button type="submit" disabled={!canSubmit}>
                 {loading ? <Loader2 className="size-4 animate-spin" /> : null}
-                Create
+                {gt("Create")}
               </Button>
             </div>
           </form>

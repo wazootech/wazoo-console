@@ -11,7 +11,8 @@ import { Loader2, Copy, Check } from "lucide-react";
 import { DeleteWorldDialog } from "@/components/delete-world-dialog";
 import { ReindexWorldButton } from "@/components/reindex-world-button";
 import { WorldTokenSelector } from "@/components/world-token-selector";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
+import { useGT } from "gt-next";
 import { WorldInfoCards } from "./world-info-cards";
 import {
   getWorldIdentity,
@@ -24,6 +25,7 @@ export default function WorldDetailPage({
 }: {
   params: Promise<{ worldId: string }>;
 }) {
+  const gt = useGT();
   const { worldId } = use(params);
   const { client } = useAuth();
   const router = useRouter();
@@ -51,7 +53,10 @@ export default function WorldDetailPage({
     fetchWorld();
   }, [fetchWorld]);
 
-  const tabs = getWorldTabs(worldId);
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
 
   function copyWorldId() {
     if (!world) return;
@@ -77,7 +82,7 @@ export default function WorldDetailPage({
   if (!world)
     return (
       <AppShell>
-        <p className="text-muted-foreground">World not found.</p>
+        <p className="text-muted-foreground">{gt("World not found.")}</p>
       </AppShell>
     );
 
@@ -91,7 +96,7 @@ export default function WorldDetailPage({
               <Button
                 variant="ghost"
                 size="sm"
-                aria-label={`Copy world ID ${worldId}`}
+                aria-label={gt("Copy world ID {worldId}", { worldId })}
                 onClick={copyWorldId}
                 className="h-auto px-1 py-0.5 text-sm text-muted-foreground hover:text-foreground"
               >
@@ -103,7 +108,7 @@ export default function WorldDetailPage({
                 )}
               </Button>
               <span className="sr-only" aria-live="polite">
-                {copied ? "Copied to clipboard" : ""}
+                {copied ? gt("Copied to clipboard") : ""}
               </span>
             </div>
           </div>
@@ -114,7 +119,7 @@ export default function WorldDetailPage({
               size="sm"
               onClick={() => setShowDelete(true)}
             >
-              Delete
+              {gt("Delete")}
             </Button>
           </div>
         </div>

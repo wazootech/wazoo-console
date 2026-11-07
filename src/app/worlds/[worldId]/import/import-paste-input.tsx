@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useGT } from "gt-next";
 
 interface ImportPasteInputProps {
   pasteType: "json" | "text";
@@ -20,6 +21,7 @@ export function ImportPasteInput({
   setPasteContent,
   processPaste,
 }: ImportPasteInputProps) {
+  const gt = useGT();
   return (
     <div className="space-y-3">
       <div className="flex gap-1 rounded-lg border border-zinc-800 bg-zinc-900/60 p-1">
@@ -28,14 +30,14 @@ export function ImportPasteInput({
           onClick={() => setPasteType("json")}
           className={tabClass(pasteType === "json")}
         >
-          JSON quads
+          {gt("JSON quads")}
         </button>
         <button
           type="button"
           onClick={() => setPasteType("text")}
           className={tabClass(pasteType === "text")}
         >
-          Plain text
+          {gt("Plain text")}
         </button>
       </div>
       <textarea
@@ -44,7 +46,9 @@ export function ImportPasteInput({
         placeholder={
           pasteType === "json"
             ? '[{"subject": "https://example.org/alice", "predicate": "https://schema.org/givenName", "object": "Alice"}]'
-            : "One text chunk per line. Each line becomes a chunk indexed for full-text search."
+            : gt(
+                "One text chunk per line. Each line becomes a chunk indexed for full-text search.",
+              )
         }
         rows={8}
         className="w-full rounded-md border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-xs text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-primary resize-y"
@@ -57,7 +61,7 @@ export function ImportPasteInput({
           onClick={processPaste}
           className="border-zinc-800 hover:bg-zinc-900"
         >
-          Preview
+          {gt("Preview")}
         </Button>
       )}
     </div>

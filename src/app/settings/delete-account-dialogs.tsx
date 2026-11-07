@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Loader2, AlertTriangle } from "lucide-react";
 import type { DeletionInitiated } from "./use-account-data";
+import { useGT } from "gt-next";
 
 interface DeleteAccountDialogsProps {
   deleteOpen: boolean;
@@ -30,15 +31,17 @@ export function DeleteAccountDialogs({
   handleInitiateDelete,
   handleConfirmDelete,
 }: DeleteAccountDialogsProps) {
+  const gt = useGT();
   return (
     <>
       <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete your account?</DialogTitle>
+            <DialogTitle>{gt("Delete your account?")}</DialogTitle>
             <DialogDescription>
-              This permanently deletes your account, worlds, tokens, and usage
-              data. Exported data can no longer be recovered.
+              {gt(
+                "This permanently deletes your account, worlds, tokens, and usage data. Exported data can no longer be recovered.",
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -53,7 +56,7 @@ export function DeleteAccountDialogs({
                 onClick={() => setDeleteOpen(false)}
                 disabled={deleting}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -65,7 +68,7 @@ export function DeleteAccountDialogs({
                 ) : (
                   <AlertTriangle className="size-4" />
                 )}
-                Continue
+                {gt("Continue")}
               </Button>
             </div>
           </div>
@@ -80,7 +83,7 @@ export function DeleteAccountDialogs({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm deletion</DialogTitle>
+            <DialogTitle>{gt("Confirm deletion")}</DialogTitle>
             <DialogDescription>{pending?.message}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -90,8 +93,9 @@ export function DeleteAccountDialogs({
               </p>
             )}
             <p className="text-xs text-muted-foreground">
-              This step must be completed within 15 minutes. Once confirmed, you
-              will be signed out.
+              {gt(
+                "This step must be completed within 15 minutes. Once confirmed, you will be signed out.",
+              )}
             </p>
             <div className="flex justify-end gap-2">
               <Button
@@ -99,7 +103,7 @@ export function DeleteAccountDialogs({
                 onClick={() => setPending(null)}
                 disabled={deleting}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button
                 variant="destructive"
@@ -107,7 +111,7 @@ export function DeleteAccountDialogs({
                 disabled={deleting}
               >
                 {deleting ? <Loader2 className="size-4 animate-spin" /> : null}
-                Permanently delete account
+                {gt("Permanently delete account")}
               </Button>
             </div>
           </div>

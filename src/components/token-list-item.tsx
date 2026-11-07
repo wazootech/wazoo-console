@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { KeyRound, Trash2, Copy, Check } from "lucide-react";
 import { useState } from "react";
+import { useGT } from "gt-next";
 
 interface TokenListItemProps {
   name: string;
@@ -22,6 +23,7 @@ export function TokenListItem({
   onRevoke,
 }: TokenListItemProps) {
   const [copied, setCopied] = useState(false);
+  const gt = useGT();
 
   function handleCopyUid() {
     if (!uid) return;
@@ -59,8 +61,8 @@ export function TokenListItem({
                 type="button"
                 onClick={handleCopyUid}
                 className="text-zinc-500 hover:text-zinc-300 transition-colors p-0.5"
-                aria-label="Copy Token UID"
-                title="Copy Token UID"
+                aria-label={gt("Copy Token UID")}
+                title={gt("Copy Token UID")}
               >
                 {copied ? (
                   <Check className="size-3 text-emerald-400" />
@@ -89,7 +91,7 @@ export function TokenListItem({
         <Button
           variant="ghost"
           size="icon"
-          aria-label={`Revoke token ${name}`}
+          aria-label={gt("Revoke token {name}", { name })}
           onClick={onRevoke}
           className="text-zinc-400 hover:text-red-400 hover:bg-zinc-900 shrink-0"
         >

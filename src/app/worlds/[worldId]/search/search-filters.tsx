@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useGT } from "gt-next";
 
 interface SearchFiltersProps {
   limit: number;
@@ -16,6 +17,7 @@ interface SearchFiltersProps {
 }
 
 export function SearchFilters(p: SearchFiltersProps) {
+  const gt = useGT();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
       <div className="space-y-1.5">
@@ -49,7 +51,7 @@ export function SearchFilters(p: SearchFiltersProps) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="type-filter" className="text-zinc-400 text-xs">
-          Type (rdf:type)
+          {gt("Type (rdf:type)")}
         </Label>
         <select
           id="type-filter"
@@ -57,7 +59,7 @@ export function SearchFilters(p: SearchFiltersProps) {
           onChange={(e) => p.setTypeFilter(e.target.value)}
           className="h-9 w-full rounded-md border border-zinc-800 bg-zinc-900 text-white text-xs px-2"
         >
-          <option value="">All types</option>
+          <option value="">{gt("All types")}</option>
           {p.typeOptions.map((t) => (
             <option key={t} value={t}>
               {t}
@@ -67,12 +69,12 @@ export function SearchFilters(p: SearchFiltersProps) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="prop-filter" className="text-zinc-400 text-xs">
-          Property (predicate contains)
+          {gt("Property (predicate contains)")}
         </Label>
         <Input
           id="prop-filter"
           type="text"
-          placeholder="e.g. #label"
+          placeholder={gt("e.g. #label")}
           value={p.propFilter}
           onChange={(e) => p.setPropFilter(e.target.value)}
           className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"
@@ -80,12 +82,12 @@ export function SearchFilters(p: SearchFiltersProps) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="label-filter" className="text-zinc-400 text-xs">
-          Label / object contains
+          {gt("Label / object contains")}
         </Label>
         <Input
           id="label-filter"
           type="text"
-          placeholder="e.g. agent"
+          placeholder={gt("e.g. agent")}
           value={p.labelFilter}
           onChange={(e) => p.setLabelFilter(e.target.value)}
           className="bg-zinc-900 border-zinc-800 text-white h-9 text-xs"

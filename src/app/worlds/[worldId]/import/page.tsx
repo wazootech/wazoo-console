@@ -7,12 +7,13 @@ import { NavTabs } from "@/components/nav-tabs";
 import { WorldTokenSelector } from "@/components/world-token-selector";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getWorldTabs } from "@/lib/utils";
+import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import { Upload, CheckCircle, Loader2, ClipboardPaste } from "lucide-react";
 import { useImportForm } from "./use-import-form";
 import { ImportFileInput } from "./import-file-input";
 import { ImportPasteInput } from "./import-paste-input";
 import { ImportPreview } from "./import-preview";
+import { useGT } from "gt-next";
 
 const modeClass = (active: boolean) =>
   `flex-1 flex items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
@@ -25,7 +26,11 @@ export default function ImportPage({
   params: Promise<{ worldId: string }>;
 }) {
   const { worldId } = use(params);
-  const tabs = getWorldTabs(worldId);
+  const gt = useGT();
+  const tabs = getWorldTabs(worldId).map((t) => ({
+    ...t,
+    label: translateWorldTabLabel(gt, t.label),
+  }));
   const f = useImportForm(worldId);
   const { mode, success, loading } = f;
 
@@ -33,8 +38,10 @@ export default function ImportPage({
     <AppShell>
       <div className="space-y-6">
         <PageHeader
-          title="Import Data"
-          description="Load graph quads or plain text chunks into your World"
+          title={gt("Import Data")}
+          description={gt(
+            "Load graph quads or plain text chunks into your World",
+          )}
         />
         <NavTabs tabs={tabs} />
 
@@ -46,7 +53,7 @@ export default function ImportPage({
             <Card className="border border-zinc-800 bg-zinc-950 text-white">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold">
-                  Import Data
+                  {gt("Import Data")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -57,7 +64,7 @@ export default function ImportPage({
                     className={modeClass(mode === "file")}
                   >
                     <Upload className="size-3.5" />
-                    Upload file
+                    {gt("Upload file")}
                   </button>
                   <button
                     type="button"
@@ -65,7 +72,7 @@ export default function ImportPage({
                     className={modeClass(mode === "paste")}
                   >
                     <ClipboardPaste className="size-3.5" />
-                    Paste text
+                    {gt("Paste text")}
                   </button>
                 </div>
 
@@ -86,10 +93,10 @@ export default function ImportPage({
                   {loading ? (
                     <>
                       <Loader2 className="size-4 animate-spin mr-1.5" />
-                      Importing...
+                      {gt("Importing...")}
                     </>
                   ) : (
-                    "Execute Import"
+                    gt("Execute Import")
                   )}
                 </Button>
               </CardContent>
@@ -101,10 +108,10 @@ export default function ImportPage({
                   <CheckCircle className="size-5 shrink-0 mt-0.5" />
                   <div className="space-y-1">
                     <p className="text-sm font-semibold text-white">
-                      Import Successful
+                      {gt("Import Successful")}
                     </p>
                     <p className="text-xs text-green-300">
-                      Successfully imported:
+                      {gt("Successfully imported:")}
                       {success.quads > 0 && ` ${success.quads} quads`}
                       {success.chunks > 0 && ` ${success.chunks} text chunks`}
                     </p>

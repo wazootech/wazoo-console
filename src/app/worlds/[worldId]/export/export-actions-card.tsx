@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { ExportFormat } from "./export-formats";
 import { ExportPreviewBody } from "./export-preview-body";
+import { useGT } from "gt-next";
 
 interface ExportActionsCardProps {
   worldId: string;
@@ -39,6 +40,7 @@ export function ExportActionsCard({
   handleLoadPreview,
   handleDownload,
 }: ExportActionsCardProps) {
+  const gt = useGT();
   return (
     <Card className="border border-zinc-800 bg-zinc-950 text-white">
       <CardHeader className="border-b border-zinc-900 flex flex-row items-center justify-between py-4">
@@ -58,12 +60,12 @@ export function ExportActionsCard({
               {copied ? (
                 <>
                   <Check className="size-3.5 text-green-400" />
-                  Copied
+                  {gt("Copied")}
                 </>
               ) : (
                 <>
                   <Copy className="size-3.5" />
-                  Copy Preview
+                  {gt("Copy Preview")}
                 </>
               )}
             </Button>
@@ -81,7 +83,7 @@ export function ExportActionsCard({
             ) : (
               <FileCode className="size-3.5" />
             )}
-            {previewContent ? "Refresh Preview" : "Preview Sample"}
+            {previewContent ? gt("Refresh Preview") : gt("Preview Sample")}
           </Button>
 
           <Button
@@ -95,7 +97,7 @@ export function ExportActionsCard({
             ) : (
               <Download className="size-3.5" />
             )}
-            Download {selectedFormat.ext}
+            {gt("Download {ext}", { ext: selectedFormat.ext })}
           </Button>
         </div>
       </CardHeader>

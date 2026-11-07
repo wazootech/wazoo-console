@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { XCircle } from "lucide-react";
 import type { QuotaSummary } from "@/lib/quota-error";
 import type { Billing } from "@wazoo/client";
+import { useGT } from "gt-next";
 
 interface BillingCardsProps {
   billing: Billing;
@@ -18,24 +19,25 @@ export function BillingCards({
   cancelled,
   onCancelClick,
 }: BillingCardsProps) {
+  const gt = useGT();
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">State</CardTitle>
+          <CardTitle className="text-sm">{gt("State")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{billing.state}</Badge>
             {billing.paymentRequired && (
-              <Badge variant="destructive">Payment required</Badge>
+              <Badge variant="destructive">{gt("Payment required")}</Badge>
             )}
           </div>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Provider</CardTitle>
+          <CardTitle className="text-sm">{gt("Provider")}</CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm">{billing.provider}</p>
@@ -43,41 +45,45 @@ export function BillingCards({
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Customer</CardTitle>
+          <CardTitle className="text-sm">{gt("Customer")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Badge variant={billing.customerConfigured ? "default" : "secondary"}>
-            {billing.customerConfigured ? "Configured" : "Not configured"}
+            {billing.customerConfigured
+              ? gt("Configured")
+              : gt("Not configured")}
           </Badge>
         </CardContent>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Subscription</CardTitle>
+          <CardTitle className="text-sm">{gt("Subscription")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             <Badge
               variant={billing.subscriptionConfigured ? "default" : "secondary"}
             >
-              {billing.subscriptionConfigured ? "Configured" : "Not configured"}
+              {billing.subscriptionConfigured
+                ? gt("Configured")
+                : gt("Not configured")}
             </Badge>
             {billing.subscriptionConfigured && !cancelled ? (
               <div>
                 <Button variant="destructive" size="sm" onClick={onCancelClick}>
                   <XCircle className="size-4" />
-                  Cancel subscription
+                  {gt("Cancel subscription")}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Cancelling ends the subscription immediately. Your world and
-                  its data stay intact; access to paid features ends at the next
-                  billing cycle.
+                  {gt(
+                    "Cancelling ends the subscription immediately. Your world and its data stay intact; access to paid features ends at the next billing cycle.",
+                  )}
                 </p>
               </div>
             ) : null}
             {cancelled ? (
               <p className="text-sm text-muted-foreground">
-                Subscription cancelled.
+                {gt("Subscription cancelled.")}
               </p>
             ) : null}
           </div>
@@ -86,7 +92,7 @@ export function BillingCards({
       {quotaSummary && quotaSummary.limits.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm">Plan limits</CardTitle>
+            <CardTitle className="text-sm">{gt("Plan limits")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="divide-y">

@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { SavedWorldToken } from "@/lib/utils";
+import { useGT } from "gt-next";
 
 interface TokenSelectProps {
   tokens: SavedWorldToken[];
@@ -14,13 +15,14 @@ interface TokenSelectProps {
 }
 
 export function TokenSelect({ tokens, value, onChange }: TokenSelectProps) {
+  const gt = useGT();
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         id="token-select"
         className="w-full bg-zinc-900 border-zinc-800 text-white"
       >
-        <SelectValue placeholder="Select a token or import one..." />
+        <SelectValue placeholder={gt("Select a token or import one...")} />
       </SelectTrigger>
       <SelectContent className="bg-zinc-900 border-zinc-800 text-white">
         {tokens.map((t) => (
@@ -32,7 +34,7 @@ export function TokenSelect({ tokens, value, onChange }: TokenSelectProps) {
           </SelectItem>
         ))}
         <SelectItem value="manual" className="text-primary font-medium">
-          + Import existing token
+          {gt("+ Import existing token")}
         </SelectItem>
       </SelectContent>
     </Select>

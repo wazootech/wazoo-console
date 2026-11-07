@@ -13,6 +13,7 @@ import {
   validateScopes,
   type ScopeValidationResult,
 } from "@/lib/platform-scopes";
+import { useGT } from "gt-next";
 
 interface ScopeSelectorProps {
   value: string;
@@ -27,6 +28,7 @@ export function ScopeSelector({
   disabled = false,
   onValidationChange,
 }: ScopeSelectorProps) {
+  const gt = useGT();
   const activeScopes = parseScopes(value);
   const activeSet = new Set(activeScopes);
   const validation: ScopeValidationResult = validateScopes(value);
@@ -66,7 +68,7 @@ export function ScopeSelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
-        <Label htmlFor="scope">Scopes</Label>
+        <Label htmlFor="scope">{gt("Scopes")}</Label>
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -76,7 +78,7 @@ export function ScopeSelector({
             onClick={handleSelectDefaults}
             disabled={disabled}
           >
-            Select defaults
+            {gt("Select defaults")}
           </Button>
           <span className="text-muted-foreground/40">•</span>
           <Button
@@ -87,14 +89,14 @@ export function ScopeSelector({
             onClick={handleClear}
             disabled={disabled}
           >
-            Clear
+            {gt("Clear")}
           </Button>
         </div>
       </div>
 
       <Input
         id="scope"
-        placeholder="e.g. users.read worlds.read"
+        placeholder={gt("e.g. users.read worlds.read")}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
@@ -108,7 +110,7 @@ export function ScopeSelector({
       {/* Selectable Chip Grid */}
       <div className="space-y-1.5">
         <p className="text-xs font-medium text-muted-foreground">
-          Available Scopes:
+          {gt("Available Scopes:")}
         </p>
         <div className="flex flex-wrap gap-1.5">
           {VALID_PLATFORM_SCOPES.map((scope) => {
