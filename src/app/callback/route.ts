@@ -6,16 +6,18 @@ import {
   mintPlatformToken,
   tokenCookieName,
 } from "@/lib/server-auth";
+import { emailNotVerifiedCode, requireVerifiedEmail } from "@/lib/workos-user";
 
 export const GET = handleAuth({
   returnPathname: "/worlds",
   onSuccess: async ({ user }) => {
+    const email = requireVerifiedEmail(user);
     const cookieStore = await cookies();
     const ageConfirmed = cookieStore.get(ageCookieName)?.value === "1";
     const token = await mintPlatformToken({
-      email: user.email,
+      email,
       displayName: getDisplayName({
-        email: user.email,
+        email,
         firstName: user.firstName,
         lastName: user.lastName,
       }),
@@ -36,7 +38,10 @@ export const GET = handleAuth({
   },
   onError: async ({ error }) => {
     const errObj = error as { code?: string } | null | undefined;
-    if (errObj?.code === "AGE_GATE_REQUIRED") {
+    if (
+      errObj?.code === "AGE_GATE_REQUIRED" ||
+      errObj?.code === emailNotVerifiedCode
+    ) {
       return new Response(null, {
         status: 303,
         headers: { Location: "/sign-in" },
