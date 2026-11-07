@@ -129,7 +129,7 @@ export function CreateWorldDialog({
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button type="submit" disabled={!canSubmit}>
                 {loading ? <Loader2 className="size-4 animate-spin" /> : null}

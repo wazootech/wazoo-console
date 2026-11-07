@@ -103,7 +103,7 @@ export function DeleteAccountDialogs({
                 onClick={() => setPending(null)}
                 disabled={deleting}
               >
-                Cancel
+                {gt("Cancel")}
               </Button>
               <Button
                 variant="destructive"
