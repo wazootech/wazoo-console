@@ -55,7 +55,11 @@ async function selectToken(page: Page, worldId: string) {
     { worldId },
   );
   await page.reload();
-  await expect(page.getByRole("combobox")).toContainText("Saved token");
+  // The gt-next LocaleSelector also renders as a combobox; scope to the
+  // world token selector so strict mode doesn't see two matches.
+  await expect(
+    page.getByRole("combobox", { name: "World Access Token" }),
+  ).toContainText("Saved token");
 }
 
 async function mockApiResponse(
