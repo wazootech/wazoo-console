@@ -15,6 +15,7 @@
     "build:qa": "cross-env NEXT_PUBLIC_API_URL=https://api-qa.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console-qa.wazoo.dev/callback next build --webpack",
     "build:prod": "cross-env NEXT_PUBLIC_API_URL=https://api.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console.wazoo.dev/callback next build --webpack",
     "deploy": "cross-env NEXT_PUBLIC_API_URL=https://api.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console.wazoo.dev/callback npx @opennextjs/cloudflare build && npx wrangler deploy",
+    "build:preview": "cross-env NEXT_PUBLIC_API_URL=https://api-qa.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://wazoo-console-preview.ethan-r-davidson.workers.dev/callback npx @opennextjs/cloudflare build",
     "deploy:qa": "cross-env NEXT_PUBLIC_API_URL=https://api-qa.wazoo.dev NEXT_PUBLIC_WORKOS_REDIRECT_URI=https://console-qa.wazoo.dev/callback npx @opennextjs/cloudflare build && npx wrangler deploy --env qa",
     "format": "prettier \"src/**/*.{ts,tsx,css}\" --write",
     "format:check": "prettier \"src/**/*.{ts,tsx,css}\" --check",

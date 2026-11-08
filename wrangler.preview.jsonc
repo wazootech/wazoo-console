@@ -1,3 +1,13 @@
+// PR preview Worker for the console, built by Cloudflare Workers Builds (not
+// GitHub Actions, so no PR workflow holds a deploy credential; contract-lint R5).
+//
+//   Build command:   pnpm run build:preview
+//   Deploy (main):   npx wrangler deploy -c wrangler.preview.jsonc
+//   Preview (PRs):   npx wrangler versions upload -c wrangler.preview.jsonc
+//
+// It is a separate Worker from wazoo-console / wazoo-console-qa, with a build
+// token scoped to this Worker only. It talks to api-qa and uses the QA WorkOS
+// staging secrets, set on this Worker. workers.dev only: no custom domain.
 {
   "$schema": "https://json.schemastore.org/wrangler.json",
   "name": "wazoo-console-preview",
@@ -8,16 +18,21 @@
   "preview_urls": true,
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS",
+    "binding": "ASSETS"
   },
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "wazoo-console",
-    },
+      "service": "wazoo-console-preview"
+    }
   ],
+  "vars": {
+    "NEXT_PUBLIC_API_URL": "https://api-qa.wazoo.dev",
+    // Per-branch hostnames: derive the WorkOS callback from the request.
+    "WORKOS_REDIRECT_FROM_ORIGIN": "true"
+  },
   "observability": {
     "enabled": true,
-    "head_sampling_rate": 1,
-  },
+    "head_sampling_rate": 1
+  }
 }
