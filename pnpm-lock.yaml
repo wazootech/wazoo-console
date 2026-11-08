@@ -179,8 +179,8 @@ importers:
         specifier: ^4.3.3
         version: 4.3.3
       '@wazoo/client':
-        specifier: npm:@jsr/wazoo__client@^0.6.0
-        version: '@jsr/wazoo__client@0.6.0'
+        specifier: npm:@jsr/wazoo__client@^0.6.1
+        version: '@jsr/wazoo__client@0.6.1'
       '@workos-inc/authkit-nextjs':
         specifier: ^4.3.0
         version: 4.3.0(@workos-inc/node@10.8.0)(next@16.2.10(@babel/core@7.29.7(supports-color@10.2.2))(@playwright/test@1.62.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@5.9.3)
@@ -1300,8 +1300,8 @@ packages:
     peerDependencies:
       jsep: ^0.4.0||^1.0.0
 
-  '@jsr/wazoo__client@0.6.0':
-    resolution: {integrity: sha512-Ba2ATADe0l6s4oJRHYkDTPAk20Z8/vyePgSyRZ8nre1LJapkjceopvIgc7RsvDE1Xf2IKxTarZHYjRwS1hPRTA==, tarball: https://npm.jsr.io/~/11/@jsr/wazoo__client/0.6.0.tgz}
+  '@jsr/wazoo__client@0.6.1':
+    resolution: {integrity: sha512-EVsWGYHcADnOdpwCDxAdGRE2rmHZMI3n3GuWomB92IAiI5BixIJ9mKD3SJ1jk9UFIEzT/vXC9UPiw20N/1jcbA==, tarball: https://npm.jsr.io/~/11/@jsr/wazoo__client/0.6.1.tgz}
 
   '@monaco-editor/loader@1.7.0':
     resolution: {integrity: sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==}
@@ -6229,7 +6229,7 @@ snapshots:
     dependencies:
       jsep: 1.6.0
 
-  '@jsr/wazoo__client@0.6.0': {}
+  '@jsr/wazoo__client@0.6.1': {}
 
   '@monaco-editor/loader@1.7.0':
     dependencies:
