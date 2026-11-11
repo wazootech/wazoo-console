@@ -74,11 +74,20 @@ Pushes to `main` also trigger `deploy-qa`, which publishes the
 `wazoo-console-qa` Worker to the `qa` Wrangler environment and points it at
 `api-qa.wazoo.dev`. Verify the QA Worker before dispatching a production deploy.
 
-Pull requests do not deploy. A PR-triggered job must not hold a deploy
-credential, and the shared Infisical machine identity refuses OIDC requests from
-a pull-request context, so PR workflows stop at `contract-lint` and `verify`.
-PR preview Workers are retired; `wrangler.preview.jsonc` is no longer referenced
-by CI.
+GitHub Actions does not deploy pull requests. A PR-triggered job must not hold a
+deploy credential, and the shared Infisical machine identity refuses OIDC
+requests from a pull-request context, so PR workflows stop at `contract-lint`
+and `verify`.
+
+PR previews come from Cloudflare Workers Builds instead, using
+`wrangler.preview.jsonc`. The credential stays in Cloudflare and is scoped to a
+separate `wazoo-console-preview` Worker, so it can't deploy QA or prod. Every
+branch pushed to this repo gets a `*-wazoo-console-preview.*.workers.dev` URL
+against `api-qa.wazoo.dev`, and Cloudflare comments it on the PR. Sign-in works
+because the preview Worker derives the WorkOS callback from the request origin
+(`WORKOS_REDIRECT_FROM_ORIGIN`), and WorkOS staging allowlists those hostnames.
+Branch code runs with that Worker's QA secrets, so treat write access to this
+repo as access to them.
 
 Required GitHub Actions secrets and variables:
 
