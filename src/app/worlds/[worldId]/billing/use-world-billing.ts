@@ -56,7 +56,11 @@ export function useWorldBilling(worldId: string) {
         `/api/worlds/${encodeURIComponent(worldId)}/billing/cancel`,
         { method: "POST" },
       );
-      const body = (await res.json().catch(() => ({}))) as {
+      const body = (await res.json().catch(() => {
+        throw new Error(
+          "Could not read the billing cancellation response as JSON",
+        );
+      })) as {
         billing?: Billing;
         error?: { message?: string };
       };
@@ -69,7 +73,8 @@ export function useWorldBilling(worldId: string) {
       setBilling(body.billing);
       setCancelled(true);
       setCancelOpen(false);
-    } catch {
+    } catch (err) {
+      console.error("Could not cancel the world subscription", err);
       setCancelError("Could not cancel the subscription.");
     } finally {
       setCancelling(false);

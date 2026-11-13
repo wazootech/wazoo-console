@@ -34,12 +34,40 @@ export interface SavedWorldToken {
   token: string;
 }
 
+/**
+ * Reads the saved world tokens from localStorage, throwing on parse errors or invalid data.
+ * @param key The key under which the tokens are stored in localStorage.
+ * @returns An array of saved world tokens.
+ */
+function readWorldTokens(key: string): SavedWorldToken[] {
+  const raw = localStorage.getItem(key);
+  if (raw === null) return [];
+  let tokens: unknown;
+  try {
+    tokens = JSON.parse(raw);
+  } catch {
+    throw new SyntaxError("Saved world token list is not valid JSON");
+  }
+  if (
+    Array.isArray(tokens) &&
+    tokens.every((entry: unknown): entry is SavedWorldToken => {
+      const value = entry as { name?: unknown; token?: unknown } | null;
+      return (
+        typeof value?.name === "string" && typeof value?.token === "string"
+      );
+    })
+  ) {
+    return tokens;
+  }
+  throw new TypeError("Invalid saved world token list");
+}
+
 export function getLocalWorldTokens(worldId: string): SavedWorldToken[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(`wazoo_world_tokens_${worldId}`);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+    return readWorldTokens(`wazoo_world_tokens_${worldId}`);
+  } catch (err) {
+    console.error("Could not load saved world tokens", err);
     return [];
   }
 }
@@ -48,20 +76,22 @@ export function saveLocalWorldToken(
   worldId: string,
   token: string,
   name: string,
-) {
-  if (typeof window === "undefined") return;
+): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    const current = getLocalWorldTokens(worldId);
-    // Avoid duplicates
+    const key = `wazoo_world_tokens_${worldId}`;
+
+    // Let read failures stop the save so it preserves the existing data.
+    const current = readWorldTokens(key);
+
     if (!current.some((t) => t.token === token)) {
       current.push({ token, name });
-      localStorage.setItem(
-        `wazoo_world_tokens_${worldId}`,
-        JSON.stringify(current),
-      );
+      localStorage.setItem(key, JSON.stringify(current));
     }
-  } catch (e) {
-    console.error("Failed to save local world token", e);
+    return true;
+  } catch (err) {
+    console.error("Could not save local world token", err);
+    return false;
   }
 }
 

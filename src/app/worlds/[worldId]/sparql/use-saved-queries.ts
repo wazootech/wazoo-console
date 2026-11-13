@@ -13,8 +13,8 @@ export function useSavedQueries(worldId: string, query: string) {
     try {
       const saved = localStorage.getItem(`wazoo_sparql_queries_${worldId}`);
       if (saved) setCustomQueries(JSON.parse(saved));
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("Could not load saved SPARQL queries", err);
     }
   }, [worldId]);
 

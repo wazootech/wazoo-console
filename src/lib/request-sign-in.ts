@@ -19,7 +19,9 @@ export async function requestSignIn(): Promise<
     if (res.redirected || (location && res.status >= 300 && res.status < 400)) {
       return { redirectTo: location ?? res.url };
     }
-    const body = (await res.json().catch(() => ({}))) as {
+    const body = (await res.json().catch(() => {
+      throw new Error("Could not read the sign-in response as JSON");
+    })) as {
       url?: string;
       error?: { message?: string };
     };
@@ -27,7 +29,8 @@ export async function requestSignIn(): Promise<
       return { error: body.error?.message ?? null };
     }
     return { redirectTo: body.url };
-  } catch {
+  } catch (err) {
+    console.error("Could not start sign-in", err);
     return { error: null };
   }
 }
