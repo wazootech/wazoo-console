@@ -39,6 +39,7 @@ export default function WorldTokensPage({
     uid: string;
     name: string;
     token: string;
+    saveFailed: boolean;
   } | null>(null);
   const [showSecret, setShowSecret] = useState(false);
 
@@ -60,9 +61,7 @@ export default function WorldTokensPage({
     setLoading(false);
   }, [client, worldId]);
 
-  useEffect(() => {
-    fetchTokens();
-  }, [fetchTokens]);
+  useEffect(() => void fetchTokens(), [fetchTokens]);
 
   async function handleCreate() {
     if (!client) return;
@@ -79,8 +78,8 @@ export default function WorldTokensPage({
         uid: t.uid,
         name: t.name,
         token: tokenStr,
+        saveFailed: !saveLocalWorldToken(worldId, tokenStr, t.name),
       });
-      saveLocalWorldToken(worldId, tokenStr, t.name);
     }
     fetchTokens();
   }
@@ -107,6 +106,7 @@ export default function WorldTokensPage({
         {newToken && (
           <TokenSecretCard
             token={newToken.token}
+            saveFailed={newToken.saveFailed}
             showSecret={showSecret}
             maskedLength={40}
             onToggle={() => setShowSecret(!showSecret)}

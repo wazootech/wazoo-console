@@ -24,7 +24,8 @@ export function readConsent(): ConsentStatus {
   try {
     const value = window.localStorage.getItem(consentStorageKey);
     return value === "accepted" || value === "rejected" ? value : null;
-  } catch {
+  } catch (err) {
+    console.error("Could not read saved consent", err);
     return null;
   }
 }
@@ -47,7 +48,8 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
   const persist = useCallback((value: "accepted" | "rejected") => {
     try {
       window.localStorage.setItem(consentStorageKey, value);
-    } catch {
+    } catch (err) {
+      console.error("Could not persist consent", err);
       // Storage can be unavailable (private mode, quota); consent still applies for this session.
     }
     setStatus(value);

@@ -31,7 +31,7 @@ export async function fetchExportText(
     try {
       errData = responseText ? JSON.parse(responseText) : null;
     } catch {
-      errData = null;
+      console.error("Could not parse export error response.");
     }
     const message =
       errData?.error?.message ||

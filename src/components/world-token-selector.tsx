@@ -31,6 +31,7 @@ export function WorldTokenSelector({
   const [manualName, setManualName] = useState("");
   const [showManualForm, setShowManualForm] = useState(false);
   const [showTokenSecret, setShowTokenSecret] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   useEffect(() => {
     const list = getLocalWorldTokens(worldId);
@@ -46,6 +47,7 @@ export function WorldTokenSelector({
 
   function handleSelectChange(val: string) {
     setSelectedTokenValue(val);
+    setSaveFailed(false);
     if (val === "manual") {
       setShowManualForm(true);
       onTokenChange(null);
@@ -57,16 +59,18 @@ export function WorldTokenSelector({
 
   function handleAddManualToken(e: React.FormEvent) {
     e.preventDefault();
-    if (!manualToken.trim()) return;
+    const token = manualToken.trim();
+    if (!token) return;
 
     const name =
       manualName.trim() || `Imported Key (${manualToken.slice(0, 8)}...)`;
-    saveLocalWorldToken(worldId, manualToken.trim(), name);
+    const saved = saveLocalWorldToken(worldId, token, name);
+    setSaveFailed(!saved);
+    if (!saved) return;
 
-    const updated = getLocalWorldTokens(worldId);
-    setTokens(updated);
-    setSelectedTokenValue(manualToken.trim());
-    onTokenChange(manualToken.trim());
+    setTokens(getLocalWorldTokens(worldId));
+    setSelectedTokenValue(token);
+    onTokenChange(token);
     setManualToken("");
     setManualName("");
     setShowManualForm(false);
@@ -110,6 +114,7 @@ export function WorldTokenSelector({
             setManualToken={setManualToken}
             showTokenSecret={showTokenSecret}
             setShowTokenSecret={setShowTokenSecret}
+            saveFailed={saveFailed}
             onSubmit={handleAddManualToken}
             onCancel={() => {
               setShowManualForm(false);

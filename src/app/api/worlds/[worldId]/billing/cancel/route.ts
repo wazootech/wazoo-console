@@ -37,7 +37,10 @@ export async function POST(_request: Request, { params }: RouteContext) {
     },
   );
 
-  const body = (await response.json().catch(() => ({}))) as {
+  const body = (await response.json().catch(() => {
+    console.error("Could not parse billing cancellation response");
+    return {};
+  })) as {
     billing?: unknown;
     error?: { message?: string };
   };

@@ -46,7 +46,7 @@ export function useSparqlExecution(
       try {
         data = responseText ? JSON.parse(responseText) : null;
       } catch {
-        data = null;
+        console.error("Could not parse SPARQL response");
       }
 
       const message =

@@ -5,12 +5,14 @@ import { useGT } from "gt-next";
 
 export function TokenSecretCard({
   token,
+  saveFailed,
   showSecret,
   maskedLength,
   onToggle,
   onDismiss,
 }: {
   token: string;
+  saveFailed?: boolean;
   showSecret: boolean;
   maskedLength: number;
   onToggle: () => void;
@@ -23,6 +25,11 @@ export function TokenSecretCard({
         <CardTitle className="text-sm">{gt("New Token Created")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
+        {saveFailed && (
+          <p role="alert" className="text-sm text-destructive">
+            {gt("Could not save the token in this browser.")}
+          </p>
+        )}
         <p className="text-xs text-muted-foreground">
           {gt("Copy this token now.")}{" "}
           <strong>{gt("It will not be shown again.")}</strong>

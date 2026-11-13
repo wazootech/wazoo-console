@@ -11,6 +11,7 @@ interface ManualTokenFormProps {
   setManualToken: (v: string) => void;
   showTokenSecret: boolean;
   setShowTokenSecret: (v: boolean) => void;
+  saveFailed: boolean;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
@@ -22,6 +23,7 @@ export function ManualTokenForm({
   setManualToken,
   showTokenSecret,
   setShowTokenSecret,
+  saveFailed,
   onSubmit,
   onCancel,
 }: ManualTokenFormProps) {
@@ -86,6 +88,11 @@ export function ManualTokenForm({
           </button>
         </div>
       </div>
+      {saveFailed && (
+        <p role="alert" className="text-sm text-destructive">
+          {gt("Could not save the token in this browser.")}
+        </p>
+      )}
       <div className="flex justify-end gap-2">
         <Button
           type="button"
