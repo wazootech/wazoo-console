@@ -8,9 +8,9 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
+import { wazooStorage } from "./wazoo-storage";
 
-export const consentStorageKey = "wazoo_consent";
-
+export const consentStorageKey = "consent";
 export type ConsentStatus = "accepted" | "rejected" | null;
 
 /**
@@ -22,7 +22,7 @@ export function readConsent(): ConsentStatus {
   if (typeof window === "undefined") return null;
 
   try {
-    const value = window.localStorage.getItem(consentStorageKey);
+    const value = wazooStorage.get(consentStorageKey);
     return value === "accepted" || value === "rejected" ? value : null;
   } catch (err) {
     console.error("Could not read saved consent", err);
@@ -47,7 +47,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
 
   const persist = useCallback((value: "accepted" | "rejected") => {
     try {
-      window.localStorage.setItem(consentStorageKey, value);
+      wazooStorage.set(consentStorageKey, value);
     } catch (err) {
       console.error("Could not persist consent", err);
       // Storage can be unavailable (private mode, quota); consent still applies for this session.

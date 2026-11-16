@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import type { BillingCancellationBody } from "@/lib/billing-cancellation";
 import {
   errMsg,
   isUnauthorizedError,
@@ -56,14 +57,11 @@ export function useWorldBilling(worldId: string) {
         `/api/worlds/${encodeURIComponent(worldId)}/billing/cancel`,
         { method: "POST" },
       );
-      const body = (await res.json().catch(() => {
+      const body: BillingCancellationBody = await res.json().catch(() => {
         throw new Error(
           "Could not read the billing cancellation response as JSON",
         );
-      })) as {
-        billing?: Billing;
-        error?: { message?: string };
-      };
+      });
       if (!res.ok || !body.billing) {
         setCancelError(
           body.error?.message ?? "Could not cancel the subscription.",

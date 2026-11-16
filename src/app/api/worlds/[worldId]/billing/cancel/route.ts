@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import type { BillingCancellationBody } from "@/lib/billing-cancellation";
 import { fetchUser, getApiBaseUrl, tokenCookieName } from "@/lib/server-auth";
 
 interface RouteContext {
@@ -37,13 +38,10 @@ export async function POST(_request: Request, { params }: RouteContext) {
     },
   );
 
-  const body = (await response.json().catch(() => {
+  const body: BillingCancellationBody = await response.json().catch(() => {
     console.error("Could not parse billing cancellation response");
     return {};
-  })) as {
-    billing?: unknown;
-    error?: { message?: string };
-  };
+  });
 
   if (!response.ok) {
     return NextResponse.json(

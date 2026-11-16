@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { wazooStorage } from "./wazoo-storage";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -36,11 +37,11 @@ export interface SavedWorldToken {
 
 /**
  * Reads the saved world tokens from localStorage, throwing on parse errors or invalid data.
- * @param key The key under which the tokens are stored in localStorage.
+ * @param key The key under which the tokens are stored in localStorage (see wazoo-storage.ts).
  * @returns An array of saved world tokens.
  */
 function readWorldTokens(key: string): SavedWorldToken[] {
-  const raw = localStorage.getItem(key);
+  const raw = wazooStorage.get(key);
   if (raw === null) return [];
   let tokens: unknown;
   try {
@@ -65,7 +66,7 @@ function readWorldTokens(key: string): SavedWorldToken[] {
 export function getLocalWorldTokens(worldId: string): SavedWorldToken[] {
   if (typeof window === "undefined") return [];
   try {
-    return readWorldTokens(`wazoo_world_tokens_${worldId}`);
+    return readWorldTokens(`world_tokens_${worldId}`);
   } catch (err) {
     console.error("Could not load saved world tokens", err);
     return [];
@@ -79,14 +80,14 @@ export function saveLocalWorldToken(
 ): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const key = `wazoo_world_tokens_${worldId}`;
+    const key = `world_tokens_${worldId}`;
 
     // Let read failures stop the save so it preserves the existing data.
     const current = readWorldTokens(key);
 
     if (!current.some((t) => t.token === token)) {
       current.push({ token, name });
-      localStorage.setItem(key, JSON.stringify(current));
+      wazooStorage.set(key, JSON.stringify(current));
     }
     return true;
   } catch (err) {
