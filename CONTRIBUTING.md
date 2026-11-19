@@ -102,7 +102,7 @@ committed.
 `E2E_AUTH_BYPASS_ENABLED="true"` is opt-in local use of `/api/auth/bypass`
 (passwordless session minting with a platform token). It is disabled by default
 and disabled in every deployed environment except the QA Worker; see
-`secret-registry.md` for the full gate matrix.
+`SECRETS.md` for the full gate matrix.
 
 ## Local development
 
@@ -232,7 +232,7 @@ WORKOS_COOKIE_PASSWORD
 WAZOO_PLATFORM_ADMIN_TOKEN
 ```
 
-See `secret-registry.md` for the full secret inventory, AuthKit settings, and
+See `SECRETS.md` for the full secret inventory, AuthKit settings, and
 security rules.
 
 ## QA checklist before inviting beta users
@@ -267,7 +267,7 @@ security rules.
 
 - General Wazoo workspace questions: see the workspace `AGENTS.md`.
 - Console-specific conventions: see `AGENTS.md` in this repository.
-- Auth and deployment details: see `secret-registry.md`.
+- Auth and deployment details: see `SECRETS.md`.
 - Private beta signup and allowlist: see
   `wazootech/memory/wiki/Private_Beta.md`.
 
