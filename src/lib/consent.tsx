@@ -4,10 +4,10 @@ import {
   createContext,
   useContext,
   useState,
-  useEffect,
   useCallback,
   type ReactNode,
 } from "react";
+import { useStoredValue } from "./use-stored-value";
 import { wazooStorage } from "./wazoo-storage";
 
 export const consentStorageKey = "consent";
@@ -39,11 +39,11 @@ interface ConsentContextValue {
 const ConsentContext = createContext<ConsentContextValue | null>(null);
 
 export function ConsentProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<ConsentStatus>(null);
-
-  useEffect(() => {
-    setStatus(readConsent());
-  }, []);
+  const stored = useStoredValue(consentStorageKey);
+  // The choice made in this session, which holds even when storage rejects the write.
+  const [chosen, setChosen] = useState<ConsentStatus>(null);
+  const status: ConsentStatus =
+    chosen ?? (stored === "accepted" || stored === "rejected" ? stored : null);
 
   const persist = useCallback((value: "accepted" | "rejected") => {
     try {
@@ -52,7 +52,7 @@ export function ConsentProvider({ children }: { children: ReactNode }) {
       console.error("Could not persist consent", err);
       // Storage can be unavailable (private mode, quota); consent still applies for this session.
     }
-    setStatus(value);
+    setChosen(value);
   }, []);
 
   const accept = useCallback(() => persist("accepted"), [persist]);

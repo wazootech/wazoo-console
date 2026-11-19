@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "@/lib/auth";
+import { useState } from "react";
+import { useApiQuery } from "@/lib/use-api-query";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { PageHeader } from "@/components/page-header";
@@ -12,11 +12,9 @@ import { Plus, Loader2, Globe } from "lucide-react";
 import Link from "next/link";
 import { useGT } from "gt-next";
 import { CreateWorldDialog } from "@/components/create-world-dialog";
-import { isUnauthorizedError } from "@/lib/quota-error";
 import {
   listWorldIdentities,
   worldIdentityErrorMessage,
-  type WorldIdentity,
 } from "@/lib/world-identity";
 
 const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
@@ -27,32 +25,18 @@ const stateVariant: Record<string, "default" | "secondary" | "destructive"> = {
 
 export default function WorldsPage() {
   const gt = useGT();
-  const { client, logout } = useAuth();
-  const [worlds, setWorlds] = useState<WorldIdentity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
 
-  const fetchWorlds = useCallback(async () => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    const r = await listWorldIdentities(client);
-    if (r.error !== undefined) {
-      if (isUnauthorizedError(r.error)) {
-        logout();
-        return;
-      }
-      setError(worldIdentityErrorMessage(r.error));
-    } else {
-      setWorlds(r.data ?? []);
-    }
-    setLoading(false);
-  }, [client, logout]);
-
-  useEffect(() => {
-    fetchWorlds();
-  }, [fetchWorlds]);
+  const {
+    data: result,
+    loading,
+    reload,
+  } = useApiQuery(listWorldIdentities, { signOutOnUnauthorized: true });
+  const worlds = result?.error === undefined ? (result?.data ?? []) : [];
+  const error =
+    result?.error !== undefined
+      ? worldIdentityErrorMessage(result.error)
+      : null;
 
   return (
     <AppShell>
@@ -77,7 +61,7 @@ export default function WorldsPage() {
           <ErrorCard
             message={error}
             action={
-              <Button variant="outline" size="sm" onClick={fetchWorlds}>
+              <Button variant="outline" size="sm" onClick={reload}>
                 {gt("Retry")}
               </Button>
             }
@@ -124,7 +108,7 @@ export default function WorldsPage() {
         <CreateWorldDialog
           open={showCreate}
           onOpenChange={setShowCreate}
-          onCreated={fetchWorlds}
+          onCreated={reload}
         />
       </div>
     </AppShell>

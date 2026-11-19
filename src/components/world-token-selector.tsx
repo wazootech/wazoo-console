@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
-  getLocalWorldTokens,
+  parseWorldTokens,
   saveLocalWorldToken,
+  worldTokensKey,
   type SavedWorldToken,
 } from "@/lib/utils";
+import { useStoredValue } from "@/lib/use-stored-value";
 import Link from "next/link";
 import { KeyRound } from "lucide-react";
 import { ManualTokenForm } from "./manual-token-form";
 import { TokenSelect } from "./token-select";
 import { NoTokensNotice } from "./no-tokens-notice";
 import { useGT } from "gt-next";
+
+function parseSavedTokens(raw: string | null): SavedWorldToken[] {
+  try {
+    return parseWorldTokens(raw);
+  } catch (err) {
+    console.error("Could not load saved world tokens", err);
+    return [];
+  }
+}
 
 interface WorldTokenSelectorProps {
   worldId: string;
@@ -25,36 +36,30 @@ export function WorldTokenSelector({
   onTokenChange,
 }: WorldTokenSelectorProps) {
   const gt = useGT();
-  const [tokens, setTokens] = useState<SavedWorldToken[]>([]);
-  const [selectedTokenValue, setSelectedTokenValue] = useState<string>("");
+  const raw = useStoredValue(worldTokensKey(worldId));
+  const tokens = useMemo(() => parseSavedTokens(raw), [raw]);
+  // The user's pick for this world; until they pick, the first saved token is used.
+  const [choice, setChoice] = useState<{
+    worldId: string;
+    value: string;
+  } | null>(null);
   const [manualToken, setManualToken] = useState("");
   const [manualName, setManualName] = useState("");
-  const [showManualForm, setShowManualForm] = useState(false);
   const [showTokenSecret, setShowTokenSecret] = useState(false);
   const [saveFailed, setSaveFailed] = useState(false);
 
+  const selectedTokenValue =
+    choice?.worldId === worldId ? choice.value : (tokens[0]?.token ?? "");
+  const showManualForm = selectedTokenValue === "manual";
+  const activeToken = showManualForm ? null : selectedTokenValue || null;
+
   useEffect(() => {
-    const list = getLocalWorldTokens(worldId);
-    setTokens(list);
-    if (list.length > 0) {
-      setSelectedTokenValue(list[0].token);
-      onTokenChange(list[0].token);
-    } else {
-      setSelectedTokenValue("");
-      onTokenChange(null);
-    }
-  }, [worldId, onTokenChange]);
+    onTokenChange(activeToken);
+  }, [activeToken, onTokenChange]);
 
   function handleSelectChange(val: string) {
-    setSelectedTokenValue(val);
+    setChoice({ worldId, value: val });
     setSaveFailed(false);
-    if (val === "manual") {
-      setShowManualForm(true);
-      onTokenChange(null);
-    } else {
-      setShowManualForm(false);
-      onTokenChange(val || null);
-    }
   }
 
   function handleAddManualToken(e: React.FormEvent) {
@@ -68,12 +73,9 @@ export function WorldTokenSelector({
     setSaveFailed(!saved);
     if (!saved) return;
 
-    setTokens(getLocalWorldTokens(worldId));
-    setSelectedTokenValue(token);
-    onTokenChange(token);
+    setChoice({ worldId, value: token });
     setManualToken("");
     setManualName("");
-    setShowManualForm(false);
   }
 
   return (
@@ -116,15 +118,7 @@ export function WorldTokenSelector({
             setShowTokenSecret={setShowTokenSecret}
             saveFailed={saveFailed}
             onSubmit={handleAddManualToken}
-            onCancel={() => {
-              setShowManualForm(false);
-              if (tokens.length > 0) {
-                setSelectedTokenValue(tokens[0].token);
-                onTokenChange(tokens[0].token);
-              } else {
-                setSelectedTokenValue("");
-              }
-            }}
+            onCancel={() => setChoice(null)}
           />
         )}
 
