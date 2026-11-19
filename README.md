@@ -91,7 +91,7 @@ INFISICAL_PROJECT_SLUG    # variable (non-secret)
 `WORKOS_*` and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub secrets: the
 `deploy-qa` and `deploy-prod` jobs fetch them from Infisical at deploy time over
 OIDC machine identity, and the Infisical syncs keep the Worker secrets current.
-See `secret-registry.md` for the inventory and rotation rules.
+See `SECRETS.md` for the inventory and rotation rules.
 
 Required Cloudflare Worker secrets for `wazoo-console`:
 
