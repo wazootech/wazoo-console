@@ -58,7 +58,7 @@ test("creates a world through the console UI and sees it ACTIVE in the list", as
     const createBody: unknown = await createResponse.json();
     expect(createResponse.status(), JSON.stringify(createBody)).toBe(201);
     expect(createResponse.request().postDataJSON()).toEqual({
-      world: { displayName },
+      displayName,
     });
     createdWorldId = readCreatedWorldId(createBody);
     if (!createdWorldId) {
