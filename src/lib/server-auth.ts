@@ -29,7 +29,7 @@ export async function mintPlatformToken(options: {
     throw new Error("WAZOO_PLATFORM_ADMIN_TOKEN is required for WorkOS login.");
   }
 
-  const response = await fetch(`${getApiBaseUrl()}/v1/auth/workos-session`, {
+  const response = await fetch(`${getApiBaseUrl()}/v1/auth/workos`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${adminToken}`,
