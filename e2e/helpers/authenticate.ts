@@ -50,7 +50,7 @@ export function createRunWorldDisplayName(): string {
 export async function mintE2eUserSession(
   email: string,
 ): Promise<E2eUserSession> {
-  const res = await fetch(`${requireE2eApiBase()}/v1/auth/workos-session`, {
+  const res = await fetch(`${requireE2eApiBase()}/v1/auth/workos`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${requireAdminToken()}`,
@@ -60,7 +60,7 @@ export async function mintE2eUserSession(
   });
   if (!res.ok) {
     throw new Error(
-      `workos-session mint failed (${res.status}): ${await res.text()}`,
+      `workos mint failed (${res.status}): ${await res.text()}`,
     );
   }
   const body = (await res.json()) as { token: string; expiresAt: string };
