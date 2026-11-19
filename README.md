@@ -65,14 +65,11 @@ The `/api/health` endpoint returns `{ "status": "ok" }` and a `200` status.
 ## Deployment
 
 Production deploys are human-in-the-loop. Do not deploy `console.wazoo.dev`
-directly from a local shell for normal releases. Push the reviewed commit, then
-run the `CI` workflow with `workflow_dispatch` from the intended branch. The
-`deploy-prod` job waits for `verify` before publishing the top-level
-`wazoo-console` Worker and custom domain.
-
-Pushes to `main` also trigger `deploy-qa`, which publishes the
-`wazoo-console-qa` Worker to the `qa` Wrangler environment and points it at
-`api-qa.wazoo.dev`. Verify the QA Worker before dispatching a production deploy.
+directly from a local shell for normal releases. Merge the reviewed PR:
+there is no QA environment, and every push to `main` runs `deploy-prod`, which
+waits for `verify` and then publishes the top-level `wazoo-console` Worker and
+custom domain. To redeploy the current head, run the `CI` workflow with
+`workflow_dispatch` from `main`.
 
 Pull requests do not deploy. A PR-triggered job must not hold a deploy
 credential, and the shared Infisical machine identity refuses OIDC requests from
@@ -83,13 +80,13 @@ by CI.
 Required GitHub Actions secrets and variables:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*)
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-prod (vars.*)
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
 
 `WORKOS_*` and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub secrets: the
-`deploy-qa` and `deploy-prod` jobs fetch them from Infisical at deploy time over
+`deploy-prod` job fetches them from Infisical at deploy time over
 OIDC machine identity, and the Infisical syncs keep the Worker secrets current.
 See `SECRETS.md` for the inventory and rotation rules.
 
@@ -104,10 +101,10 @@ WAZOO_PLATFORM_ADMIN_TOKEN
 
 `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WORKOS_REDIRECT_URI` are set by the
 production workflow to `https://api.wazoo.dev` and
-`https://console.wazoo.dev/callback`. No CI job runs against production:
-`deploy-prod` only publishes (the `e2e-qa` job covers the QA Worker on every
-`main` push), so verify a production deploy by hand --
-`https://console.wazoo.dev/api/health` must return `{ "status": "ok" }`.
+`https://console.wazoo.dev/callback`. After `deploy-prod`,
+`canary-prod` runs credential-free read-only GETs against production; for a
+manual check, `https://console.wazoo.dev/api/health` must return
+`{ "status": "ok" }`.
 
 For a full sign-in verification, smoke test `https://console.wazoo.dev/` and
 confirm it returns a `307` redirect to hosted WorkOS with the production callback
@@ -117,4 +114,4 @@ sign-in page with a `200`, and Next normalizes the trailing slash
 
 ## E2E tests
 
-Playwright's console base URL defaults to http://localhost:3000; start the local server before `pnpm run test:e2e`; live account/world specs make real API writes and therefore require explicitly setting `WAZOO_E2E_API_BASE_URL` (and `WAZOO_PLATFORM_ADMIN_TOKEN`); the QA workflow explicitly sets that URL to https://api-qa.wazoo.dev; and `BASE_URL` should only be set to a hosted console when intentionally targeting that environment.
+Playwright's console base URL defaults to http://localhost:3000; start the local server before `pnpm run test:e2e`; CI runs only the hermetic specs (mocked API, no credentials); `BASE_URL` should only be set to a hosted console when intentionally targeting that environment.
