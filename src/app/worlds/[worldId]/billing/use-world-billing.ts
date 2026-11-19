@@ -1,52 +1,34 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import type { BillingCancellationBody } from "@/lib/billing-cancellation";
-import {
-  errMsg,
-  isUnauthorizedError,
-  quotaErrorInfo,
-  quotaFromData,
-  type QuotaError,
-  type QuotaSummary,
-} from "@/lib/quota-error";
-import { getWorldBilling, type Billing } from "@wazoo/client";
+import { errMsg, quotaErrorInfo, quotaFromData } from "@/lib/quota-error";
+import { getWorldBilling, type Billing, type Client } from "@wazoo/client";
 
 export function useWorldBilling(worldId: string) {
-  const { client, logout } = useAuth();
-  const [billing, setBilling] = useState<Billing | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
-  const [quotaSummary, setQuotaSummary] = useState<QuotaSummary | null>(null);
+  const { client } = useAuth();
+  const [cancelledBilling, setCancelledBilling] = useState<Billing | null>(
+    null,
+  );
   const [cancelOpen, setCancelOpen] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelled, setCancelled] = useState(false);
 
-  useEffect(() => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    setErrorQuota(null);
-    setQuotaSummary(null);
-    getWorldBilling({ client, path: { worldId } }).then((r) => {
-      if (r.error) {
-        if (isUnauthorizedError(r.error)) {
-          logout();
-          return;
-        }
-        setError(errMsg(r.error));
-        setErrorQuota(quotaErrorInfo(r.error));
-      } else {
-        setBilling(r.data?.billing ?? null);
-        setQuotaSummary(quotaFromData(r.data));
-      }
-      setLoading(false);
-    });
-  }, [client, worldId, logout]);
+  const fetchBilling = useCallback(
+    (c: Client) => getWorldBilling({ client: c, path: { worldId } }),
+    [worldId],
+  );
+  const { data: result, loading } = useApiQuery(fetchBilling, {
+    signOutOnUnauthorized: true,
+  });
+  const error = result?.error ? errMsg(result.error) : null;
+  const errorQuota = result?.error ? quotaErrorInfo(result.error) : null;
+  const quotaSummary = result?.error ? null : quotaFromData(result?.data);
+  const billing = cancelledBilling ?? result?.data?.billing ?? null;
 
   async function handleCancel() {
     if (!client || confirm !== worldId) return;
@@ -68,7 +50,7 @@ export function useWorldBilling(worldId: string) {
         );
         return;
       }
-      setBilling(body.billing);
+      setCancelledBilling(body.billing);
       setCancelled(true);
       setCancelOpen(false);
     } catch (err) {

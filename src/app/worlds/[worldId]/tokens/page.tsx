@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, use } from "react";
+import { useCallback, useState, use } from "react";
 import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { PageHeader } from "@/components/page-header";
@@ -21,6 +22,7 @@ import {
   listWorldTokens,
   createWorldToken,
   deleteWorldToken,
+  type Client,
   type WorldToken,
 } from "@wazoo/client";
 
@@ -32,9 +34,7 @@ export default function WorldTokensPage({
   const gt = useGT();
   const { worldId } = use(params);
   const { client } = useAuth();
-  const [tokens, setTokens] = useState<WorldToken[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [newToken, setNewToken] = useState<{
     uid: string;
     name: string;
@@ -48,27 +48,20 @@ export default function WorldTokensPage({
     label: translateWorldTabLabel(gt, t.label),
   }));
 
-  const fetchTokens = useCallback(async () => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    const r = await listWorldTokens({ client, path: { worldId } });
-    if (r.error) {
-      setError(errMsg(r.error));
-    } else {
-      setTokens(r.data?.tokens ?? []);
-    }
-    setLoading(false);
-  }, [client, worldId]);
-
-  useEffect(() => void fetchTokens(), [fetchTokens]);
+  const listTokens = useCallback(
+    (c: Client) => listWorldTokens({ client: c, path: { worldId } }),
+    [worldId],
+  );
+  const { data: result, loading, reload } = useApiQuery(listTokens);
+  const tokens: WorldToken[] = result?.data?.tokens ?? [];
+  const error = actionError ?? (result?.error ? errMsg(result.error) : null);
 
   async function handleCreate() {
     if (!client) return;
-    setError(null);
+    setActionError(null);
     const r = await createWorldToken({ client, path: { worldId } });
     if (r.error) {
-      setError(errMsg(r.error));
+      setActionError(errMsg(r.error));
       return;
     }
     const t = r.data?.token;
@@ -81,13 +74,13 @@ export default function WorldTokensPage({
         saveFailed: !saveLocalWorldToken(worldId, tokenStr, t.name),
       });
     }
-    fetchTokens();
+    reload();
   }
 
   async function handleRevoke(tokenUid: string) {
     if (!client) return;
     await deleteWorldToken({ client, path: { worldId, tokenUid } });
-    fetchTokens();
+    reload();
   }
 
   return (

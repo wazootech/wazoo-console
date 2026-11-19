@@ -20,10 +20,6 @@ export default tseslint.config(
   ...nextVitals,
   {
     rules: {
-      // The data-loading effects here start a fetch and flip `loading` from
-      // the effect body. Moving that to Suspense/use() is a refactor of its
-      // own, so this React Compiler rule stays off until that lands.
-      "react-hooks/set-state-in-effect": "off",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },

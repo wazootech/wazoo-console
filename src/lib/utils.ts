@@ -35,13 +35,17 @@ export interface SavedWorldToken {
   token: string;
 }
 
+/** The wazooStorage key under which a world's saved tokens are stored. */
+export function worldTokensKey(worldId: string): string {
+  return `world_tokens_${worldId}`;
+}
+
 /**
- * Reads the saved world tokens from localStorage, throwing on parse errors or invalid data.
- * @param key The key under which the tokens are stored in localStorage (see wazoo-storage.ts).
+ * Parses a saved world token list, throwing on parse errors or invalid data.
+ * @param raw The stored JSON, or null when nothing is saved.
  * @returns An array of saved world tokens.
  */
-function readWorldTokens(key: string): SavedWorldToken[] {
-  const raw = wazooStorage.get(key);
+export function parseWorldTokens(raw: string | null): SavedWorldToken[] {
   if (raw === null) return [];
   let tokens: unknown;
   try {
@@ -63,10 +67,15 @@ function readWorldTokens(key: string): SavedWorldToken[] {
   throw new TypeError("Invalid saved world token list");
 }
 
+/** Reads the saved world tokens stored under `key` (see wazoo-storage.ts). */
+function readWorldTokens(key: string): SavedWorldToken[] {
+  return parseWorldTokens(wazooStorage.get(key));
+}
+
 export function getLocalWorldTokens(worldId: string): SavedWorldToken[] {
   if (typeof window === "undefined") return [];
   try {
-    return readWorldTokens(`world_tokens_${worldId}`);
+    return readWorldTokens(worldTokensKey(worldId));
   } catch (err) {
     console.error("Could not load saved world tokens", err);
     return [];
@@ -80,7 +89,7 @@ export function saveLocalWorldToken(
 ): boolean {
   if (typeof window === "undefined") return false;
   try {
-    const key = `world_tokens_${worldId}`;
+    const key = worldTokensKey(worldId);
 
     // Let read failures stop the save so it preserves the existing data.
     const current = readWorldTokens(key);

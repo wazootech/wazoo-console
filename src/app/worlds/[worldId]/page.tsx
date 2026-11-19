@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState, use } from "react";
+import { useCallback, useState, use } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { NavTabs } from "@/components/nav-tabs";
@@ -14,10 +14,10 @@ import { WorldTokenSelector } from "@/components/world-token-selector";
 import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import { useGT } from "gt-next";
 import { WorldInfoCards } from "./world-info-cards";
+import type { Client } from "@wazoo/client";
 import {
   getWorldIdentity,
   worldIdentityErrorMessage,
-  type WorldIdentity,
 } from "@/lib/world-identity";
 
 export default function WorldDetailPage({
@@ -27,31 +27,21 @@ export default function WorldDetailPage({
 }) {
   const gt = useGT();
   const { worldId } = use(params);
-  const { client } = useAuth();
   const router = useRouter();
-  const [world, setWorld] = useState<WorldIdentity | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showDelete, setShowDelete] = useState(false);
   const [worldToken, setWorldToken] = useState<string | null>(null);
 
-  const fetchWorld = useCallback(async () => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    const r = await getWorldIdentity(client, worldId);
-    if (r.error !== undefined) {
-      setError(worldIdentityErrorMessage(r.error));
-    } else {
-      setWorld(r.data ?? null);
-    }
-    setLoading(false);
-  }, [client, worldId]);
-
-  useEffect(() => {
-    fetchWorld();
-  }, [fetchWorld]);
+  const fetchWorld = useCallback(
+    (c: Client) => getWorldIdentity(c, worldId),
+    [worldId],
+  );
+  const { data: result, loading } = useApiQuery(fetchWorld);
+  const world = result?.error === undefined ? (result?.data ?? null) : null;
+  const error =
+    result?.error !== undefined
+      ? worldIdentityErrorMessage(result.error)
+      : null;
 
   const tabs = getWorldTabs(worldId).map((t) => ({
     ...t,

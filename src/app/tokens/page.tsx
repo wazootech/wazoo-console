@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useAuth } from "@/lib/auth";
+import { useApiQuery } from "@/lib/use-api-query";
 import { AppShell } from "@/components/app-shell";
 import { ErrorCard } from "@/components/error-card";
 import { PageHeader } from "@/components/page-header";
@@ -13,6 +14,7 @@ import { Loader2, Plus } from "lucide-react";
 import {
   listPlatformTokens,
   deletePlatformToken,
+  type Client,
   type PlatformToken,
 } from "@wazoo/client";
 import { CreateTokenDialog } from "./create-token-dialog";
@@ -22,9 +24,7 @@ import { useGT } from "gt-next";
 export default function TokensPage() {
   const gt = useGT();
   const { client } = useAuth();
-  const [tokens, setTokens] = useState<PlatformToken[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newSecret, setNewSecret] = useState<{
     uid: string;
@@ -33,31 +33,23 @@ export default function TokensPage() {
   } | null>(null);
   const [showSecret, setShowSecret] = useState(false);
 
-  const fetchTokens = useCallback(async () => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    const r = await listPlatformTokens({ client });
-    if (r.error) {
-      setError(errMsg(r.error));
-    } else {
-      setTokens(r.data?.tokens ?? []);
-    }
-    setLoading(false);
-  }, [client]);
-
-  useEffect(() => {
-    fetchTokens();
-  }, [fetchTokens]);
+  const listTokens = useCallback(
+    (c: Client) => listPlatformTokens({ client: c }),
+    [],
+  );
+  const { data: result, loading, reload } = useApiQuery(listTokens);
+  const tokens: PlatformToken[] = result?.data?.tokens ?? [];
+  const error = actionError ?? (result?.error ? errMsg(result.error) : null);
 
   async function handleRevoke(tokenName: string) {
     if (!client) return;
     const res = await deletePlatformToken({ client, path: { tokenName } });
     if (res.error) {
-      setError(errMsg(res.error));
+      setActionError(errMsg(res.error));
       return;
     }
-    fetchTokens();
+    setActionError(null);
+    reload();
   }
 
   return (
@@ -117,7 +109,7 @@ export default function TokensPage() {
           onOpenChange={setShowCreate}
           onCreated={(uid, name, token) => {
             setNewSecret({ uid, name, token });
-            fetchTokens();
+            reload();
           }}
         />
       </div>
