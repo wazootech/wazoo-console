@@ -82,6 +82,6 @@ test("detail and reindex use the same server-minted world ID", async ({
   await page.getByRole("button", { name: "Reindex World" }).click();
   await expect(page.getByText("Reindexed")).toBeVisible();
   expect(reindexPath).toBe(`/worlds/${WORLD_ID}/reindex`);
-  expect(reindexOrigin).toBe("https://data-qa.wazoo.dev");
+  expect(reindexOrigin).toBe("https://data.wazoo.dev");
   expect(reindexAuthorization).toBe(`Bearer ${WORLD_TOKEN}`);
 });

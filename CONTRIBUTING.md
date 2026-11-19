@@ -193,15 +193,13 @@ Turnstile CAPTCHA blocks headless browsers.
 
 ## Deployment
 
-Production deploys are human-in-the-loop.
+There is no QA environment: merging to `main` deploys to production.
 
 1. Push the reviewed branch to GitHub.
 2. Create a pull request.
 3. Wait for CI to pass (`verify`, `contract-lint`).
-4. Merge to `main`.
-5. Pushes to `main` automatically deploy to the QA environment.
-6. Verify `https://console-qa.wazoo.dev`.
-7. Dispatch the `deploy-prod` workflow manually only after QA verification.
+4. Merge to `main`. `deploy-prod` runs after `verify`, then `canary-prod`.
+5. Check `https://console.wazoo.dev/api/health` returns `{ "status": "ok" }`.
 
 Do not deploy `console.wazoo.dev` directly from a local shell for normal
 releases.
@@ -211,7 +209,7 @@ releases.
 For CI/CD, the following GitHub Actions secrets and variables must be set:
 
 ```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-qa/deploy-prod (vars.*)
+CLOUDFLARE_ACCOUNT_ID     # variable for deploy-prod (vars.*)
 INFISICAL_MACHINE_ID      # variable (non-secret)
 INFISICAL_PROJECT_SLUG    # variable (non-secret)
 ```
