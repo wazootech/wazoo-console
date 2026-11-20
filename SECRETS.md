@@ -16,7 +16,7 @@ private ops home, `wazootech/memory` (`wiki/Infisical_(vault).md`).
 - CI fetches runtime secrets from Infisical at deploy time via OIDC machine
   identity (no Infisical credentials are stored in GitHub). The legacy
   `WAZOO_PLATFORM_ADMIN_TOKEN` / `WORKOS_*` GitHub secrets are retired after
-  cutover. `deploy-qa` and `deploy-prod` fetch only `CLOUDFLARE_API_TOKEN`
+  cutover. `deploy-prod` fetches only `CLOUDFLARE_API_TOKEN`
   from the vault folder `/ci` (named `secret-name`, `secret-path: /ci`) and read `CLOUDFLARE_ACCOUNT_ID` from a
   repository **variable**. No workflow reads a `secrets.CLOUDFLARE_*` value: the
   PR `deploy-preview` and `cleanup-preview` jobs were the last users, and they
@@ -65,7 +65,7 @@ returns 404.
 
 - **Production Worker** (`console.wazoo.dev`): var unset -> route disabled.
 - **QA Worker** (`console-qa.wazoo.dev`): var set in `wrangler.jsonc`
-  `env.qa.vars` -> route enabled (used by the live world-creation e2e gate).
+  `env.qa.vars` -> route enabled (no CI job uses it now that the live QA e2e specs are gone).
 - **Local dev**: opt-in via `.env.local` (`E2E_AUTH_BYPASS_ENABLED=true`);
   unset by default.
 
@@ -127,14 +127,14 @@ Tokens stored in `~/.local/share/opencode/mcp-auth.json`. These are per-user, no
 ## Deployment flow
 
 1. Push to `main` triggers CI (`ci.yml`)
-2. CI sets `NEXT_PUBLIC_*` env vars for QA builds
+2. CI sets `NEXT_PUBLIC_*` env vars for the production build
 3. CI fetches only the named `CLOUDFLARE_API_TOKEN` from the Infisical
-   folder `/ci` (OIDC machine identity, `qa` env)
+   folder `/ci` (OIDC machine identity, `prod` env)
 4. `wrangler deploy` uploads Worker to Cloudflare
 5. Continuous secrets sync is owned by the Infisical Cloudflare Workers Secret
    Syncs configured in the Infisical dashboard (see the vault record in
    `wazootech/memory`); deploys no longer set worker secrets by hand
-6. Runtime vars in `wrangler.jsonc` QA env block provide non-build-time config
+6. Runtime vars in `wrangler.jsonc` provide non-build-time config
 
 ## Local emulator (`@workos/emulate`)
 

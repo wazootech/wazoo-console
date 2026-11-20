@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useAuth } from "@/lib/auth";
+import { useCallback, use } from "react";
+import { useApiQuery } from "@/lib/use-api-query";
 import { AppShell } from "@/components/app-shell";
 import { PageHeader } from "@/components/page-header";
 import { NavTabs } from "@/components/nav-tabs";
@@ -9,15 +9,8 @@ import { QuotaErrorBanner } from "@/components/quota-error-banner";
 import { Loader2 } from "lucide-react";
 import { getWorldTabs, translateWorldTabLabel } from "@/lib/utils";
 import { useGT } from "gt-next";
-import {
-  errMsg,
-  isUnauthorizedError,
-  quotaErrorInfo,
-  quotaFromData,
-  type QuotaError,
-  type QuotaSummary,
-} from "@/lib/quota-error";
-import { getWorldUsage, type UsageEvent } from "@wazoo/client";
+import { errMsg, quotaErrorInfo, quotaFromData } from "@/lib/quota-error";
+import { getWorldUsage, type Client } from "@wazoo/client";
 import { UsageCards } from "./usage-cards";
 
 export default function WorldUsagePage({
@@ -27,42 +20,23 @@ export default function WorldUsagePage({
 }) {
   const gt = useGT();
   const { worldId } = use(params);
-  const { client, logout } = useAuth();
-  const [usage, setUsage] = useState<{
-    total: Array<{ metric: string; quantity: number }>;
-    events: UsageEvent[];
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [errorQuota, setErrorQuota] = useState<QuotaError | null>(null);
-  const [quotaSummary, setQuotaSummary] = useState<QuotaSummary | null>(null);
+  const fetchUsage = useCallback(
+    (c: Client) => getWorldUsage({ client: c, path: { worldId } }),
+    [worldId],
+  );
+  const { data: result, loading } = useApiQuery(fetchUsage, {
+    signOutOnUnauthorized: true,
+  });
+  const error = result?.error ? errMsg(result.error) : null;
+  const errorQuota = result?.error ? quotaErrorInfo(result.error) : null;
+  const usage = result?.error ? null : (result?.data?.usage ?? null);
+  const quotaSummary =
+    !result?.error && result?.data?.usage ? quotaFromData(result.data) : null;
 
   const tabs = getWorldTabs(worldId).map((t) => ({
     ...t,
     label: translateWorldTabLabel(gt, t.label),
   }));
-
-  useEffect(() => {
-    if (!client) return;
-    setLoading(true);
-    setError(null);
-    setErrorQuota(null);
-    setQuotaSummary(null);
-    getWorldUsage({ client, path: { worldId } }).then((r) => {
-      if (r.error) {
-        if (isUnauthorizedError(r.error)) {
-          logout();
-          return;
-        }
-        setError(errMsg(r.error));
-        setErrorQuota(quotaErrorInfo(r.error));
-      } else if (r.data?.usage) {
-        setUsage(r.data.usage);
-        setQuotaSummary(quotaFromData(r.data));
-      }
-      setLoading(false);
-    });
-  }, [client, worldId, logout]);
 
   return (
     <AppShell>

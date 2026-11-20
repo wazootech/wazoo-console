@@ -1,41 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
+import { useStoredValue } from "@/lib/use-stored-value";
+import { wazooStorage } from "@/lib/wazoo-storage";
+
+type SavedQuery = { name: string; query: string };
+
+function parseSavedQueries(saved: string | null): SavedQuery[] {
+  if (!saved) return [];
+  try {
+    return JSON.parse(saved);
+  } catch (err) {
+    console.error("Could not load saved SPARQL queries", err);
+    return [];
+  }
+}
 
 export function useSavedQueries(worldId: string, query: string) {
-  const [customQueries, setCustomQueries] = useState<
-    Array<{ name: string; query: string }>
-  >([]);
+  const storageKey = `sparql_queries_${worldId}`;
   const [newQueryName, setNewQueryName] = useState("");
-
-  // Load custom queries from local storage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(`wazoo_sparql_queries_${worldId}`);
-      if (saved) setCustomQueries(JSON.parse(saved));
-    } catch (e) {
-      console.error(e);
-    }
-  }, [worldId]);
+  const saved = useStoredValue(storageKey);
+  const customQueries = useMemo(() => parseSavedQueries(saved), [saved]);
 
   function saveQuery() {
     if (!newQueryName.trim() || !query.trim()) return;
     const updated = [...customQueries, { name: newQueryName.trim(), query }];
-    setCustomQueries(updated);
-    localStorage.setItem(
-      `wazoo_sparql_queries_${worldId}`,
-      JSON.stringify(updated),
-    );
+    wazooStorage.set(storageKey, JSON.stringify(updated));
     setNewQueryName("");
   }
 
   function deleteQuery(index: number) {
     const updated = customQueries.filter((_, i) => i !== index);
-    setCustomQueries(updated);
-    localStorage.setItem(
-      `wazoo_sparql_queries_${worldId}`,
-      JSON.stringify(updated),
-    );
+    wazooStorage.set(storageKey, JSON.stringify(updated));
   }
 
   return {

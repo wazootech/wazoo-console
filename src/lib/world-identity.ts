@@ -99,7 +99,7 @@ export async function createWorldByDisplayName(
       url: "/v1/worlds",
       security: bearerSecurity,
       headers: { "Content-Type": "application/json" },
-      body: { world: { displayName: name } },
+      body: { displayName: name },
     });
     const status = result.response?.status;
     if (result.error !== undefined) {

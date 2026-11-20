@@ -80,7 +80,7 @@ test.describe("create world dialog", () => {
     await expect(worldLink.getByText(WORLD.id, { exact: true })).toBeVisible();
     await expect(page.getByText("ACTIVE", { exact: true })).toBeVisible();
     expect(createRequestBody).toEqual({
-      world: { displayName: WORLD.displayName },
+      displayName: WORLD.displayName,
     });
   });
 

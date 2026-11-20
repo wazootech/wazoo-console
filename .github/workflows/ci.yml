@@ -38,7 +38,7 @@ jobs:
       - run: pnpm run typecheck
       - run: pnpm run build
         env:
-          NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
+          NEXT_PUBLIC_API_URL: https://api.wazoo.dev
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
       - name: Run UI regression checks (a11y + quota banners)
@@ -53,8 +53,7 @@ jobs:
           done
           # Hermetic allowlist only. Never run bare `pnpm exec playwright test` here:
           # prod-health.spec.ts needs real WorkOS creds + open network (renders
-          # a WorkOS error page with placeholders), and world-lifecycle-qa.spec.ts
-          # needs WAZOO_PLATFORM_ADMIN_TOKEN. Both run in e2e-qa instead.
+          # a WorkOS error page with placeholders).
           BASE_URL=http://localhost:3100 pnpm exec playwright test \
             e2e/a11y.spec.ts \
             e2e/create-world.spec.ts \
@@ -70,59 +69,6 @@ jobs:
           WORKOS_CLIENT_ID: client_preview_placeholder
           WORKOS_API_KEY: sk_test_preview_placeholder
           WORKOS_COOKIE_PASSWORD: preview-cookie-password-at-least-32-bytes
-
-  deploy-qa:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: verify
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Fetch Cloudflare deploy token from Infisical (qa)
-        uses: Infisical/secrets-action@6cd3f7c0e4cc0d2395ee4ef414eb6eeb5d3e73db # v1.0.17
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
-          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          env-slug: "qa"
-          secret-name: CLOUDFLARE_API_TOKEN
-          secret-path: /ci
-      - run: pnpm exec opennextjs-cloudflare build && pnpm exec wrangler deploy --env qa
-        env:
-          NEXT_PUBLIC_API_URL: https://api-qa.wazoo.dev
-          NEXT_PUBLIC_WORKOS_REDIRECT_URI: https://console-qa.wazoo.dev/callback
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-
-  e2e-qa:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: deploy-qa
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Fetch secrets from Infisical (qa)
-        uses: Infisical/secrets-action@6cd3f7c0e4cc0d2395ee4ef414eb6eeb5d3e73db # v1.0.17
-        with:
-          method: oidc
-          identity-id: ${{ vars.INFISICAL_MACHINE_ID }}
-          project-slug: ${{ vars.INFISICAL_PROJECT_SLUG }}
-          env-slug: "qa"
-          secret-name: WAZOO_PLATFORM_ADMIN_TOKEN
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run test:e2e
-        env:
-          BASE_URL: https://console-qa.wazoo.dev
-          WAZOO_E2E_API_BASE_URL: https://api-qa.wazoo.dev
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -140,9 +86,15 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}:latest
 
+  # Prod is the only environment: every push to main that passes `verify` is
+  # deployed. workflow_dispatch from main redeploys the current head. Deploys
+  # queue rather than overlap so two merges cannot race each other.
   deploy-prod:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
+    concurrency:
+      group: deploy-prod
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -168,7 +120,6 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
 
   canary-prod:
-    if: github.event_name == 'workflow_dispatch'
     needs: deploy-prod
     runs-on: ubuntu-latest
     permissions:
