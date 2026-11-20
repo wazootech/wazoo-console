@@ -79,10 +79,10 @@ and `verify`.
 PR previews come from Cloudflare Workers Builds instead, using
 `wrangler.preview.jsonc`. The credential stays in Cloudflare and is scoped to a
 separate `wazoo-console-preview` Worker, so it can't deploy QA or prod. Every
-branch pushed to this repo gets a `*-wazoo-console-preview.*.workers.dev` URL
+branch pushed to this repo gets a `<preview-name>.preview.console.wazoo.dev` URL
 against `api-qa.wazoo.dev`, and Cloudflare comments it on the PR. Sign-in works
 because the preview Worker derives the WorkOS callback from the request origin
-(`WORKOS_REDIRECT_FROM_ORIGIN`), and WorkOS staging allowlists those hostnames.
+(`WORKOS_REDIRECT_FROM_ORIGIN`), and WorkOS allowlists `https://*.preview.console.wazoo.dev/callback`.
 Branch code runs with that Worker's QA secrets, so treat write access to this
 repo as access to them.
 

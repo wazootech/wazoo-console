@@ -7,7 +7,9 @@
 //
 // It is a separate Worker from wazoo-console / wazoo-console-qa, with a build
 // token scoped to this Worker only. It talks to api-qa and uses the QA WorkOS
-// staging secrets, set on this Worker. workers.dev only: no custom domain.
+// staging secrets, set on this Worker. Previews are served at
+// <preview-name>.preview.console.wazoo.dev (wildcard DNS + cert, as on
+// blog.wazoo.dev); WorkOS allowlists https://*.preview.console.wazoo.dev/callback.
 {
   "$schema": "https://json.schemastore.org/wrangler.json",
   "name": "wazoo-console-preview",
@@ -16,6 +18,14 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "preview.console.wazoo.dev",
+      "custom_domain": true,
+      "previews_enabled": true,
+      "enabled": false
+    }
+  ],
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
