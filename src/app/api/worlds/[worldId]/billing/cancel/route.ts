@@ -28,7 +28,7 @@ export async function POST(_request: Request, { params }: RouteContext) {
   }
 
   const response = await fetch(
-    `${getApiBaseUrl()}/v1/worlds/${encodeURIComponent(worldId)}/billing/cancel?email=${encodeURIComponent(user.email)}`,
+    `${await getApiBaseUrl()}/v1/worlds/${encodeURIComponent(worldId)}/billing/cancel?email=${encodeURIComponent(user.email)}`,
     {
       method: "POST",
       headers: {

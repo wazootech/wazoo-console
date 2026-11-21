@@ -12,7 +12,8 @@ import { usePathname } from "next/navigation";
 import { createClient, type Client, type User } from "@wazoo/client";
 import { useAsyncData } from "./use-async-data";
 
-function getApiBaseUrl(): string {
+function getApiBaseUrl(serverResolved?: string): string {
+  if (serverResolved) return serverResolved;
   const injected =
     typeof window !== "undefined"
       ? (window as Window & { __WZ_API_URL?: string }).__WZ_API_URL
@@ -59,7 +60,14 @@ async function loadSession(): Promise<SessionResult> {
   }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({
+  children,
+  apiUrl,
+}: {
+  children: ReactNode;
+  /** Server-resolved API URL (preview builds only); else the build-time one. */
+  apiUrl?: string;
+}) {
   const pathname = (usePathname() ?? "").replace(/\/$/, "");
   const onAuthPage = authPathnames.has(pathname);
   const [loggedOut, setLoggedOut] = useState(false);
@@ -72,10 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ? createClient({
             auth: token,
             throwOnError: false,
-            baseUrl: getApiBaseUrl() ?? "https://api.wazoo.dev",
+            baseUrl: getApiBaseUrl(apiUrl),
           })
         : null,
-    [token],
+    [token, apiUrl],
   );
   const state: AuthState = {
     token,

@@ -48,12 +48,13 @@ Last audited: 2026-10-18
 
 ## WorkOS environment variables
 
-| Variable                          | Value                                       | Notes                                                                  |
-| --------------------------------- | ------------------------------------------- | ---------------------------------------------------------------------- |
-| `NEXT_PUBLIC_WORKOS_REDIRECT_URI` | QA: `https://console-qa.wazoo.dev/callback` | Inlined at build time via Webpack. Set as env var before `next build`. |
-| `NEXT_PUBLIC_API_URL`             | QA: `https://api-qa.wazoo.dev`              | Inlined at build time.                                                 |
-| `WORKOS_REDIRECT_URI`             | Auto-derived from `NEXT_PUBLIC_*`           | Used by `@workos-inc/authkit-nextjs` middleware.                       |
-| `E2E_AUTH_BYPASS_ENABLED`         | QA Worker: `true`; Prod: unset              | Runtime-only gate for `POST /api/auth/bypass` (see below).             |
+| Variable                          | Value                                       | Notes                                                                                   |
+| --------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_WORKOS_REDIRECT_URI` | QA: `https://console-qa.wazoo.dev/callback` | Inlined at build time via Webpack. Set as env var before `next build`.                  |
+| `NEXT_PUBLIC_API_URL`             | QA: `https://api-qa.wazoo.dev`              | Inlined at build time. Preview Worker: `https://main.preview.api.wazoo.dev` (fallback). |
+| `WAZOO_PREVIEW`                   | Preview Worker: `true`; else unset          | Enables same-alias API preview selection (`src/lib/preview-api.ts`).                    |
+| `WORKOS_REDIRECT_URI`             | Auto-derived from `NEXT_PUBLIC_*`           | Used by `@workos-inc/authkit-nextjs` middleware.                                        |
+| `E2E_AUTH_BYPASS_ENABLED`         | QA Worker: `true`; Prod: unset              | Runtime-only gate for `POST /api/auth/bypass` (see below).                              |
 
 ## Bypass auth gate
 
