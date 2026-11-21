@@ -1,10 +1,11 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { fetchUser, getApiBaseUrl, tokenCookieName } from "@/lib/server-auth";
+import { fetchUser, getApiBaseUrl } from "@/lib/server-auth";
+import { clearTokenCookies, getTokenCookieName } from "@/lib/session-cookie";
 
 async function authedToken(): Promise<string | null> {
   const cookieStore = await cookies();
-  const token = cookieStore.get(tokenCookieName)?.value;
+  const token = cookieStore.get(getTokenCookieName())?.value;
   if (!token) return null;
   const user = await fetchUser(token);
   if (!user) return null;
@@ -91,7 +92,7 @@ export async function DELETE(request: Request) {
 
   if (response.ok) {
     const cookieStore = await cookies();
-    cookieStore.delete(tokenCookieName);
+    clearTokenCookies(cookieStore);
     return new Response(null, { status: 204 });
   }
 

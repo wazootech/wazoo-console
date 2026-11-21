@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest, NextFetchEvent } from "next/server";
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
 import { originRedirectUri } from "@/lib/redirect-uri";
-import { tokenCookieName } from "@/lib/server-auth";
+import { getTokenCookieName } from "@/lib/session-cookie";
 
 const proxyOptions = {
   middlewareAuth: {
@@ -22,7 +22,7 @@ export default async function middleware(
   request: NextRequest,
   event: NextFetchEvent,
 ) {
-  const hasToken = request.cookies.has(tokenCookieName);
+  const hasToken = request.cookies.has(getTokenCookieName());
   const pathname = request.nextUrl.pathname;
 
   if (hasToken) {

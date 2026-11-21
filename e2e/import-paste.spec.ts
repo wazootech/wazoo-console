@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { sessionCookies } from "./session-cookies";
 
 // Regression for pasted imports (first-customer flow). Clicking "Execute
 // Import" once, without "Preview", must send the pasted text. It used to post
@@ -13,13 +14,7 @@ async function openImportPage(page: Page) {
   if (!baseURL) throw new Error("baseURL is required for this spec");
   await page
     .context()
-    .addCookies([
-      {
-        name: "wazoo_console_token",
-        value: "e2e-platform-token",
-        url: baseURL,
-      },
-    ]);
+    .addCookies([...sessionCookies(baseURL, "e2e-platform-token")]);
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
       json: {

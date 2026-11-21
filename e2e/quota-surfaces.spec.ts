@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { sessionCookies } from "./session-cookies";
 
 // Hermetic regression tests for the QuotaErrorBanner and quota summary on the
 // usage and billing surfaces (issue #68 / wazoo-api#34). Every API call is
@@ -69,13 +70,9 @@ test.describe("quota banner on usage and billing surfaces", () => {
   async function signInAndMockSession(page: Page) {
     const baseURL = test.info().project.use.baseURL;
     if (!baseURL) throw new Error("baseURL is required for this spec");
-    await page.context().addCookies([
-      {
-        name: "wazoo_console_token",
-        value: "e2e-platform-token",
-        url: baseURL,
-      },
-    ]);
+    await page
+      .context()
+      .addCookies([...sessionCookies(baseURL, "e2e-platform-token")]);
     await page.route("**/api/auth/session", (route) =>
       route.fulfill({ json: SESSION_BODY }),
     );

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { fetchUser, tokenCookieName } from "@/lib/server-auth";
+import { fetchUser } from "@/lib/server-auth";
+import { setTokenCookie } from "@/lib/session-cookie";
 
 export async function POST(request: Request) {
   if (process.env.E2E_AUTH_BYPASS_ENABLED !== "true") {
@@ -29,13 +30,7 @@ export async function POST(request: Request) {
       );
     }
 
-    (await cookies()).set(tokenCookieName, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24,
-      path: "/",
-    });
+    setTokenCookie(await cookies(), token);
 
     return NextResponse.json({ ok: true, user });
   } catch (err) {

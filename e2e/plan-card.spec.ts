@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { sessionCookies } from "./session-cookies";
 import AxeBuilder from "@axe-core/playwright";
 
 // The plan card on /settings: shows the plan and daily write usage, starts a
@@ -38,13 +39,9 @@ const PRO: Plan = {
 async function signIn(page: Page) {
   const baseURL = test.info().project.use.baseURL;
   if (!baseURL) throw new Error("baseURL is required for this spec");
-  await page.context().addCookies([
-    {
-      name: "wazoo_console_token",
-      value: "e2e-platform-token",
-      url: baseURL,
-    },
-  ]);
+  await page
+    .context()
+    .addCookies([...sessionCookies(baseURL, "e2e-platform-token")]);
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({
       json: {
