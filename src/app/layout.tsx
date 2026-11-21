@@ -5,6 +5,7 @@ import { GTProvider } from "gt-next";
 import { getLocale } from "gt-next/server";
 import { AuthKitProvider } from "@workos-inc/authkit-nextjs/components";
 import { AuthProvider } from "@/lib/auth";
+import { getPreviewApiUrl } from "@/lib/preview-api-server";
 import { ConsentProvider } from "@/lib/consent";
 import { ConsentBanner } from "@/components/consent-banner";
 import "./globals.css";
@@ -22,6 +23,7 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
+  const previewApiUrl = await getPreviewApiUrl();
   return (
     <html className="dark" lang={await getLocale()}>
       <body className="min-h-screen bg-background text-foreground antialiased">
@@ -33,7 +35,7 @@ export default async function RootLayout({
             Skip to content
           </a>
           <AuthKitProvider>
-            <AuthProvider>
+            <AuthProvider apiUrl={previewApiUrl ?? undefined}>
               <ConsentProvider>
                 {children}
                 <ConsentBanner />

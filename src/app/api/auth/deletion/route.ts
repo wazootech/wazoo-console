@@ -21,14 +21,17 @@ export async function POST() {
     );
   }
 
-  const response = await fetch(`${getApiBaseUrl()}/v1/users/me/deletion`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${await getApiBaseUrl()}/v1/users/me/deletion`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
     },
-    cache: "no-store",
-  });
+  );
 
   const body = (await response.json().catch(() => ({}))) as {
     deletion?: { uid: string; expiresAt: string };
@@ -80,7 +83,7 @@ export async function DELETE(request: Request) {
     );
   }
 
-  const response = await fetch(`${getApiBaseUrl()}/v1/users/me`, {
+  const response = await fetch(`${await getApiBaseUrl()}/v1/users/me`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,

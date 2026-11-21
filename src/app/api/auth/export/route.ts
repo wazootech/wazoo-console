@@ -21,7 +21,7 @@ export async function GET() {
     );
   }
 
-  const response = await fetch(`${getApiBaseUrl()}/v1/users/me/export`, {
+  const response = await fetch(`${await getApiBaseUrl()}/v1/users/me/export`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });

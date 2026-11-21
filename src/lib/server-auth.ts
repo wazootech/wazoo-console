@@ -1,13 +1,18 @@
 import type { User } from "@wazoo/client";
+import { getPreviewApiUrl } from "./preview-api-server";
 
 export const ageCookieName = "wazoo_age_confirmed";
 
-export function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL ?? "https://api.wazoo.dev";
+export async function getApiBaseUrl(): Promise<string> {
+  return (
+    (await getPreviewApiUrl()) ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "https://api.wazoo.dev"
+  );
 }
 
 export async function fetchUser(token: string): Promise<User | null> {
-  const response = await fetch(`${getApiBaseUrl()}/v1/users/me`, {
+  const response = await fetch(`${await getApiBaseUrl()}/v1/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
@@ -28,7 +33,7 @@ export async function mintPlatformToken(options: {
     throw new Error("WAZOO_PLATFORM_ADMIN_TOKEN is required for WorkOS login.");
   }
 
-  const response = await fetch(`${getApiBaseUrl()}/v1/auth/workos`, {
+  const response = await fetch(`${await getApiBaseUrl()}/v1/auth/workos`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${adminToken}`,

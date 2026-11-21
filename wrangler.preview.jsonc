@@ -6,7 +6,7 @@
 //   Preview (PRs):   npx wrangler versions upload -c wrangler.preview.jsonc
 //
 // It is a separate Worker from wazoo-console / wazoo-console-qa, with a build
-// token scoped to this Worker only. It talks to api-qa and uses the QA WorkOS
+// token scoped to this Worker only. It talks to the API previews and uses the QA WorkOS
 // staging secrets, set on this Worker. Previews are served at
 // <preview-name>.preview.console.wazoo.dev (wildcard DNS + cert, as on
 // blog.wazoo.dev); WorkOS allowlists https://*.preview.console.wazoo.dev/callback.
@@ -37,7 +37,11 @@
     }
   ],
   "vars": {
-    "NEXT_PUBLIC_API_URL": "https://api-qa.wazoo.dev",
+    // Fallback API: the preview that tracks main. A same-alias API preview
+    // (<alias>.preview.api.wazoo.dev) wins when it answers /health; see
+    // src/lib/preview-api.ts.
+    "NEXT_PUBLIC_API_URL": "https://main.preview.api.wazoo.dev",
+    "WAZOO_PREVIEW": "true",
     // Per-branch hostnames: derive the WorkOS callback from the request.
     "WORKOS_REDIRECT_FROM_ORIGIN": "true"
   },
