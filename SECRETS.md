@@ -34,8 +34,8 @@ vault folder `/wazoo-console` and publishes exactly the four values below
 
 | Secret                     | Infisical env | Prod Worker | QA Worker | Rotated    | Security Rule                                                                                                                    |
 | -------------------------- | ------------- | ----------- | --------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| WORKOS_CLIENT_ID           | qa, prod      | yes         | yes       | 2026-09-10 | Identical for staging AuthKit instance.                                                                                          |
-| WORKOS_API_KEY             | qa, prod      | yes         | yes       | 2026-09-10 | Staging API key.                                                                                                                 |
+| WORKOS_CLIENT_ID           | qa, prod      | yes         | yes       | 2026-09-10 | Client ID of the WorkOS environment used.                                                                                        |
+| WORKOS_API_KEY             | qa, prod      | yes         | yes       | 2026-09-10 | Key of the same environment.                                                                                                     |
 | WORKOS_COOKIE_PASSWORD     | qa, prod      | yes         | yes       | 2026-09-10 | Environment-specific random 32-byte secret.                                                                                      |
 | WAZOO_PLATFORM_ADMIN_TOKEN | qa, prod      | yes         | yes       | 2026-09-10 | MUST be distinct between QA and Prod. QA token connects only to `api-qa.wazoo.dev`; Prod token connects only to `api.wazoo.dev`. |
 
@@ -69,7 +69,7 @@ returns 404.
 - **Local dev**: opt-in via `.env.local` (`E2E_AUTH_BYPASS_ENABLED=true`);
   unset by default.
 
-## WorkOS redirect URIs (staging environment)
+## WorkOS environments and redirect URIs
 
 | URI                                     | Default | Notes                   |
 | --------------------------------------- | ------- | ----------------------- |
@@ -82,8 +82,17 @@ The default is the redirect WorkOS uses when a flow starts outside the console,
 such as the password-reset email link. It must be the production URL: with the
 local URL as the default, a password reset ended on `localhost:3000/callback`.
 Sign-in started from the console passes its own `redirect_uri`, so QA and local
-dev are not affected. The QA and production consoles share this one WorkOS
-environment (type sandbox, named "QA").
+dev are not affected.
+
+The WorkOS project has two environments, **Production** and **QA** (a sandbox),
+each with its own client ID, API key, and redirect list. Measured 2026-11-20:
+`console.wazoo.dev` and `console-qa.wazoo.dev` both send sign-in to the
+Production client ID, so the table above is the QA environment's list and the
+Production environment's list differs (its default is `localhost:3000`). PR
+previews (`https://<slug>.preview.console.wazoo.dev/callback`, registered as a
+wildcard in the QA environment only) use the QA environment's client ID and API
+key, never Production's, so a branch-built Worker never holds the production
+key.
 
 To change the default, replace the whole list (the command takes every URI, not
 a single one) and dry-run first:
@@ -92,7 +101,7 @@ a single one) and dry-run first:
 npx workos authkit redirect-uris set --uri <uri> [--uri <uri> ...] --default <uri> --dry-run
 ```
 
-## AuthKit settings (staging)
+## AuthKit settings (QA environment)
 
 | Setting                     | Value                              |
 | --------------------------- | ---------------------------------- |
