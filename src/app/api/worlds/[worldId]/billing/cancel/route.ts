@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { BillingCancellationBody } from "@/lib/billing-cancellation";
-import { fetchUser, getApiBaseUrl, tokenCookieName } from "@/lib/server-auth";
+import { fetchUser, getApiBaseUrl } from "@/lib/server-auth";
+import { getTokenCookieName } from "@/lib/session-cookie";
 
 interface RouteContext {
   params: Promise<{ worldId: string }>;
@@ -10,7 +11,7 @@ interface RouteContext {
 export async function POST(_request: Request, { params }: RouteContext) {
   const { worldId } = await params;
   const cookieStore = await cookies();
-  const token = cookieStore.get(tokenCookieName)?.value;
+  const token = cookieStore.get(getTokenCookieName())?.value;
   if (!token) {
     return NextResponse.json(
       { error: { message: "Not signed in." } },

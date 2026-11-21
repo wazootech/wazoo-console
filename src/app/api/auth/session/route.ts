@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { User } from "@wazoo/client";
-import { fetchUser, tokenCookieName } from "@/lib/server-auth";
+import { fetchUser } from "@/lib/server-auth";
+import { clearTokenCookies, getTokenCookieName } from "@/lib/session-cookie";
 
 interface SessionResponse {
   token: string;
@@ -10,7 +11,7 @@ interface SessionResponse {
 
 export async function GET(): Promise<NextResponse<SessionResponse | unknown>> {
   const cookieStore = await cookies();
-  const storedToken = cookieStore.get(tokenCookieName)?.value;
+  const storedToken = cookieStore.get(getTokenCookieName())?.value;
   if (!storedToken) {
     return NextResponse.json(
       { error: { message: "Not signed in." } },
@@ -24,7 +25,7 @@ export async function GET(): Promise<NextResponse<SessionResponse | unknown>> {
       { error: { message: "Session expired." } },
       { status: 401 },
     );
-    res.cookies.delete(tokenCookieName);
+    clearTokenCookies(res.cookies);
     return res;
   }
 

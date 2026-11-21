@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { sessionCookies } from "./session-cookies";
 
 // Hermetic regression test for the DATABASE_LIMIT_REACHED quota banner in the
 // create-world dialog. Every API call the page makes (session + worlds) is
@@ -6,7 +7,7 @@ import { test, expect } from "@playwright/test";
 // (local `next start` in CI, or a deployed console) without touching real
 // backends or needing the org's database quota to actually be exhausted.
 //
-// The only server-side requirement is the `wazoo_console_token` cookie, which
+// The only server-side requirement is the session cookie, which
 // lets the auth middleware pass; the session endpoint itself is intercepted so
 // no real platform token or user is needed.
 
@@ -45,11 +46,7 @@ test.describe("quota banner (DATABASE_LIMIT_REACHED)", () => {
     if (!baseURL) throw new Error("baseURL is required for this spec");
 
     await context.addCookies([
-      {
-        name: "wazoo_console_token",
-        value: "e2e-platform-token",
-        url: baseURL,
-      },
+      ...sessionCookies(baseURL, "e2e-platform-token"),
     ]);
 
     await page.route("**/api/auth/session", (route) =>

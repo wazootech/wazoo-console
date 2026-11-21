@@ -1,4 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
+import { sessionCookies } from "./session-cookies";
 
 const SESSION_BODY = {
   token: "e2e-platform-token",
@@ -17,13 +18,9 @@ const WORLD_TOKEN = "wzw_e2e_world_token";
 async function signInAndMockSession(page: Page) {
   const baseURL = test.info().project.use.baseURL;
   if (!baseURL) throw new Error("baseURL is required for this spec");
-  await page.context().addCookies([
-    {
-      name: "wazoo_console_token",
-      value: "e2e-platform-token",
-      url: baseURL,
-    },
-  ]);
+  await page
+    .context()
+    .addCookies([...sessionCookies(baseURL, "e2e-platform-token")]);
   await page.route("**/api/auth/session", (route) =>
     route.fulfill({ json: SESSION_BODY }),
   );

@@ -4,8 +4,8 @@ import {
   ageCookieName,
   getDisplayName,
   mintPlatformToken,
-  tokenCookieName,
 } from "@/lib/server-auth";
+import { setTokenCookie } from "@/lib/session-cookie";
 import { emailNotVerifiedCode, requireVerifiedEmail } from "@/lib/workos-user";
 
 export const GET = handleAuth({
@@ -28,13 +28,7 @@ export const GET = handleAuth({
       cookieStore.delete(ageCookieName);
     }
 
-    (await cookies()).set(tokenCookieName, token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24,
-      path: "/",
-    });
+    setTokenCookie(cookieStore, token);
   },
   onError: async ({ error }) => {
     const errObj = error as { code?: string } | null | undefined;

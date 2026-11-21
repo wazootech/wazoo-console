@@ -1,6 +1,5 @@
 import type { User } from "@wazoo/client";
 
-export const tokenCookieName = "wazoo_console_token";
 export const ageCookieName = "wazoo_age_confirmed";
 
 export function getApiBaseUrl(): string {
