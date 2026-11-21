@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { getSignInUrl } from "@workos-inc/authkit-nextjs";
+import { originRedirectUri } from "@/lib/redirect-uri";
 import { ageCookieName } from "@/lib/server-auth";
 
 export async function POST(request: Request) {
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
     path: "/",
   });
 
-  const url = await getSignInUrl();
+  const redirectUri = originRedirectUri(request.url);
+  const url = await getSignInUrl(redirectUri ? { redirectUri } : undefined);
   return NextResponse.json({ url });
 }

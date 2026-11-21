@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest, NextFetchEvent } from "next/server";
 import { authkitProxy } from "@workos-inc/authkit-nextjs";
+import { originRedirectUri } from "@/lib/redirect-uri";
 import { tokenCookieName } from "@/lib/server-auth";
 
-const proxy = authkitProxy({
+const proxyOptions = {
   middlewareAuth: {
     enabled: true,
     unauthenticatedPaths: [
@@ -14,7 +15,8 @@ const proxy = authkitProxy({
       "/api/health",
     ],
   },
-});
+};
+const proxy = authkitProxy(proxyOptions);
 
 export default async function middleware(
   request: NextRequest,
@@ -34,7 +36,11 @@ export default async function middleware(
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 
-  return proxy(request, event);
+  // Preview Workers derive the WorkOS callback from the request origin.
+  const redirectUri = originRedirectUri(request.url);
+  return redirectUri
+    ? authkitProxy({ ...proxyOptions, redirectUri })(request, event)
+    : proxy(request, event);
 }
 
 export const config = {
