@@ -266,8 +266,6 @@ security rules.
 - General Wazoo workspace questions: see the workspace `AGENTS.md`.
 - Console-specific conventions: see `AGENTS.md` in this repository.
 - Auth and deployment details: see `SECRETS.md`.
-- Private beta signup and allowlist: see
-  `wazootech/memory/wiki/Private_Beta.md`.
 
 ## Useful links
 
