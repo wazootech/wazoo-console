@@ -39,37 +39,10 @@ jobs:
       - run: pnpm run build
         env:
           NEXT_PUBLIC_API_URL: https://api.wazoo.dev
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
       - name: Run UI regression checks (a11y + quota banners)
-        run: |
-          pnpm exec next start -p 3100 &
-          for i in $(seq 1 60); do
-            if curl -sf -o /dev/null http://localhost:3100/sign-in; then
-              echo "Server ready after ${i}s"
-              break
-            fi
-            sleep 1
-          done
-          # Hermetic allowlist only. Never run bare `pnpm exec playwright test` here:
-          # prod-health.spec.ts needs real WorkOS creds + open network (renders
-          # a WorkOS error page with placeholders).
-          BASE_URL=http://localhost:3100 pnpm exec playwright test \
-            e2e/a11y.spec.ts \
-            e2e/create-world.spec.ts \
-            e2e/import-paste.spec.ts \
-            e2e/plan-card.spec.ts             e2e/preview-api.spec.ts \
-            e2e/quota-banner.spec.ts \
-            e2e/quota-surfaces.spec.ts \
-            e2e/session-cookie.spec.ts \
-            e2e/world-canonical-identity.spec.ts \
-            e2e/world-data-plane-id.spec.ts \
-            e2e/workos-verified-email.spec.ts
+        run: bash scripts/ui-regression.sh
         env:
-          NEXT_PUBLIC_WORKOS_REDIRECT_URI: http://localhost:3100/callback
-          WORKOS_CLIENT_ID: client_preview_placeholder
-          WORKOS_API_KEY: sk_test_preview_placeholder
-          WORKOS_COOKIE_PASSWORD: preview-cookie-password-at-least-32-bytes
+          PLAYWRIGHT_INSTALL_ARGS: --with-deps
 
   publish-image:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
