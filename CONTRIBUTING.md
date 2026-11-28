@@ -198,7 +198,8 @@ There is no QA environment: merging to `main` deploys to production.
 1. Push the reviewed branch to GitHub.
 2. Create a pull request.
 3. Wait for CI to pass (`verify`, `contract-lint`).
-4. Merge to `main`. `deploy-prod` runs after `verify`, then `canary-prod`.
+4. Merge to `main`. Cloudflare Workers Builds deploys it, then `post-deploy.yml`
+   runs the canary. Check that `verify` also passes on `main`.
 5. Check `https://console.wazoo.dev/api/health` returns `{ "status": "ok" }`.
 
 Do not deploy `console.wazoo.dev` directly from a local shell for normal
@@ -206,20 +207,8 @@ releases.
 
 ## Required secrets
 
-For CI/CD, the following GitHub Actions secrets and variables must be set:
-
-```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-prod (vars.*)
-INFISICAL_MACHINE_ID      # variable (non-secret)
-INFISICAL_PROJECT_SLUG    # variable (non-secret)
-```
-
-The `WORKOS_*` values and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub
-secrets: the deploy jobs fetch them from Infisical over OIDC machine identity.
-
-The deploy credential `CLOUDFLARE_API_TOKEN` lives at the Infisical folder `/ci`,
-deliberately outside any Worker secret sync's scope; the deploy jobs fetch it
-with `secret-path: /ci`.
+CI needs no deploy credential: GitHub Actions deploys nothing. Cloudflare Workers
+Builds holds its own build token.
 
 For Cloudflare Worker runtime secrets:
 
