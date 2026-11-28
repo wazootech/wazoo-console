@@ -65,18 +65,24 @@ The `/api/health` endpoint returns `{ "status": "ok" }` and a `200` status.
 ## Deployment
 
 Production deploys are human-in-the-loop. Do not deploy `console.wazoo.dev`
-directly from a local shell for normal releases. Merge the reviewed PR:
-there is no QA environment, and every push to `main` runs `deploy-prod`, which
-waits for `verify` and then publishes the top-level `wazoo-console` Worker and
-custom domain. To redeploy the current head, run the `CI` workflow with
-`workflow_dispatch` from `main`.
+directly from a local shell for normal releases. Merge the reviewed PR: there is
+no QA environment. Cloudflare Workers Builds is connected to this repository on
+the `wazoo-console` Worker. On each push to `main` it runs format, lint, and
+type checks, builds with the production `NEXT_PUBLIC_*` values, and deploys the
+top-level Worker and custom domain. The commands and the build token are Worker
+settings in the Cloudflare dashboard (Settings, Builds), and builds for other
+branches are off. To redeploy the current head, retry its latest build on the
+Worker's Deployments page.
 
-GitHub Actions does not deploy pull requests. A PR-triggered job must not hold a
-deploy credential, and the shared Infisical machine identity refuses OIDC
-requests from a pull-request context, so PR workflows stop at `contract-lint`
-and `verify`.
+The browser regression checks (`scripts/ui-regression.sh`) run only in GitHub's
+required `verify` check, because the Cloudflare build image cannot run the
+browser. Cloudflare does not wait for that check, so watch `verify` on `main`.
 
-PR previews come from Cloudflare Workers Builds instead, using
+GitHub Actions deploys nothing and holds no Cloudflare or Infisical credential.
+
+Previews are not set up yet. The intended design follows.
+
+PR previews come from Cloudflare Workers Builds, using
 `wrangler.preview.jsonc`. The credential stays in Cloudflare and is scoped to a
 separate `wazoo-console-preview` Worker, so it can't deploy QA or prod. Every
 branch pushed to this repo gets a `<preview-name>.preview.console.wazoo.dev` URL,
@@ -89,17 +95,7 @@ because the preview Worker derives the WorkOS callback from the request origin
 Branch code runs with that Worker's QA secrets, so treat write access to this
 repo as access to them.
 
-Required GitHub Actions secrets and variables:
-
-```sh
-CLOUDFLARE_ACCOUNT_ID     # variable for deploy-prod (vars.*)
-INFISICAL_MACHINE_ID      # variable (non-secret)
-INFISICAL_PROJECT_SLUG    # variable (non-secret)
-```
-
-`WORKOS_*` and `WAZOO_PLATFORM_ADMIN_TOKEN` are no longer GitHub secrets: the
-`deploy-prod` job fetches them from Infisical at deploy time over
-OIDC machine identity, and the Infisical syncs keep the Worker secrets current.
+Worker secrets are not GitHub secrets: the Infisical syncs keep them current.
 See `SECRETS.md` for the inventory and rotation rules.
 
 Required Cloudflare Worker secrets for `wazoo-console`:
@@ -112,10 +108,10 @@ WAZOO_PLATFORM_ADMIN_TOKEN
 ```
 
 `NEXT_PUBLIC_API_URL` and `NEXT_PUBLIC_WORKOS_REDIRECT_URI` are set by the
-production workflow to `https://api.wazoo.dev` and
-`https://console.wazoo.dev/callback`. After `deploy-prod`,
-`canary-prod` runs credential-free read-only GETs against production; for a
-manual check, `https://console.wazoo.dev/api/health` must return
+Cloudflare build command to `https://api.wazoo.dev` and
+`https://console.wazoo.dev/callback`. When the `Workers Builds: wazoo-console`
+check passes, `post-deploy.yml` runs credential-free read-only GETs against
+production; for a manual check, `https://console.wazoo.dev/api/health` must return
 `{ "status": "ok" }`.
 
 For a full sign-in verification, smoke test `https://console.wazoo.dev/` and

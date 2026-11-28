@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Browser regression checks against a built app. GitHub's verify job and the
-# Cloudflare build both run this, so a failing check stops a deploy.
-# Run `pnpm run build` first. PLAYWRIGHT_INSTALL_ARGS adds installer flags.
+# Browser regression checks against a built app, run by GitHub's verify job.
+# The Cloudflare build image lacks the browser's system libraries, so these do
+# not run there. Run `pnpm run build` first. PLAYWRIGHT_INSTALL_ARGS adds
+# installer flags.
 set -euo pipefail
 
 export NEXT_PUBLIC_WORKOS_REDIRECT_URI=http://localhost:3100/callback
